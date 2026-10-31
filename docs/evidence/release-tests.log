@@ -1,0 +1,11 @@
+test_dependency_integrity_and_modified_cache_preserved (test_release.ReleaseTests.test_dependency_integrity_and_modified_cache_preserved) ... ok
+test_github_manifest_pins_annexes_and_updates_from_latest (test_release.ReleaseTests.test_github_manifest_pins_annexes_and_updates_from_latest) ... ok
+test_invalid_publication_metadata_is_rejected_before_writes (test_release.ReleaseTests.test_invalid_publication_metadata_is_rejected_before_writes) ... ok
+test_offline_manifest_remains_available (test_release.ReleaseTests.test_offline_manifest_remains_available) ... ok
+test_source_export_excludes_binary_dependencies (test_release.ReleaseTests.test_source_export_excludes_binary_dependencies) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.071s
+
+OK
+OK téléchargement: backend/test.whl

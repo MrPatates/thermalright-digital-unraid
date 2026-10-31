@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "path": "backend/trcc_linux-9.11.2-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/63/62/864f1bf63430b59cf54f76e4f87b5b1cdda5c2e40fad93397794e1513da1/trcc_linux-9.11.2-py3-none-any.whl",
+      "sha256": "e5a84a9b656763d9b5fc330e4b0ab1e0b6ae4b7382958edf0b14c99176a97dc7"
+    },
+    {
+      "path": "third_party/trcc_linux-9.11.2.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/50/6c/cebc96c93ec5ee40037803404d44dae0bc00a39426937a133a21ef58c370/trcc_linux-9.11.2.tar.gz",
+      "sha256": "6763c4e2e61f6da6f17cd982b33e076a08d8c02c968a80865f92fc5278505608"
+    },
+    {
+      "path": "third_party/pyusb-1.3.1.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/00/6b/ce3727395e52b7b76dfcf0c665e37d223b680b9becc60710d4bc08b7b7cb/pyusb-1.3.1.tar.gz",
+      "sha256": "3af070b607467c1c164f49d5b0caabe8ac78dbed9298d703a8dbf9df4052d17e"
+    },
+    {
+      "path": "third_party/libusb-1.0_1.0.26.orig.tar.bz2",
+      "url": "https://deb.debian.org/debian/pool/main/libu/libusb-1.0/libusb-1.0_1.0.26.orig.tar.bz2",
+      "sha256": "12ce7a61fc9854d1d2a1ffe095f7b5fac19ddba095c259e6067a46500381b5a5"
+    }
+  ]
+}

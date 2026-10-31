@@ -1,0 +1,281 @@
+Requirement already satisfied: trcc-linux==9.11.2 in /usr/local/lib/python3.12/site-packages (9.11.2)
+Collecting certifi>=2023.7.22 (from trcc-linux==9.11.2)
+  Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+Collecting click>=7.0 (from trcc-linux==9.11.2)
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting cryptography>=3.4.8 (from trcc-linux==9.11.2)
+  Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.4 kB)
+Collecting fastapi>=0.100 (from trcc-linux==9.11.2)
+  Downloading fastapi-0.162.0-py3-none-any.whl.metadata (26 kB)
+Collecting hidapi>=0.14.0 (from trcc-linux==9.11.2)
+  Downloading hidapi-0.15.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (3.7 kB)
+Collecting numpy>=1.24.0 (from trcc-linux==9.11.2)
+  Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+Collecting nvidia-ml-py>=11.0.0 (from trcc-linux==9.11.2)
+  Downloading nvidia_ml_py-13.615.71-py3-none-any.whl.metadata (9.7 kB)
+Collecting prompt-toolkit>=3.0.0 (from trcc-linux==9.11.2)
+  Downloading prompt_toolkit-3.0.53-py3-none-any.whl.metadata (6.4 kB)
+Collecting psutil>=5.9.0 (from trcc-linux==9.11.2)
+  Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl.metadata (22 kB)
+Collecting pyside6>=6.5.0 (from trcc-linux==9.11.2)
+  Downloading pyside6-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl.metadata (5.5 kB)
+Collecting python-multipart>=0.0.18 (from trcc-linux==9.11.2)
+  Downloading python_multipart-0.0.33-py3-none-any.whl.metadata (6.3 kB)
+Collecting pyudev>=0.24.1 (from trcc-linux==9.11.2)
+  Downloading pyudev-0.24.5-py3-none-any.whl.metadata (4.4 kB)
+Requirement already satisfied: pyusb>=1.2.0 in /usr/local/lib/python3.12/site-packages (from trcc-linux==9.11.2) (1.3.1)
+Collecting sounddevice>=0.4.6 (from trcc-linux==9.11.2)
+  Downloading sounddevice-0.5.6-py3-none-any.whl.metadata (1.4 kB)
+Collecting typer>=0.9.0 (from trcc-linux==9.11.2)
+  Downloading typer-0.27.3-py3-none-any.whl.metadata (16 kB)
+Collecting uvicorn>=0.20 (from uvicorn[standard]>=0.20->trcc-linux==9.11.2)
+  Downloading uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting cffi>=2.0.0 (from cryptography>=3.4.8->trcc-linux==9.11.2)
+  Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+Collecting starlette>=0.46.0 (from fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading starlette-1.10.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting pydantic>=2.9.0 (from fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading pydantic-2.14.2-py3-none-any.whl.metadata (137 kB)
+Collecting typing-extensions>=4.8.0 (from fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting typing-inspection>=0.4.2 (from fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Collecting annotated-doc>=0.0.2 (from fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+Collecting opentelemetry-api>=1.44.0 (from fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading opentelemetry_api-1.45.2-py3-none-any.whl.metadata (1.4 kB)
+Collecting wcwidth>=0.1.4 (from prompt-toolkit>=3.0.0->trcc-linux==9.11.2)
+  Downloading wcwidth-0.9.4-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (23 kB)
+Collecting PySide6_Essentials==6.12.0 (from pyside6>=6.5.0->trcc-linux==9.11.2)
+  Downloading pyside6_essentials-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl.metadata (3.7 kB)
+Collecting PySide6_Addons==6.12.0 (from pyside6>=6.5.0->trcc-linux==9.11.2)
+  Downloading pyside6_addons-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl.metadata (4.3 kB)
+Collecting PySide6_WebEngine==6.12.0.140 (from pyside6>=6.5.0->trcc-linux==9.11.2)
+  Downloading pyside6_webengine-6.12.0.140-cp310-abi3-manylinux_2_34_x86_64.whl.metadata (3.5 kB)
+Collecting PySide6_Pdf==6.12.0.140 (from pyside6>=6.5.0->trcc-linux==9.11.2)
+  Downloading pyside6_pdf-6.12.0.140-cp310-abi3-manylinux_2_34_x86_64.whl.metadata (3.4 kB)
+Collecting shiboken6==6.12.0 (from PySide6_Essentials==6.12.0->pyside6>=6.5.0->trcc-linux==9.11.2)
+  Downloading shiboken6-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl.metadata (2.5 kB)
+Collecting shellingham>=1.3.0 (from typer>=0.9.0->trcc-linux==9.11.2)
+  Downloading shellingham-1.5.4-py2.py3-none-any.whl.metadata (3.5 kB)
+Collecting rich>=13.8.0 (from typer>=0.9.0->trcc-linux==9.11.2)
+  Downloading rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+Collecting h11>=0.8 (from uvicorn>=0.20->uvicorn[standard]>=0.20->trcc-linux==9.11.2)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting httptools>=0.8.0 (from uvicorn[standard]>=0.20->trcc-linux==9.11.2)
+  Downloading httptools-0.9.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+Collecting python-dotenv>=0.13 (from uvicorn[standard]>=0.20->trcc-linux==9.11.2)
+  Downloading python_dotenv-1.2.4-py3-none-any.whl.metadata (29 kB)
+Collecting pyyaml>=5.1 (from uvicorn[standard]>=0.20->trcc-linux==9.11.2)
+  Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+Collecting uvloop>=0.15.1 (from uvicorn[standard]>=0.20->trcc-linux==9.11.2)
+  Downloading uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.1 kB)
+Collecting watchfiles>=0.20 (from uvicorn[standard]>=0.20->trcc-linux==9.11.2)
+  Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+Collecting websockets>=13.0 (from uvicorn[standard]>=0.20->trcc-linux==9.11.2)
+  Downloading websockets-17.4-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=3.4.8->trcc-linux==9.11.2)
+  Downloading pycparser-3.12-py3-none-any.whl.metadata (9.7 kB)
+Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.50.2 (from pydantic>=2.9.0->fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading pydantic_core-2.50.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (6.5 kB)
+Collecting markdown-it-py>=2.2.0 (from rich>=13.8.0->typer>=0.9.0->trcc-linux==9.11.2)
+  Downloading markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting pygments<3.0.0,>=2.13.0 (from rich>=13.8.0->typer>=0.9.0->trcc-linux==9.11.2)
+  Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting anyio<5,>=4.0.0 (from starlette>=0.46.0->fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+Collecting idna>=2.8 (from anyio<5,>=4.0.0->starlette>=0.46.0->fastapi>=0.100->trcc-linux==9.11.2)
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.8.0->typer>=0.9.0->trcc-linux==9.11.2)
+  Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.8/4.8 MB 267.4 MB/s eta 0:00:00
+Downloading fastapi-0.162.0-py3-none-any.whl (148 kB)
+Downloading hidapi-0.15.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 188.7 MB/s eta 0:00:00
+Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.7/16.7 MB 207.8 MB/s eta 0:00:00
+Downloading nvidia_ml_py-13.615.71-py3-none-any.whl (58 kB)
+Downloading prompt_toolkit-3.0.53-py3-none-any.whl (392 kB)
+Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+Downloading pyside6-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl (577 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 577.7/577.7 kB 423.3 MB/s eta 0:00:00
+Downloading pyside6_addons-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl (59.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 59.2/59.2 MB 220.7 MB/s eta 0:00:00
+Downloading pyside6_essentials-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl (84.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 84.3/84.3 MB 266.7 MB/s eta 0:00:00
+Downloading pyside6_pdf-6.12.0.140-cp310-abi3-manylinux_2_34_x86_64.whl (2.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.8/2.8 MB 150.2 MB/s eta 0:00:00
+Downloading pyside6_webengine-6.12.0.140-cp310-abi3-manylinux_2_34_x86_64.whl (116.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 116.7/116.7 MB 213.4 MB/s eta 0:00:00
+Downloading shiboken6-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl (279 kB)
+Downloading python_multipart-0.0.33-py3-none-any.whl (32 kB)
+Downloading pyudev-0.24.5-py3-none-any.whl (60 kB)
+Downloading sounddevice-0.5.6-py3-none-any.whl (32 kB)
+Downloading typer-0.27.3-py3-none-any.whl (123 kB)
+Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading httptools-0.9.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (552 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 552.8/552.8 kB 327.0 MB/s eta 0:00:00
+Downloading opentelemetry_api-1.45.2-py3-none-any.whl (60 kB)
+Downloading pydantic-2.14.2-py3-none-any.whl (490 kB)
+Downloading pydantic_core-2.50.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (2.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 245.8 MB/s eta 0:00:00
+Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 392.8 MB/s eta 0:00:00
+Downloading rich-15.0.0-py3-none-any.whl (310 kB)
+Downloading shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+Downloading starlette-1.10.0-py3-none-any.whl (80 kB)
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Downloading uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 240.1 MB/s eta 0:00:00
+Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (458 kB)
+Downloading wcwidth-0.9.4-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (785 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 785.9/785.9 kB 336.6 MB/s eta 0:00:00
+Downloading websockets-17.4-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (226 kB)
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+Downloading markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 225.8 MB/s eta 0:00:00
+Downloading pycparser-3.12-py3-none-any.whl (62 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Installing collected packages: nvidia-ml-py, hidapi, websockets, wcwidth, uvloop, typing-extensions, shiboken6, shellingham, pyyaml, pyudev, python-multipart, python-dotenv, pygments, pycparser, psutil, numpy, mdurl, idna, httptools, h11, click, certifi, annotated-types, annotated-doc, uvicorn, typing-inspection, PySide6_Essentials, pydantic-core, prompt-toolkit, opentelemetry-api, markdown-it-py, cffi, anyio, watchfiles, starlette, sounddevice, rich, PySide6_Pdf, PySide6_Addons, pydantic, cryptography, typer, PySide6_WebEngine, fastapi, pyside6
+Successfully installed PySide6_Addons-6.12.0 PySide6_Essentials-6.12.0 PySide6_Pdf-6.12.0.140 PySide6_WebEngine-6.12.0.140 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 certifi-2026.10.23 cffi-2.1.1 click-8.5.0 cryptography-50.0.2 fastapi-0.162.0 h11-0.16.0 hidapi-0.15.0 httptools-0.9.0 idna-3.20 markdown-it-py-4.2.0 mdurl-0.1.2 numpy-2.5.4 nvidia-ml-py-13.615.71 opentelemetry-api-1.45.2 prompt-toolkit-3.0.53 psutil-7.2.2 pycparser-3.12 pydantic-2.14.2 pydantic-core-2.50.2 pygments-2.21.0 pyside6-6.12.0 python-dotenv-1.2.4 python-multipart-0.0.33 pyudev-0.24.5 pyyaml-6.0.3 rich-15.0.0 shellingham-1.5.4 shiboken6-6.12.0 sounddevice-0.5.6 starlette-1.10.0 typer-0.27.3 typing-extensions-4.16.0 typing-inspection-0.4.4 uvicorn-0.54.0 uvloop-0.23.0 watchfiles-1.3.0 wcwidth-0.9.4 websockets-17.4
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.2
+[notice] To update, run: pip install --upgrade pip
+2026-10-31T18:28:12.602 INFO    [19] trcc._entry:main:84: main: dispatching to the CLI
+2026-10-31T18:28:13.073 INFO    [19] trcc.adapters.visual._base:drawn_on:95: drawn_on: EglSurface
+2026-10-31T18:28:13.095 INFO    [19] trcc.adapters.visual._base:drawn_on:95: drawn_on: EglSurface
+2026-10-31T18:28:13.097 INFO    [19] trcc.adapters.visual._base:drawn_on:95: drawn_on: CglSurface
+2026-10-31T18:28:13.113 INFO    [19] trcc.adapters.visual._base:drawn_on:95: drawn_on: WglSurface
+2026-10-31T18:28:13.113 INFO    [19] trcc.adapters.system:current_platform:43: current_platform: building LinuxOS
+2026-10-31T18:28:13.113 INFO    [19] trcc.adapters.system._base:__init__:343: LinuxOS: initialising
+2026-10-31T18:28:13.113 INFO    [19] trcc.adapters.system.linux:__init__:78: LinuxPaths: root=/tmp/.trcc user_content=/tmp/.trcc-user
+2026-10-31T18:28:13.113 INFO    [19] trcc.adapters.system.linux:__init__:918: LinuxOS: family=Debian-family manager=apt
+2026-10-31T18:28:13.130 INFO    [19] trcc.adapters.infra.logging:configure_logging:733: configure_logging: file=/tmp/.trcc/trcc.log latest=/tmp/.trcc/trcc.latest.log level=DEBUG rotate=1000000×5 stderr=INFO
+2026-10-31T18:28:13.131 INFO    [19] trcc.adapters.infra.logging:configure_logging:742: configure_logging: per-frame logging OFF (-vvv enables it)
+2026-10-31T18:28:13.131 INFO    [19] trcc.ui.cli.main:_root:741: verbosity: -v x1 -> terminal=INFO file=DEBUG per_frame=False
+                                                                                
+ Usage: trcc led play [OPTIONS] {key}                                           
+                                                                                
+ Run the LED render ticker until Ctrl-C.                                        
+                                                                                
+ Mirrors ``display play`` — dispatches ``RenderLed`` every tick so              
+ BREATHING / COLORFUL / RAINBOW animations advance.  Stops cleanly              
+ on SIGINT.                                                                     
+                                                                                
+╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+│ *    key      <str>  LED device key, e.g. 0416:8001 [required]               │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --interval  -i      <float>  Tick interval in seconds (default:              │
+│                              AppSettings.refresh_interval_s)                 │
+│ --help                       Show this message and exit.                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+2026-10-31T18:28:13.211 INFO    [19] trcc.adapters.infra.logging:PosixSharedLogHandler.close:327: PosixSharedLogHandler.close: releasing /tmp/.trcc/trcc.latest.log.lock
+2026-10-31T18:28:13.212 INFO    [19] trcc.adapters.infra.logging:PosixSharedLogHandler.close:327: PosixSharedLogHandler.close: releasing /tmp/.trcc/trcc.log.lock
+2026-10-31T18:28:13.354 INFO    [32] trcc._entry:main:84: main: dispatching to the CLI
+2026-10-31T18:28:13.732 INFO    [32] trcc.adapters.visual._base:drawn_on:95: drawn_on: EglSurface
+2026-10-31T18:28:13.747 INFO    [32] trcc.adapters.visual._base:drawn_on:95: drawn_on: EglSurface
+2026-10-31T18:28:13.748 INFO    [32] trcc.adapters.visual._base:drawn_on:95: drawn_on: CglSurface
+2026-10-31T18:28:13.757 INFO    [32] trcc.adapters.visual._base:drawn_on:95: drawn_on: WglSurface
+2026-10-31T18:28:13.757 INFO    [32] trcc.adapters.system:current_platform:43: current_platform: building LinuxOS
+2026-10-31T18:28:13.757 INFO    [32] trcc.adapters.system._base:__init__:343: LinuxOS: initialising
+2026-10-31T18:28:13.757 INFO    [32] trcc.adapters.system.linux:__init__:78: LinuxPaths: root=/tmp/.trcc user_content=/tmp/.trcc-user
+2026-10-31T18:28:13.757 INFO    [32] trcc.adapters.system.linux:__init__:918: LinuxOS: family=Debian-family manager=apt
+2026-10-31T18:28:13.772 INFO    [32] trcc.adapters.infra.logging:configure_logging:733: configure_logging: file=/tmp/.trcc/trcc.log latest=/tmp/.trcc/trcc.latest.log level=DEBUG rotate=1000000×5 stderr=INFO
+2026-10-31T18:28:13.773 INFO    [32] trcc.adapters.infra.logging:configure_logging:742: configure_logging: per-frame logging OFF (-vvv enables it)
+2026-10-31T18:28:13.773 INFO    [32] trcc.ui.cli.main:_root:741: verbosity: -v x1 -> terminal=INFO file=DEBUG per_frame=False
+2026-10-31T18:28:13.773 INFO    [32] trcc.ui.cli.led:play:434: cli led play: key=0416:8001 interval=1.0
+2026-10-31T18:28:13.776 INFO    [32] trcc.ui._base:CliUI._app:396: _app: composing for CliUI
+2026-10-31T18:28:13.776 INFO    [32] trcc.ui._uis:CliUI.compose:463: CliUI.compose: composing the CLI's App
+2026-10-31T18:28:13.778 INFO    [32] trcc._boot:trcc:111: trcc: TRCC_DAEMON=0 platform=False renderer=False -> TRCC_DAEMON=0
+2026-10-31T18:28:13.778 INFO    [32] trcc._boot:_build_local_app:151: _build_local_app: platform=False renderer=False draws=True
+2026-10-31T18:28:13.778 INFO    [32] trcc.adapters.system:current_platform:43: current_platform: building LinuxOS
+2026-10-31T18:28:13.778 INFO    [32] trcc.adapters.system._base:LinuxOS.__init__:343: LinuxOS: initialising
+2026-10-31T18:28:13.778 INFO    [32] trcc.adapters.system.linux:LinuxPaths.__init__:78: LinuxPaths: root=/tmp/.trcc user_content=/tmp/.trcc-user
+2026-10-31T18:28:13.779 INFO    [32] trcc.adapters.system.linux:LinuxOS.__init__:918: LinuxOS: family=Debian-family manager=apt
+2026-10-31T18:28:13.779 INFO    [32] trcc.adapters.system._base:LinuxOS.scan_devices:508: LinuxOS.scan_devices: scanning 10 known VID/PID pairs
+2026-10-31T18:28:13.798 INFO    [32] trcc.adapters.system._base:LinuxOS.scan_devices:519: LinuxOS.scan_devices: 0 device(s) total
+2026-10-31T18:28:13.798 INFO    [32] trcc._boot:_led_coolers_only:192: _led_coolers_only: 0 device(s), kinds=[]
+2026-10-31T18:28:13.845 WARNING [32] trcc._boot:_build_local_app:169: QtRenderer unavailable (libglib-2.0.so.0: cannot open shared object file: No such file or directory); display commands will fail until a renderer is attached
+2026-10-31T18:28:13.846 INFO    [32] trcc.core._safe:load_json_or_default:51: load_json_or_default: /tmp/.trcc/trcc.json
+2026-10-31T18:28:13.877 INFO    [32] trcc.adapters.system._base:LinuxOS.http_fetcher:582: LinuxOS.http_fetcher: building the urllib fetcher
+2026-10-31T18:28:13.912 INFO    [32] trcc.adapters.repo.http:_default_context:52: _default_context: system trust store + certifi /usr/local/lib/python3.12/site-packages/certifi/cacert.pem
+2026-10-31T18:28:13.919 INFO    [32] trcc.adapters.infra.data_install_runner:ThreadDataInstallRunner.__init__:141: ThreadDataInstallRunner.__init__: join_timeout=2.0s retry_delays_s=(30.0, 120.0, 600.0)
+2026-10-31T18:28:13.919 INFO    [32] trcc.adapters.infra.data_install_runner:_SubmitOnce.__init__:91: _SubmitOnce.__init__
+2026-10-31T18:28:13.919 INFO    [32] trcc.adapters.infra._worker:QueueWorker.__init__:71: QueueWorker(trcc-data-install).__init__: join_timeout=2.0s
+2026-10-31T18:28:13.921 INFO    [32] trcc.adapters.infra.video_export_runner:ThreadVideoExportRunner.__init__:140: ThreadVideoExportRunner.__init__: join_timeout=2.0s
+2026-10-31T18:28:13.921 INFO    [32] trcc.adapters.infra._worker:QueueWorker.__init__:71: QueueWorker(trcc-video-export).__init__: join_timeout=2.0s
+2026-10-31T18:28:13.936 INFO    [32] trcc.adapters.diagnostics.adapter:DiagnosticsAdapter.__init__:37: DiagnosticsAdapter: platform=LinuxOS gpu_state=nvml_init_state
+2026-10-31T18:28:13.938 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=RefreshIntervalChanged handler=MetricsLoop._wake_for_pref_change
+2026-10-31T18:28:13.938 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=TempUnitChanged handler=MetricsLoop._wake_for_pref_change
+2026-10-31T18:28:13.938 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=HddEnabledChanged handler=MetricsLoop._wake_for_pref_change
+2026-10-31T18:28:13.938 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=BrightnessChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=MaskApplied handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=MaskPositionChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=MaskVisibilityChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=OverlayChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=FitModeChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=SplitModeChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=SensorsUpdated handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=VideoStarted handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=VideoStopped handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=BackgroundChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=TempUnitChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=LedSettingsChanged handler=_DeviceRenderObserver._on_visual_change
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=OverlayChanged handler=App._persist_user_mask_dc
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=DeviceAttached handler=App._on_device_attached
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=DeviceDetached handler=App._on_device_detached
+2026-10-31T18:28:13.939 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=OrientationChanged handler=App._on_orientation_changed
+2026-10-31T18:28:13.940 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=SystemResumed handler=App._on_system_resumed
+2026-10-31T18:28:13.940 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=DataInstalled handler=App._on_data_installed
+2026-10-31T18:28:13.940 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=LedColorsChanged handler=RgbMirrorService.on_colors
+2026-10-31T18:28:13.940 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=FrameSent handler=App._follow_frame
+2026-10-31T18:28:13.940 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=DeviceConnected handler=App._prime_all
+2026-10-31T18:28:13.940 INFO    [32] trcc.core.events:EventBus.subscribe:633: subscribe: event=DataInstalled handler=App._prime_all
+2026-10-31T18:28:13.940 INFO    [32] trcc.app:App._enable_saved_modules:479: _enable_saved_modules: on: []
+2026-10-31T18:28:13.940 INFO    [32] trcc.app:App.dispatch:1573: [cli] dispatch InitializeLed(key='0416:8001', color=None, phase=0)
+2026-10-31T18:28:13.940 INFO    [32] trcc.app:App._connect_for:1623: _connect_for: InitializeLed needs 0416:8001 — connecting
+2026-10-31T18:28:13.940 INFO    [32] trcc.app:App.dispatch:1573: [cli] dispatch EnsureConnected(key='0416:8001')
+2026-10-31T18:28:13.941 INFO    [32] trcc.core.commands.device:EnsureConnected.execute:540: EnsureConnected 0416:8001: not connected — attaching
+2026-10-31T18:28:13.941 INFO    [32] trcc.services.settings:Settings._seed_for:366: _seed_for: 0416:8001 is new — seeding the global temperature unit
+2026-10-31T18:28:13.941 INFO    [32] trcc.app:App.connect_unit:639: connect_unit: connecting 0416:8001
+2026-10-31T18:28:13.941 INFO    [32] trcc.app:App.dispatch:1573: [cli] dispatch ConnectDevice(key='0416:8001')
+2026-10-31T18:28:13.941 INFO    [32] trcc.app:App.attach:969: attach: 0416:8001 quirk_transport=False
+2026-10-31T18:28:13.941 INFO    [32] trcc.adapters.system._base:LinuxOS.scan_devices:508: LinuxOS.scan_devices: scanning 10 known VID/PID pairs
+2026-10-31T18:28:13.944 INFO    [32] trcc.adapters.system._base:LinuxOS.scan_devices:519: LinuxOS.scan_devices: 0 device(s) total
+2026-10-31T18:28:13.944 INFO    [32] trcc.adapters.system._base:LinuxOS.open_transport:474: LinuxOS.open_transport: wire=led 0416:8001 serial=None unit=(only) → _open_bulk
+2026-10-31T18:28:13.946 INFO    [32] trcc.adapters.system._udev:rules_state:242: rules_state: no 99-trcc-lcd.rules in any rules directory
+2026-10-31T18:28:13.946 INFO    [32] trcc.core.ports:Led.set_unit:332: Device 0416:8001: unit=''
+2026-10-31T18:28:13.946 INFO    [32] trcc.adapters.device._base:Led._open_transport:216: Led 0416:8001: opening transport
+2026-10-31T18:28:13.947 ERROR   [32] trcc.adapters.device.transport:PyUsbBulkTransport.open:126: USB device 0416:8001 not found
+2026-10-31T18:28:13.947 WARNING [32] trcc.adapters.device._base:Led._open_transport:220: Led 0416:8001: transport open failed
+2026-10-31T18:28:13.947 INFO    [32] trcc.adapters.device._base:Led.disconnect:297: Led 0416:8001: disconnecting
+2026-10-31T18:28:13.947 INFO    [32] trcc.adapters.device.transport:PyUsbBulkTransport.close:257: PyUsbBulkTransport.close: 0416:8001 (was_open=False)
+2026-10-31T18:28:13.947 INFO    [32] trcc.adapters.system.linux:LinuxOS.check_permissions:787: LinuxOS.check_permissions: probing
+2026-10-31T18:28:13.948 INFO    [32] trcc.adapters.system._udev:rules_state:242: rules_state: no 99-trcc-lcd.rules in any rules directory
+2026-10-31T18:28:13.948 INFO    [32] trcc.adapters.system.linux:LinuxOS.check_permissions:806: LinuxOS.check_permissions: 1 warning(s)
+2026-10-31T18:28:13.949 INFO    [32] trcc.core.commands.device:_connect_failure_hints:211: _connect_failure_hints: HandshakeError -> 1 hint(s)
+2026-10-31T18:28:13.949 INFO    [32] trcc.app:App.note_connect_issue:1087: note_connect_issue: key=0416:8001 permanent=False msg=Failed to open led transport for 0416:8001
+2026-10-31T18:28:13.949 WARNING [32] trcc.app:App.dispatch:1586: [cli] ConnectDevice failed: Failed to open led transport for 0416:8001
+2026-10-31T18:28:13.950 WARNING [32] trcc.app:App.dispatch:1586: [cli] EnsureConnected failed: Failed to open led transport for 0416:8001
+2026-10-31T18:28:13.950 INFO    [32] trcc.core.commands.led:InitializeLed.execute:153: InitializeLed: key=0416:8001 color=None phase=0
+2026-10-31T18:28:13.953 WARNING [32] trcc.app:recurring_warning:318: [cli] RenderLed failed: Not attached: 0416:8001 — Failed to open led transport for 0416:8001 — repeats go to the per-frame log
+2026-10-31T18:28:13.953 WARNING [32] trcc.app:App.dispatch:1586: [cli] InitializeLed failed: Not attached: 0416:8001 — Failed to open led transport for 0416:8001
+Not attached: 0416:8001 — Failed to open led transport for 0416:8001
+2026-10-31T18:28:13.954 INFO    [32] trcc.adapters.infra.logging:PosixSharedLogHandler.close:327: PosixSharedLogHandler.close: releasing /tmp/.trcc/trcc.latest.log.lock
+2026-10-31T18:28:13.954 INFO    [32] trcc.adapters.infra.logging:PosixSharedLogHandler.close:327: PosixSharedLogHandler.close: releasing /tmp/.trcc/trcc.log.lock

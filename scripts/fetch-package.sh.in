@@ -1,0 +1,79 @@
+# URL installation bootstrap. Executed in the SAME shell as install.sh.in.
+# All payload URLs below are real publication paths; hashes are embedded.
+downloaded_pkg=0
+if [[ ! -f "$pkg/payload.txz" || ! -f "$pkg/release.json" || ! -f "$pkg/backend-image.tar.xz" || ! -f "$pkg/$name.plg" ]]; then
+  download_base='@DOWNLOAD_BASE@'
+  [[ -n "$download_base" ]] || { echo "Copier le bundle COMPLET dans $pkg avant installation"; exit 1; }
+  [[ ! -e "$pkg" ]] || { echo "Paquet partiel préexistant conservé : $pkg ; réparer ce dossier avant de réessayer."; exit 1; }
+  [[ ! -L "$state" && ! -L "$state/packages" && ! -L "$ram" ]] || { echo 'Lien symbolique refusé'; exit 1; }
+  if [[ -d "$state" && ! -f "$state/inventory.json" ]]; then
+    for existing in "$state"/*; do [[ ! -e "$existing" || "$existing" == "$state/packages" ]] || { echo "Dossier préexistant inconnu conservé : $existing"; exit 1; }; done
+  fi
+  if [[ -f "$state/inventory.json" ]]; then
+    php -r '$i=json_decode(file_get_contents($argv[1]),true);exit(($i["owner"]??"")==="thermalright-digital" && preg_match("/^[a-f0-9]{32}$/D",$i["instance"]??"")?0:1);' "$state/inventory.json" || { echo 'Inventaire préexistant inconnu conservé'; exit 1; }
+  fi
+  if [[ -e "$ram" && ( ! -f "$ram/.owner" || $(cat "$ram/.owner") != "$name" ) ]]; then echo 'Répertoire RAM inconnu conservé'; exit 1; fi
+  fetch_new_ram=0
+  if [[ ! -d "$ram" ]]; then mkdir -p "$ram"; printf '%s' "$name" > "$ram/.owner"; fetch_new_ram=1; fi
+  exec 8>"$ram/download.lock"
+  flock -n 8 || { echo 'Un téléchargement du plugin est déjà en cours'; exit 1; }
+  fetch_stage="$ram/download"
+  fetch_publish=''
+  rm -rf -- "$fetch_stage"
+  mkdir "$fetch_stage"
+  fetch_cleanup() {
+    rc=$?
+    trap - EXIT INT TERM HUP
+    rm -rf -- "$fetch_stage"
+    [[ -z "$fetch_publish" ]] || rm -rf -- "$fetch_publish"
+    if [[ $rc != 0 && $downloaded_pkg == 1 ]]; then rm -rf -- "$pkg"; rmdir "$state/packages" "$state" 2>/dev/null || true; fi
+    if [[ $fetch_new_ram == 1 ]]; then rm -rf -- "$ram"; fi
+    exit "$rc"
+  }
+  trap fetch_cleanup EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM HUP
+  fetch_file() {
+    local file=$1 expected=$2
+    echo "Téléchargement vérifié : $file"
+    if command -v curl >/dev/null; then
+      curl --fail --location --silent --show-error --connect-timeout 10 --max-time 300 --retry 1 "$download_base/$file" -o "$fetch_stage/$file"
+    else
+      wget -T 30 -t 2 -O "$fetch_stage/$file" "$download_base/$file"
+    fi
+    printf '%s  %s\n' "$expected" "$fetch_stage/$file" | sha256sum -c -
+  }
+  fetch_file payload.txz "$payload_sha"
+  fetch_file release.json "$release_sha"
+  image_sha='@IMAGE_SHA@'
+  for cached in "$state"/packages/*/backend-image.tar.xz; do
+    if [[ -f "$cached" && ! -L "$cached" ]] && printf '%s  %s\n' "$image_sha" "$cached" | sha256sum -c - >/dev/null 2>&1; then
+      echo 'Réutilisation de l’image Docker déjà présente.'
+      cp -- "$cached" "$fetch_stage/backend-image.tar.xz"
+      break
+    fi
+  done
+  [[ -f "$fetch_stage/backend-image.tar.xz" ]] || fetch_file backend-image.tar.xz "$image_sha"
+  # The native manager already downloaded the executing manifest here.
+  # Compare its actual INLINE bytes to this running script before copying it.
+  native_manifest="$testroot/tmp/plugins/$name.plg"
+  php -r '
+  $m=simplexml_load_file($argv[1],"SimpleXMLElement",LIBXML_NONET);
+  if(!$m || (string)$m["name"]!=="thermalright-digital" || (string)$m["version"]!==$argv[3])exit(1);
+  foreach($m->FILE as $f)if((string)$f["Method"]==="install" && hash_equals(hash("sha256",(string)$f->INLINE),hash_file("sha256",$argv[2])))exit(0);
+  exit(1);' "$native_manifest" "$0" "$version" || { echo 'Le manifeste téléchargé par le gestionnaire ne correspond pas au script exécuté.'; exit 1; }
+  cp -- "$native_manifest" "$fetch_stage/$name.plg"
+  mkdir -p "$state/packages"
+  # Publish by rename on the flash filesystem; interrupted copies are marked.
+  for pending in "$state/packages/.download-$version."*; do
+    if [[ -d "$pending" && -f "$pending/.download-origin" && $(cat "$pending/.download-origin") == "$name" ]]; then rm -rf -- "$pending"; fi
+  done
+  fetch_publish=$(mktemp -d "$state/packages/.download-$version.XXXXXX")
+  printf '%s' "$name" > "$fetch_publish/.download-origin"
+  cp -- "$fetch_stage"/* "$fetch_publish/"
+  mv -- "$fetch_publish" "$pkg"
+  fetch_publish=''
+  rm -rf -- "$fetch_stage"
+  downloaded_pkg=1
+  exec 8>&-
+fi

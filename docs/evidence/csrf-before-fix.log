@@ -1,0 +1,1 @@
+FAIL native token consumed, independent header valid; attendu 200, reçu 403; {"error":"Jeton CSRF invalide"} HTTP=403

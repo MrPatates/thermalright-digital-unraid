@@ -1,0 +1,80 @@
+{
+  "retrieved": "2026-10-31",
+  "sources": [
+    {
+      "file": "dynamix.system.temp.plg",
+      "url": "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/dynamix.system.temp.plg",
+      "sha256": "47e11a41c4472db2386b832aea33b5ee85d8ba9ba2779c62ca72ad38c1412154"
+    },
+    {
+      "file": "staxx.plg",
+      "url": "https://raw.githubusercontent.com/quadcom/Staxx/main/staxx.plg",
+      "sha256": "92957cccee55dfbcbe6525ee2a2eaa69234cf88a0a9e0eabe15d3942ccf0390d"
+    },
+    {
+      "file": "plugin-manager.php",
+      "url": "https://raw.githubusercontent.com/unraid/webgui/master/emhttp/plugins/dynamix.plugin.manager/scripts/plugin",
+      "sha256": "41450297945ecacc11374fecf7007d244b415d94809bb1c098bb059c0ef87292"
+    },
+    {
+      "file": "emhttp_event",
+      "url": "https://raw.githubusercontent.com/unraid/webgui/master/sbin/emhttp_event",
+      "sha256": "a7488bb455d9929518957122ab1e8b01d1f668b6f228f5f283488aa83e531b7f"
+    },
+    {
+      "file": "PluginInstall.page",
+      "url": "https://raw.githubusercontent.com/unraid/webgui/master/emhttp/plugins/dynamix.plugin.manager/PluginInstall.page",
+      "sha256": "bb633f4d3764437243fb8f4ddc418cc2fd1726581e1a65b32ba30caf06477794"
+    },
+    {
+      "file": "auth-request.php",
+      "url": "https://raw.githubusercontent.com/unraid/webgui/master/emhttp/auth-request.php",
+      "sha256": "043a4d4129681aca3d977dc9a5a8d62b8c7e0fe5ed19bb4c504a95a3bfa940f3"
+    },
+    {
+      "file": "pypi-9.11.2.json",
+      "url": "https://pypi.org/pypi/trcc-linux/9.11.2/json",
+      "sha256": "37f9c4efc2d86a45112582f24668f134399d8ec8b0eb9270955ce727b6d6495f"
+    },
+    {
+      "module": "trcc/adapters/device/led.py",
+      "wheel_matches_github_tag": "v9.11.2",
+      "sha256": "bb42d8aa4bd8ac90ce4e346db5a5684f29dd5f59596158434249475d837a879e"
+    },
+    {
+      "module": "trcc/adapters/device/transport.py",
+      "wheel_matches_github_tag": "v9.11.2",
+      "sha256": "657083c40d8670f140f7c588e267c79486aa6a12341be013e192d331fac78848"
+    },
+    {
+      "module": "trcc/services/led_segment.py",
+      "wheel_matches_github_tag": "v9.11.2",
+      "sha256": "cd2f3d278e43206ee1257f0142176a8e2c895559b1c4cf39b5477c982a159e6c"
+    },
+    {
+      "module": "trcc/core/models.py",
+      "wheel_matches_github_tag": "v9.11.2",
+      "sha256": "a7d59ee20c3675dae1cd81e4c7cb19db0fff45dd59f9241c14f8b6b808a3607c"
+    },
+    {
+      "file": "local_prepend.php",
+      "url": "https://raw.githubusercontent.com/unraid/webgui/master/emhttp/plugins/dynamix/include/local_prepend.php",
+      "sha256": "44c961c3bd35d0129e0a4a6c802d9529be7b21a4be14ce82fa7a38b3cffcf39b"
+    },
+    {
+      "file": "HeadInlineJS.php",
+      "url": "https://raw.githubusercontent.com/unraid/webgui/master/emhttp/plugins/dynamix/include/DefaultPageLayout/HeadInlineJS.php",
+      "sha256": "ae1a370422030e7fb25e5e33b7ee96a435357b58511897ae91e0577b57f9a260"
+    },
+    {
+      "file": "DockerClient.php",
+      "url": "https://raw.githubusercontent.com/unraid/webgui/master/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php",
+      "sha256": "68dfb705e9153e3777ac5d7a9eddb37b1a64989569c9d50a8fd8a1beb1f93420"
+    },
+    {
+      "file": "DockerUpdateConfig.php",
+      "url": "https://raw.githubusercontent.com/unraid/webgui/master/emhttp/plugins/dynamix.docker.manager/include/UpdateConfig.php",
+      "sha256": "c1f3f852d52cb06a7679b959ac99dd2402616082bf956a3e18b4c9f1ec3bcb6d"
+    }
+  ]
+}

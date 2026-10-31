@@ -1,0 +1,143 @@
+#!/bin/bash
+# Embedded in the real .plg. Executed by Unraid's native plugin manager.
+# The native plugin runner captures stdout only. Keep failures visible in UI.
+exec 2>&1
+set -euo pipefail
+umask 077
+name=thermalright-digital
+version='@VERSION@'
+payload_sha='@PAYLOAD_SHA@'
+release_sha='@RELEASE_SHA@'
+testroot=${TD_TEST_ROOT:-}
+if [[ -n "$testroot" && "$testroot" != /tmp/* ]]; then echo 'TD_TEST_ROOT doit être dans /tmp' >&2; exit 1; fi
+state="$testroot/boot/config/plugins/$name"
+active="$testroot/usr/local/emhttp/plugins/$name"
+stage="$testroot/usr/local/emhttp/plugins/.$name-stage"
+backup="$testroot/usr/local/emhttp/plugins/.$name-backup"
+ram="$testroot/var/run/$name"
+pkg="$state/packages/$version"
+[[ $(uname -m) == x86_64 ]] || { echo 'x86_64 requis' >&2; exit 1; }
+v=$(sed -n 's/^version="\{0,1\}\([0-9][0-9.]*\)"\{0,1\}$/\1/p' "$testroot/etc/unraid-version")
+[[ $v =~ ^(6\.12\.[0-9]+|7\.[0-3]\.[0-9]+)$ ]] || { echo "Version Unraid non prise en charge : $v" >&2; exit 1; }
+[[ ! -L "$state" && ! -L "$active" ]] || { echo 'Répertoire remplacé par un lien' >&2; exit 1; }
+@FETCH_PACKAGE@
+[[ -f "$pkg/payload.txz" && -f "$pkg/release.json" && -f "$pkg/backend-image.tar.xz" && -f "$pkg/$name.plg" ]] || { echo "Copier le bundle COMPLET dans $pkg avant installation" >&2; exit 1; }
+printf '%s  %s\n' "$payload_sha" "$pkg/payload.txz" | sha256sum -c -
+printf '%s  %s\n' "$release_sha" "$pkg/release.json" | sha256sum -c -
+# The image archive is checked against a pinned hash immediately before load;
+# do not reread the large archive from the boot flash on every server boot.
+for dir in "$active" "$stage" "$backup"; do
+  if [[ -e "$dir" && ( ! -f "$dir/.td-owner" || $(cat "$dir/.td-owner") != "$name" ) ]]; then
+    echo "Répertoire préexistant non reconnu, conservé : $dir" >&2; exit 1
+  fi
+done
+mkdir -p "$(dirname "$active")"
+had_state=0; [[ ! -f "$state/inventory.json" ]] || had_state=1
+if [[ $had_state == 0 ]]; then
+  for entry in "$state"/*; do
+    [[ ! -e "$entry" || "$entry" == "$state/packages" ]] || { echo "Répertoire préexistant contenant un fichier inconnu : $entry" >&2; exit 1; }
+  done
+fi
+was_active=0; was_ready=0; activated=0; committed=0
+cleanup() {
+  status=$?
+  trap - EXIT INT TERM HUP
+  if [[ $committed == 0 ]]; then
+    echo 'Installation échouée : restauration de la version précédente.' >&2
+    if [[ $activated == 1 ]]; then
+      php "$active/control.php" stop || true
+      rm -rf -- "$active"
+    fi
+    [[ ! -d "$backup" ]] || mv "$backup" "$active"
+    [[ ! -d "$stage" ]] || rm -rf -- "$stage"
+    if [[ $had_state == 0 ]]; then
+      rm -f -- "$state/settings.json" "$state/inventory.json"
+      if [[ -f "$ram/.owner" && $(cat "$ram/.owner") == "$name" ]]; then rm -rf -- "$ram"; fi
+    elif [[ $was_active == 1 && -f "$active/control.php" ]]; then
+      php "$active/control.php" start || true
+    fi
+    if [[ ${downloaded_pkg:-0} == 1 ]]; then
+      rm -rf -- "$pkg"
+      rmdir "$state/packages" "$state" 2>/dev/null || true
+    fi
+  fi
+  exit "$status"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM HUP
+if [[ -d "$ram" && ( ! -f "$ram/.owner" || $(cat "$ram/.owner") != "$name" ) ]]; then
+  echo 'Répertoire RAM préexistant non reconnu' >&2; exit 1
+fi
+mkdir -p "$ram"
+printf '%s' "$name" > "$ram/.owner"
+exec 9>"$ram/install.lock"
+flock -n 9 || { trap - EXIT INT TERM HUP; echo 'Une installation est déjà en cours' >&2; exit 1; }
+# Do not pass the installer lock to the detached service.
+php() { command php "$@" 9>&-; }
+# Recover a SIGKILL/power interruption between the two directory renames.
+if [[ -d "$backup" ]]; then
+  if [[ -d "$active" ]]; then
+    php "$active/control.php" stop || { committed=1; echo 'Récupération différée : arrêt du backend impossible.' >&2; exit 1; }
+    rm -rf -- "$active"
+  fi
+  mv "$backup" "$active"
+fi
+[[ ! -d "$stage" ]] || rm -rf -- "$stage"
+if [[ -f "$active/control.php" ]]; then
+  was_active=$(php "$active/control.php" is-active)
+  was_ready=$(php "$active/control.php" is-ready)
+fi
+mkdir "$stage"
+chmod 0755 "$stage"
+printf '%s\n' "$name" > "$stage/.td-owner"
+# Reject traversal, links, special files and unexpected top-level paths BEFORE extraction.
+php -r '
+$p=new PharData($argv[1]);
+foreach(new RecursiveIteratorIterator($p) as $f){
+ $n=substr($f->getPathname(),strlen("phar://".$argv[1])+1);
+ if(str_contains($n,"..") || str_starts_with($n,"/") || $f->isLink()) exit(1);
+}
+' "$pkg/payload.txz" 2>/dev/null || {
+  # Phar xz is not available on every Unraid PHP. A fixed SHA-256 already
+  # authenticates this archive; tar listings provide the portable safety check.
+  tar -tJf "$pkg/payload.txz" | while IFS= read -r entry; do
+    [[ "$entry" != /* && "$entry" != *..* ]] || exit 1
+  done
+  if tar -tvJf "$pkg/payload.txz" | sed '/^[-d]/d' | read -r _; then echo 'Type archive refusé' >&2; exit 1; fi
+}
+tar -xJf "$pkg/payload.txz" -C "$stage" --no-same-owner
+php "$stage/control.php" selftest
+if [[ -n "$testroot" && ${TD_TEST_FAIL:-} == before_activate ]]; then exit 99; fi
+if [[ -f "$active/control.php" ]]; then php "$active/control.php" stop; mv "$active" "$backup"; fi
+mv "$stage" "$active"; activated=1
+if [[ -n "$testroot" && ${TD_TEST_INTERRUPT:-} == after_activate ]]; then kill -KILL $$; fi
+php "$active/control.php" initialize
+if [[ -n "$testroot" && ${TD_TEST_FAIL:-} == after_activate ]]; then exit 99; fi
+if [[ $was_active == 1 ]]; then
+  php "$active/control.php" start
+  if [[ $was_ready == 1 ]]; then
+    echo 'Vérification du nouveau backend (maximum 210 secondes)…'
+    ready=0
+    ready_timeout=210
+    if [[ -n "$testroot" ]]; then ready_timeout=${TD_TEST_READY_TIMEOUT:-210}; fi
+    for ((n=0;n<ready_timeout;n++)); do
+      if [[ $(php "$active/control.php" is-ready) == 1 ]]; then ready=1; break; fi
+      sleep 1
+    done
+    [[ $ready == 1 ]] || { echo 'Nouveau backend non opérationnel' >&2; exit 1; }
+  fi
+fi
+php -r '
+require $argv[1]."/control.php";
+$new=["version"=>$argv[2],"payload_sha256"=>$argv[3]];
+$old=json_read(state_dir()."/installed.json");
+if($old!==$new){
+ if($old){json_write(state_dir()."/previous.json",$old); $plg=root_path("/boot/config/plugins/thermalright-digital.plg"); if(is_file($plg)) copy($plg,state_dir()."/previous.plg");}
+ json_write(state_dir()."/installed.json",$new);
+}
+' "$active" "$version" "$payload_sha"
+committed=1
+[[ ! -d "$backup" ]] || rm -rf -- "$backup"
+php "$active/control.php" event-start || echo 'Installation terminée ; démarrage différé, consulter les paramètres.' >&2
+echo "Plugin $name $version installé pour Unraid $v. Paramètres : Settings/ThermalrightDigital"

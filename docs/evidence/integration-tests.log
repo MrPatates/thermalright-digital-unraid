@@ -1,0 +1,277 @@
+No syntax errors detected in plugin/control.php
+No syntax errors detected in plugin/api.php
+No syntax errors detected in plugin/cleanup.php
+No syntax errors detected in plugin/settings.php
+No syntax errors detected in plugin/metrics.php
+No syntax errors detected in tests/fake-docker.php
+PASS initialisation native
+PASS réinstallation conserve l’instance et les réglages
+PASS détection version Unraid
+PASS version hors cible refusée
+PASS température réelle, première charge indisponible
+PASS charge calculée depuis /proc/stat hôte
+PASS température manquante reste null
+PASS intervalle invalide refusé
+PASS sonde injectée refusée
+PASS autostart lance le superviseur
+PASS conteneur avec labels instance/propriétaire
+PASS un seul nœud USB délégué
+PASS isolation sans socket ni privileged ni réseau
+PASS démarrage répété sans instance multiple
+PASS nouvelle adresse USB résolue après redémarrage
+PASS arrêt libère processus et conteneur
+PASS absence USB sans conteneur
+PASS Docker absent : attente supervisée
+Docker indisponible : arrêt physique et nettoyage non confirmés
+PASS Docker indisponible bloque la désinstallation en conservant l’inventaire
+PASS ancienne installation détectée sans appropriation
+Ressources privées supprimées. Le gestionnaire Unraid termine le retrait du manifeste; audit disponible après 10 secondes.
+PASS désinstallation réussit après retour Docker
+PASS aucun fichier privé résiduel
+PASS ressources préexistantes préservées
+Déjà désinstallé.
+PASS désinstallation répétée idempotente
+PASS initialisation native
+PASS image identique préexistante considérée empruntée
+Ressources privées supprimées. Le gestionnaire Unraid termine le retrait du manifeste; audit disponible après 10 secondes.
+PASS image préexistante conservée
+PASS initialisation native
+PASS nom de conteneur préexistant refusé et préservé
+Ressources privées supprimées. Le gestionnaire Unraid termine le retrait du manifeste; audit disponible après 10 secondes.
+PASS désinstallation ne supprime pas le conteneur homonyme
+PASS initialisation native
+Fichier préexistant/inconnu conservé : /tmp/td-test-ca759729/boot/config/plugins/thermalright-digital/unknown.txt
+PASS fichier inconnu préservé, nettoyage incomplet annoncé
+Ressources privées supprimées. Le gestionnaire Unraid termine le retrait du manifeste; audit disponible après 10 secondes.
+PASS nettoyage réessayable
+PASS initialisation native
+Ressources privées supprimées. Le gestionnaire Unraid termine le retrait du manifeste; audit disponible après 10 secondes.
+PASS retrait avec finalisation du manifeste natif
+PASS archive native exacte supprimée après déplacement par Unraid
+TOTAL 36 contrôles réussis
+PASS API méthode/CSRF/action : HTTP 405
+PASS API méthode/CSRF/action : HTTP 403
+PASS API méthode/CSRF/action : HTTP 400
+PASS native CSRF : native token consumed, independent header valid (HTTP 200)
+PASS native CSRF : wrong native token cannot bypass prepend (HTTP 403)
+PASS native CSRF : missing native token cannot bypass prepend (HTTP 403)
+PASS native CSRF : wrong independent header rejected (HTTP 403)
+PASS native CSRF : missing independent header after native consumption rejected (HTTP 403)
+PASS native CSRF : unknown action rejected after native authentication (HTTP 400)
+PASS native CSRF : rendu de page sans variable héritée
+AUDIT SANS MODIFICATION ; version active protégée : 2026.10.31.3
+CANDIDAT ancienne version : 2026.10.31.1
+CANDIDAT ancienne version : 2026.10.31.2
+CANDIDAT entrée autostart Unraid : thermalright-screen
+CANDIDAT modèle Docker ancien vérifié : /tmp/td-clean-6327fc79/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+CANDIDAT conteneur ancien : old
+CANDIDAT image ancienne : old-image
+CANDIDAT appdata ancien vérifié par son montage : /mnt/user/appdata/thermalright-screen
+CANDIDAT volume ancien étiqueté : old-volume
+CANDIDAT network ancien étiqueté : old-network
+À EXAMINER, CONSERVÉ : référence dans /tmp/td-clean-6327fc79/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+Appdata encore présent : /mnt/user/appdata/thermalright-screen (ne sera supprimé que sur preuve de montage du conteneur étiqueté).
+Relancer avec --apply pour supprimer uniquement les candidats vérifiés ci-dessus.
+PASS nettoyage : audit signale les restes présents
+PASS nettoyage : audit ne supprime ni ne modifie les ressources
+NETTOYAGE ; version active protégée : 2026.10.31.3
+SUPPRESSION ancienne version : 2026.10.31.1
+SUPPRESSION ancienne version : 2026.10.31.2
+RETRAIT entrée autostart Unraid : thermalright-screen
+SUPPRESSION modèle Docker ancien vérifié : /tmp/td-clean-6327fc79/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+SUPPRESSION conteneur ancien : old
+SUPPRESSION image ancienne : old-image
+SUPPRESSION appdata ancien vérifié par son montage : /mnt/user/appdata/thermalright-screen
+SUPPRESSION volume ancien étiqueté : old-volume
+SUPPRESSION network ancien étiqueté : old-network
+Nettoyage des ressources vérifiées terminé. Les éléments signalés CONSERVÉ/À EXAMINER restent en place.
+PASS nettoyage : nettoyage vérifié terminé
+PASS nettoyage : conteneur et image courants préservés
+PASS nettoyage : anciens volume/réseau étiquetés retirés
+PASS nettoyage : seul appdata avec preuve de montage supprimé
+PASS nettoyage : autostart partagé préservé et ancien modèle retiré
+PASS nettoyage : version active conservée, anciennes versions et ancien manifeste retirés
+PASS nettoyage : réglages et inventaire courant préservés
+NETTOYAGE ; version active protégée : 2026.10.31.3
+Nettoyage des ressources vérifiées terminé. Les éléments signalés CONSERVÉ/À EXAMINER restent en place.
+PASS nettoyage : nettoyage répété idempotent
+CONSERVÉ : conteneur homonyme sans le label ancien attendu (old).
+NETTOYAGE ; version active protégée : 2026.10.31.3
+SUPPRESSION ancienne version : 2026.10.31.1
+SUPPRESSION ancienne version : 2026.10.31.2
+SUPPRESSION volume ancien étiqueté : old-volume
+SUPPRESSION network ancien étiqueté : old-network
+À EXAMINER, CONSERVÉ : référence dans /tmp/td-clean-18f211a0/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+Appdata encore présent : /mnt/user/appdata/thermalright-screen (ne sera supprimé que sur preuve de montage du conteneur étiqueté).
+Nettoyage des ressources vérifiées terminé. Les éléments signalés CONSERVÉ/À EXAMINER restent en place.
+PASS nettoyage : ressources sans preuve signalées conservées
+PASS nettoyage : homonymes et appdata non prouvé intacts
+NETTOYAGE ; version active protégée : 2026.10.31.3
+SUPPRESSION ancienne version : 2026.10.31.1
+SUPPRESSION ancienne version : 2026.10.31.2
+RETRAIT entrée autostart Unraid : thermalright-screen
+SUPPRESSION modèle Docker ancien vérifié : /tmp/td-clean-cc138a6c/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+SUPPRESSION conteneur ancien : old
+CONSERVÉ : image partagée old-image
+CONSERVÉ : chemin partagé ou lien /mnt/user/appdata/thermalright-screen
+SUPPRESSION volume ancien étiqueté : old-volume
+SUPPRESSION network ancien étiqueté : old-network
+Appdata encore présent : /mnt/user/appdata/thermalright-screen (ne sera supprimé que sur preuve de montage du conteneur étiqueté).
+Nettoyage des ressources vérifiées terminé. Les éléments signalés CONSERVÉ/À EXAMINER restent en place.
+PASS nettoyage : dépendances partagées bloquent le nettoyage complet
+PASS nettoyage : image/dossier partagés et journal de reprise préservés
+NETTOYAGE ; version active protégée : 2026.10.31.3
+CONSERVÉ : Fichier inconnu conservé : /tmp/td-clean-3e123188/boot/config/plugins/thermalright-digital/packages/2026.10.31.1/foreign.txt
+SUPPRESSION ancienne version : 2026.10.31.2
+RETRAIT entrée autostart Unraid : thermalright-screen
+SUPPRESSION modèle Docker ancien vérifié : /tmp/td-clean-3e123188/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+SUPPRESSION conteneur ancien : old
+SUPPRESSION image ancienne : old-image
+SUPPRESSION appdata ancien vérifié par son montage : /mnt/user/appdata/thermalright-screen
+SUPPRESSION volume ancien étiqueté : old-volume
+SUPPRESSION network ancien étiqueté : old-network
+Nettoyage des ressources vérifiées terminé. Les éléments signalés CONSERVÉ/À EXAMINER restent en place.
+PASS nettoyage : fichier inconnu dans une ancienne version conservé
+PASS nettoyage : Docker absent : aucune suppression
+NETTOYAGE ; version active protégée : 2026.10.31.3
+SUPPRESSION ancienne version : 2026.10.31.1
+SUPPRESSION ancienne version : 2026.10.31.2
+RETRAIT entrée autostart Unraid : thermalright-screen
+SUPPRESSION modèle Docker ancien vérifié : /tmp/td-clean-b75eca2f/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+SUPPRESSION conteneur ancien : old
+SUPPRESSION image ancienne : old-image
+SUPPRESSION appdata ancien vérifié par son montage : /mnt/fast_pool/appdata/thermalright-screen
+SUPPRESSION volume ancien étiqueté : old-volume
+SUPPRESSION network ancien étiqueté : old-network
+Appdata encore présent : /mnt/user/appdata/thermalright-screen (ne sera supprimé que sur preuve de montage du conteneur étiqueté).
+Nettoyage des ressources vérifiées terminé. Les éléments signalés CONSERVÉ/À EXAMINER restent en place.
+PASS nettoyage : pool arbitraire : seul appdata prouvé par montage retiré
+PASS nettoyage : racine stockage symbolique exclue de la découverte
+NETTOYAGE ; version active protégée : 2026.10.31.3
+SUPPRESSION ancienne version : 2026.10.31.1
+SUPPRESSION ancienne version : 2026.10.31.2
+RETRAIT entrée autostart Unraid : thermalright-screen
+SUPPRESSION modèle Docker ancien vérifié : /tmp/td-clean-a9a5890e/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+SUPPRESSION conteneur ancien : old
+SUPPRESSION image ancienne : old-image
+SUPPRESSION volume ancien étiqueté : old-volume
+SUPPRESSION network ancien étiqueté : old-network
+Appdata encore présent : /mnt/user/appdata/thermalright-screen (ne sera supprimé que sur preuve de montage du conteneur étiqueté).
+Nettoyage des ressources vérifiées terminé. Les éléments signalés CONSERVÉ/À EXAMINER restent en place.
+PASS nettoyage : appdata derrière un lien de stockage conservé
+PASS nettoyage : parent appdata symbolique exclu des chemins supprimables
+TOTAL nettoyage : 20 contrôles réussis
+PASS réglages : anciens réglages migrés avec aspect cyan conservé
+PASS réglages : normalisation idempotente
+PASS réglages : anciens réglages RGB : toutes les catégories thermiques par défaut
+PASS réglages : RGB historique sans catégories conservé
+PASS réglages : température dynamique limitée à sa catégorie
+PASS réglages : sélection thermique invalide rejetée
+PASS réglages : sélection thermique invalide rejetée
+PASS réglages : sélection thermique invalide rejetée
+PASS réglages : sélection thermique invalide rejetée
+PASS réglages : sélection thermique invalide rejetée
+PASS réglages : sélection thermique invalide rejetée
+PASS réglages : sélection thermique invalide rejetée
+PASS réglages : sélection thermique invalide rejetée
+PASS réglages : mode RGB static
+PASS réglages : mode RGB zones
+PASS réglages : mode RGB temperature
+PASS réglages : mode RGB breathing
+PASS réglages : mode RGB rainbow
+PASS réglages : RGB invalide rejeté : mode
+PASS réglages : RGB invalide rejeté : target
+PASS réglages : RGB invalide rejeté : color
+PASS réglages : RGB invalide rejeté : brightness
+PASS réglages : RGB invalide rejeté : brightness
+PASS réglages : RGB invalide rejeté : brightness
+PASS réglages : RGB invalide rejeté : period
+PASS réglages : RGB invalide rejeté : period
+PASS réglages : RGB invalide rejeté : smoothing
+PASS réglages : RGB invalide rejeté : smoothing
+PASS réglages : RGB invalide rejeté : thresholds
+PASS réglages : RGB invalide rejeté : thresholds
+PASS réglages : RGB invalide rejeté : thresholds
+PASS réglages : RGB invalide rejeté : thresholds
+PASS réglages : RGB invalide rejeté : temperature_colors
+PASS réglages : RGB invalide rejeté : temperature_colors
+PASS réglages : RGB invalide rejeté : zone_colors
+PASS réglages : RGB invalide rejeté : unknown
+PASS réglages : RGB null rejeté
+PASS réglages : fréquence non supportée rejetée
+PASS réglages : chemin arbitraire de puissance rejeté
+PASS réglages : paramètre serveur inconnu rejeté
+PASS réglages : lecture des nouveaux défauts sans écriture flash
+PASS réglages : sauvegarde des réglages RGB
+PASS réglages : sélection thermique sauvegardée
+PASS réglages : ancien client conserve les nouveaux réglages
+PASS réglages : identifiant de sonde absent rejeté
+PASS réglages : test visuel refusé sans backend prêt
+PASS réglages : ancien formulaire RGB conserve la sélection des catégories
+TOTAL réglages : 47 contrôles réussis
+PASS absence de sources : null, jamais zéro inventé
+PASS inventaire vide sans mesure depuis la machine réelle
+PASS kHz vers MHz et priorité de cpuinfo_cur_freq mesurée
+PASS moyenne par politique unique, non par thread et sans politique inactive
+PASS liens cpufreq dédupliqués et politiques hors ligne exclues
+PASS repli et mélange mesuré/demandé clairement signalés
+PASS fréquences invalides, négatives et excessives indisponibles
+PASS un lien de fixture ne peut lire le sysfs de l’hôte
+PASS GPU, puce carte mère et TDP/limites ne deviennent pas watts CPU
+PASS vrai hwmon CPU en µW, moyenne prioritaire sans doublon input
+PASS descripteurs publics sans chemin, identifiant opaque 24 hex
+PASS repli hwmon input sans changer l’identité du canal
+PASS canal CPU désactivé indisponible
+PASS zéro réel du capteur conservé
+PASS désactivation, chemin injecté et ID inconnu sans lecture arbitraire
+PASS rails CPU sélectionnables explicitement, jamais additionnés en package
+PASS ID hwmon stable après renumérotation du pilote
+PASS RAPL physique/classe dédupliqué, sous-domaines et psys exclus, MSR avant MMIO
+PASS premier compteur d’énergie indisponible avec source identifiée
+PASS cache RAM utilisant le temps monotone
+PASS delta RAPL en watts et cache entier JSON réutilisé
+PASS µJ / secondes vers W exacts
+PASS retour circulaire du compteur corrigé via max_energy_range_uj
+PASS remise à zéro du compteur sans faux pic
+PASS cache périmé, temps inversé et intervalle trop court invalidés
+PASS redémarrage invalide le compteur précédent
+PASS source remplacée : nouvelle référence obligatoire
+PASS changement de plage compteur : mesure indisponible
+PASS intervalle pouvant masquer plusieurs retours circulaires refusé
+PASS delta énergie réellement nul conservé
+PASS cache de type invalide rejeté
+PASS cache corrompu réinitialisé sans arrêter le superviseur
+PASS repli de fournisseur garde une première mesure indisponible
+PASS compteur illisible efface la référence énergie
+PASS multi-socket : total explicite des seuls packages, sans sous-domaines
+PASS multi-socket : somme des deltas de packages indépendants
+PASS package manquant : aucun total partiel trompeur
+PASS RAPL enabled=0 : compteur lisible indépendant des limites de puissance
+PASS RAPL enabled=0 : premier échantillon conservé en RAM
+PASS RAPL enabled=0 : progression du compteur convertie en watts
+PASS lecture des watts conserve les contrôles RAPL
+PASS RAPL enabled=0 : compteur illisible reste indisponible
+TOTAL 42 contrôles métriques réussis
+test_backend_failure_rolls_back_running_installation (__main__.InstallerTests.test_backend_failure_rolls_back_running_installation) ... ok
+test_corrupt_payload_is_refused_without_activation (__main__.InstallerTests.test_corrupt_payload_is_refused_without_activation) ... ok
+test_failed_first_install_cleans_created_files (__main__.InstallerTests.test_failed_first_install_cleans_created_files) ... ok
+test_failed_update_restores_old_code_and_settings (__main__.InstallerTests.test_failed_update_restores_old_code_and_settings) ... ok
+test_install_reinstall_update_and_explicit_rollback (__main__.InstallerTests.test_install_reinstall_update_and_explicit_rollback) ... ok
+test_preexisting_configuration_folder_is_preserved (__main__.InstallerTests.test_preexisting_configuration_folder_is_preserved) ... ok
+test_preexisting_unmarked_ui_folder_is_preserved (__main__.InstallerTests.test_preexisting_unmarked_ui_folder_is_preserved) ... ok
+test_sigkill_interruption_is_recoverable (__main__.InstallerTests.test_sigkill_interruption_is_recoverable) ... ok
+test_unsupported_unraid_is_refused (__main__.InstallerTests.test_unsupported_unraid_is_refused) ... ok
+test_url_corrupt_download_preserves_current_install (__main__.InstallerTests.test_url_corrupt_download_preserves_current_install) ... 127.0.0.1 - - [31/Oct/2026 21:30:05] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+ok
+test_url_failed_activation_removes_downloaded_package (__main__.InstallerTests.test_url_failed_activation_removes_downloaded_package) ... 127.0.0.1 - - [31/Oct/2026 21:30:06] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+127.0.0.1 - - [31/Oct/2026 21:30:06] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
+ok
+test_url_fetches_missing_files_and_boots_offline (__main__.InstallerTests.test_url_fetches_missing_files_and_boots_offline) ... 127.0.0.1 - - [31/Oct/2026 21:30:07] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+127.0.0.1 - - [31/Oct/2026 21:30:07] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
+127.0.0.1 - - [31/Oct/2026 21:30:07] "GET /thermalright-digital/packages/2026.10.31.3/backend-image.tar.xz HTTP/1.1" 200 -
+ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 11.539s
+
+OK

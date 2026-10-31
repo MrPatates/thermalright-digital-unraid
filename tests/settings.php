@@ -1,0 +1,41 @@
+<?php
+declare(strict_types=1);
+require '/work/plugin/control.php';
+$count=0;
+function scheck(bool $ok,string $label): void { global $count;if(!$ok)throw new RuntimeException($label);$count++;echo "PASS réglages : $label\n"; }
+function sbad(array $data,string $label): void {$rejected=false;try{td_settings_normalize($data,true);}catch(RuntimeException $e){$rejected=true;}scheck($rejected,$label);}
+$old=['autostart'=>false,'interval'=>1,'sensor'=>'auto'];
+$new=td_settings_normalize($old,true);
+scheck($new['rgb']['mode']==='static' && $new['rgb']['color']==='#00b4ff' && $new['frequency_mode']==='max' && $new['power_sensor']==='auto','anciens réglages migrés avec aspect cyan conservé');
+scheck(td_settings_normalize($new,true)===$new,'normalisation idempotente');
+scheck($new['rgb']['temperature_zones']===['temperature','load','power','frequency','decoration'],'anciens réglages RGB : toutes les catégories thermiques par défaut');
+$legacy=$new;unset($legacy['rgb']['temperature_zones']);scheck(td_settings_normalize($legacy,true)['rgb']['temperature_zones']===$new['rgb']['temperature_zones'],'RGB historique sans catégories conservé');
+$selected=$new;$selected['rgb']['mode']='temperature';$selected['rgb']['temperature_zones']=['temperature'];
+scheck(td_settings_normalize($selected,true)['rgb']['temperature_zones']===['temperature'],'température dynamique limitée à sa catégorie');
+foreach([[],['temperature','temperature'],['unknown'],['temperature',null],'temperature',null,['key'=>'temperature'],['temperature','load','power','frequency','decoration','temperature']] as $invalid) {
+ $d=$new;$d['rgb']['temperature_zones']=$invalid;sbad($d,'sélection thermique invalide rejetée');
+}
+foreach(['static','zones','temperature','breathing','rainbow'] as $mode) {
+ $d=$new;$d['rgb']['mode']=$mode;$d['rgb']['color']='#12ABef';$v=td_settings_normalize($d,true);scheck($v['rgb']['mode']===$mode && $v['rgb']['color']==='#12abef','mode RGB '.$mode);
+}
+foreach([['mode'=>'shell'],['target'=>'../all'],['color'=>'red; echo'],['brightness'=>101],['brightness'=>-1],['brightness'=>'100'],['period'=>0],['period'=>61],['smoothing'=>-1],['smoothing'=>31],['thresholds'=>[40,40,80]],['thresholds'=>[80,60,40]],['thresholds'=>[40,60]],['thresholds'=>[40,60,126]],['temperature_colors'=>['#000000']],['temperature_colors'=>['#000000','#000000','#000000','</script>']],['zone_colors'=>['extra'=>'#00b4ff']],['unknown'=>true]] as $bad) {
+ $d=$new;$d['rgb']=array_replace($d['rgb'],$bad);sbad($d,'RGB invalide rejeté : '.array_key_first($bad));
+}
+$d=$new;$d['rgb']=null;sbad($d,'RGB null rejeté');
+$d=$new;$d['frequency_mode']='nominal';sbad($d,'fréquence non supportée rejetée');
+$d=$new;$d['power_sensor']='../../etc/shadow';sbad($d,'chemin arbitraire de puissance rejeté');
+$d=$new;$d['other']=true;sbad($d,'paramètre serveur inconnu rejeté');
+$root='/tmp/td-settings-'.bin2hex(random_bytes(4));mkdir($root);putenv('TD_TEST_ROOT='.$root);mkdir(state_dir(),0700,true);init_run();
+json_write(state_dir().'/settings.json',$old);
+$before=file_get_contents(state_dir().'/settings.json');config();scheck(file_get_contents(state_dir().'/settings.json')===$before,'lecture des nouveaux défauts sans écriture flash');
+$d=$new;$d['rgb']['mode']='rainbow';$d['rgb']['brightness']=25;save_settings($d);
+$saved=config();scheck($saved['rgb']['mode']==='rainbow' && $saved['rgb']['brightness']===25,'sauvegarde des réglages RGB');
+save_settings($selected);$saved=config();scheck($saved['rgb']['temperature_zones']===['temperature'],'sélection thermique sauvegardée');
+save_settings(['autostart'=>true,'interval'=>2,'sensor'=>'auto']);scheck(config()['rgb']===$saved['rgb'],'ancien client conserve les nouveaux réglages');
+$rejected=false;try{$d=config();$d['power_sensor']=str_repeat('f',24);save_settings($d);}catch(RuntimeException $e){$rejected=true;}scheck($rejected,'identifiant de sonde absent rejeté');
+$rejected=false;try{display_test();}catch(RuntimeException $e){$rejected=true;}scheck($rejected && !is_file(run_dir().'/display-test.json'),'test visuel refusé sans backend prêt');
+$d=config();$d['rgb']['mode']='temperature';$d['rgb']['temperature_zones']=['temperature'];save_settings($d);
+$legacy=$d;unset($legacy['rgb']['temperature_zones']);$legacy['rgb']['brightness']=70;save_settings($legacy);
+scheck(config()['rgb']['temperature_zones']===['temperature'],'ancien formulaire RGB conserve la sélection des catégories');
+erase_tree($root);
+echo "TOTAL réglages : $count contrôles réussis\n";

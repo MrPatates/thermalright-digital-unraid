@@ -1,0 +1,30 @@
+name: Signaler un problème
+description: Installation, mesures, RGB ou affichage USB
+title: "[Bug] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Versions du plugin et d’Unraid
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Ventirad et profil détecté (ex. LF12)
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Comportement observé et résultat attendu
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+  - type: textarea
+    id: logs
+    attributes:
+      label: Extrait des journaux
+      description: Retirer les adresses, jetons, noms du serveur et chemins privés avant de partager.
+      render: text

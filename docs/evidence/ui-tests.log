@@ -1,0 +1,15 @@
+PASS UI : jeton natif conservé dans formulaire/en-tête ; anciens réglages et mesures indisponibles
+PASS UI erreur : Réponse vide du serveur (HTTP 500). Consulter le journal PHP du serveur.
+PASS UI erreur : Réponse du serveur au format JSON invalide (HTTP 502). Consulter le journal PHP du serveur.
+PASS UI erreur : Jeton CSRF invalide
+PASS UI erreur : Session Unraid expirée : reconnectez-vous puis rechargez cette page.
+PASS UI erreur : Réponse JSON inattendue du serveur (HTTP 200).
+PASS UI erreur : Erreur PHP interne dans control.php:4
+PASS UI : reprise après réponse serveur réparée
+PASS UI : rendu watts/MHz, source demandée, capacités physiques et restitution exacte des réglages RGB
+PASS UI : température seule dynamique, autres couleurs fixes et sélection conservée pendant le polling
+PASS UI : périmètre général et catégories dynamiques affichés sans ambiguïté
+PASS UI : sélection dynamique vide refusée avant l’envoi
+PASS UI : polling sans perte du brouillon et sérialisation des nouvelles valeurs
+PASS UI : test temporaire sans sauvegarde du brouillon, état visuel et erreur action conservée
+PASS UI : source configurée disparue conservée explicitement

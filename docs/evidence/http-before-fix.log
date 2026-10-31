@@ -1,0 +1,6 @@
+Reproduction réelle HTTP avant correction (PHP 8.3.36 cli-server, display_errors=0)
+POST /api.php action=logs, jeton natif et en-tête valides
+HTTP/1.0 500 Internal Server Error
+Corps : vide
+PHP Fatal error: strict_types declaration must be the very first statement in the script in /work/plugin/control.php on line 4
+Les appels CLI du même contrôleur fonctionnent.

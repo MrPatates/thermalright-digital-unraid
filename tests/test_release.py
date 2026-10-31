@@ -1,0 +1,76 @@
+"""Publication guards: pinned URLs, safe packaging and reproducible inputs."""
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import tempfile
+import unittest
+import xml.etree.ElementTree as ET
+
+BASE = Path(__file__).resolve().parents[1]
+
+def module(name, script):
+    spec = importlib.util.spec_from_file_location(name, BASE / 'scripts' / script)
+    value = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(value)
+    return value
+
+pack = module('package', 'package.py')
+fetcher = module('fetcher', 'fetch-dependencies.py')
+exporter = module('exporter', 'prepare-github.py')
+
+class ReleaseTests(unittest.TestCase):
+    def test_github_manifest_pins_annexes_and_updates_from_latest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); image = root / 'image.xz'; image.write_bytes(b'test image')
+            package = pack.package(root / 'dist', image, 'sha256:' + 'a' * 64,
+                                   '2026.10.31.7', repository='example/plugin')
+            manifest = (package / 'thermalright-digital.plg').read_text()
+            xml = ET.fromstring(manifest)
+            self.assertEqual(xml.attrib['author'], 'example')
+            self.assertEqual(xml.attrib['pluginURL'], 'https://github.com/example/plugin/releases/latest/download/thermalright-digital.plg')
+            self.assertIn('https://github.com/example/plugin/releases/download/v2026.10.31.7', manifest)
+            self.assertIn(hashlib.sha256((package / 'payload.txz').read_bytes()).hexdigest(), manifest)
+
+    def test_offline_manifest_remains_available(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); image = root / 'image.xz'; image.write_bytes(b'test image')
+            package = pack.package(root / 'dist', image, 'sha256:' + 'a' * 64, '2026.10.31.7')
+            self.assertNotIn('pluginURL', ET.parse(package / 'thermalright-digital.plg').getroot().attrib)
+
+    def test_invalid_publication_metadata_is_rejected_before_writes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); image = root / 'image.xz'; image.write_bytes(b'test image')
+            for options in [dict(version='../escape'), dict(image_id='bad'), dict(repository='owner/repo\"'), dict(download_base_url='https://host/$(shell)')]:
+                args = dict(output=root / 'dist', image=image, image_id='sha256:' + 'a' * 64, version='2026.10.31.7')
+                args.update(options)
+                with self.subTest(options=options), self.assertRaises(ValueError):
+                    pack.package(**args)
+            self.assertFalse((root / 'dist').exists())
+
+    def test_dependency_integrity_and_modified_cache_preserved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); source = root / 'upstream'; source.write_bytes(b'locked archive')
+            item = dict(path='backend/test.whl', url=source.as_uri(), sha256=hashlib.sha256(source.read_bytes()).hexdigest())
+            (root / 'dependencies.lock.json').write_text(json.dumps(dict(files=[item])))
+            fetcher.fetch(root)
+            target = root / item['path']; self.assertEqual(target.read_bytes(), source.read_bytes())
+            target.write_bytes(b'modified local file')
+            with self.assertRaises(RuntimeError): fetcher.fetch(root)
+            self.assertEqual(target.read_bytes(), b'modified local file')
+
+    def test_source_export_excludes_binary_dependencies(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / 'backend').mkdir(); (root / 'third_party').mkdir()
+            (root / 'README.md').write_text('Public source')
+            (root / 'backend/worker.py').write_text('pass\n')
+            (root / 'backend/vendor.whl').write_bytes(b'ignored')
+            (root / 'third_party/vendor.tar.gz').write_bytes(b'ignored')
+            (root / 'third_party/README.md').write_text('Sources via lockfile')
+            files = [str(p.relative_to(root)) for p in exporter.source_files(root)]
+            self.assertIn('backend/worker.py', files)
+            self.assertNotIn('backend/vendor.whl', files)
+            self.assertNotIn('third_party/vendor.tar.gz', files)
+
+if __name__ == '__main__':
+    unittest.main()

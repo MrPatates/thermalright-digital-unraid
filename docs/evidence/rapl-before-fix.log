@@ -1,0 +1,40 @@
+PASS absence de sources : null, jamais zéro inventé
+PASS inventaire vide sans mesure depuis la machine réelle
+PASS kHz vers MHz et priorité de cpuinfo_cur_freq mesurée
+PASS moyenne par politique unique, non par thread et sans politique inactive
+PASS liens cpufreq dédupliqués et politiques hors ligne exclues
+PASS repli et mélange mesuré/demandé clairement signalés
+PASS fréquences invalides, négatives et excessives indisponibles
+PASS un lien de fixture ne peut lire le sysfs de l’hôte
+PASS GPU, puce carte mère et TDP/limites ne deviennent pas watts CPU
+PASS vrai hwmon CPU en µW, moyenne prioritaire sans doublon input
+PASS descripteurs publics sans chemin, identifiant opaque 24 hex
+PASS repli hwmon input sans changer l’identité du canal
+PASS canal CPU désactivé indisponible
+PASS zéro réel du capteur conservé
+PASS désactivation, chemin injecté et ID inconnu sans lecture arbitraire
+PASS rails CPU sélectionnables explicitement, jamais additionnés en package
+PASS ID hwmon stable après renumérotation du pilote
+PASS RAPL physique/classe dédupliqué, sous-domaines et psys exclus, MSR avant MMIO
+PASS premier compteur d’énergie indisponible avec source identifiée
+PASS cache RAM utilisant le temps monotone
+PASS delta RAPL en watts et cache entier JSON réutilisé
+PASS µJ / secondes vers W exacts
+PASS retour circulaire du compteur corrigé via max_energy_range_uj
+PASS remise à zéro du compteur sans faux pic
+PASS cache périmé, temps inversé et intervalle trop court invalidés
+PASS redémarrage invalide le compteur précédent
+PASS source remplacée : nouvelle référence obligatoire
+PASS changement de plage compteur : mesure indisponible
+PASS intervalle pouvant masquer plusieurs retours circulaires refusé
+PASS delta énergie réellement nul conservé
+PASS cache de type invalide rejeté
+PASS cache corrompu réinitialisé sans arrêter le superviseur
+PASS repli de fournisseur garde une première mesure indisponible
+PASS source disparue ou désactivée efface la référence énergie
+PASS multi-socket : total explicite des seuls packages, sans sous-domaines
+PASS multi-socket : somme des deltas de packages indépendants
+PASS package manquant : aucun total partiel trompeur
+FAIL RAPL enabled=0 : compteur lisible indépendant des limites de puissance
+#0 /work/tests/metrics.php(171): metric_check(false, 'RAPL enabled=0 ...')
+#1 {main}
