@@ -24,4 +24,4 @@ with tarfile.open(archive,'r:xz') as tar:
     for layer,want in zip(manifest['Layers'],expected):
         stream=tar.extractfile(layer)
         assert 'sha256:'+hashlib.file_digest(stream,'sha256').hexdigest()==want,layer
-print(f"OK: SHA-256 archive, ID image, architecture, labels, tag, {len(expected)} couches Docker")
+print(f"OK: archive SHA-256, image ID, architecture, labels, tag, {len(expected)} Docker layers")

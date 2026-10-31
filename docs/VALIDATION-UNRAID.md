@@ -1,8 +1,8 @@
-# Validation sur le serveur et l’écran
+# Validation on the server and physical display
 
-Ces opérations nécessitent votre Unraid ; elles n’ont pas été exécutées ici. Remplacer uniquement l’adresse du serveur pour la copie du README. Ne pas lancer le programme manuel TRCC en même temps que le plugin.
+These checks require your Unraid server. Only the user-confirmed checks listed in [TEST-REPORT.md](TEST-REPORT.md) have hardware confirmation. Never run manual TRCC alongside the plugin.
 
-1. Avant installation, relever :
+1. Record the environment before installation:
 
    ```bash
    cat /etc/unraid-version
@@ -14,7 +14,7 @@ Ces opérations nécessitent votre Unraid ; elles n’ont pas été exécutées 
    test ! -d /mnt/user/appdata/thermalright-screen || ls -ld /mnt/user/appdata/thermalright-screen
    ```
 
-2. Installer le bundle comme décrit dans le README. Vérifier l’entrée dans Plugins et la page Paramètres. Commencer sans autostart ; choisir une sonde CPU identifiable. Comparer sa valeur à l’hôte :
+2. Install following the README. Check the Plugins entry, logo and **Settings → THERMALRIGHT DIGITAL** page. Start with autostart disabled and choose an identifiable CPU sensor. Compare its reading to the host:
 
    ```bash
    for h in /sys/class/hwmon/hwmon*; do
@@ -26,26 +26,26 @@ Ces opérations nécessitent votre Unraid ; elles n’ont pas été exécutées 
    php /usr/local/emhttp/plugins/thermalright-digital/control.php status
    ```
 
-3. Démarrer depuis la page. Attendre le chargement initial. Inspecter le contrat réel du conteneur :
+3. Click **Start**, wait for the initial image load, then inspect the real Docker contract:
 
    ```bash
-   docker inspect thermalright-digital-backend --format '{{json .HostConfig.Devices}}'
-   docker inspect thermalright-digital-backend --format '{{json .Mounts}}'
-   docker inspect thermalright-digital-backend --format '{{json .Config.Labels}}'
-   docker inspect thermalright-digital-backend --format '{{.HostConfig.Privileged}} {{.HostConfig.NetworkMode}} {{.HostConfig.ReadonlyRootfs}} {{json .HostConfig.CapDrop}}'
+   docker inspect THERMALRIGHT-DIGITAL-BACKEND --format '{{json .HostConfig.Devices}}'
+   docker inspect THERMALRIGHT-DIGITAL-BACKEND --format '{{json .Mounts}}'
+   docker inspect THERMALRIGHT-DIGITAL-BACKEND --format '{{json .Config.Labels}}'
+   docker inspect THERMALRIGHT-DIGITAL-BACKEND --format '{{.HostConfig.Privileged}} {{.HostConfig.NetworkMode}} {{.HostConfig.ReadonlyRootfs}} {{json .HostConfig.CapDrop}}'
    cat /var/run/thermalright-digital/driver/status.json
    tail -n 60 /var/run/thermalright-digital/driver/driver.log
    ```
 
-   Attendu : un seul nœud `/dev/bus/usb/BBB/DDD`, deux binds privés, aucune clé de démarrage/socket/appdata monté ; false / none / true / ALL. Le journal doit annoncer le PM et le modèle issus du handshake. Si le style est inconnu ou la permission USB refusée, exporter le diagnostic ; ne pas activer privileged pour contourner le problème.
+   Expect one `/dev/bus/usb/BBB/DDD` node, two private binds, no boot flash/socket/appdata mounts, and false / none / true / ALL. Check the uppercase name, dedicated Docker icon and WebUI link. After upgrade, no older owned lowercase backend should remain. The log should identify the handshake PM and model. Export diagnostics for unsupported style or USB permission errors; do not bypass isolation with privileged mode.
 
-4. **Observer physiquement l’écran.** La température doit correspondre à la sonde choisie, la charge doit varier avec l’activité du serveur. L’indicateur « trames transmises » ne prouve pas le rendu physique. Les régions GPU non instrumentées doivent rester vides. Arrêter doit libérer l’USB ; relancer doit réutiliser le cache de handshake du même démarrage, pas supposer que le firmware répond indéfiniment.
+4. **Observe the physical display.** Temperature should match the selected sensor and load should change with host activity. “Frames sent” confirms transfers, not physical rendering. Uninstrumented GPU areas should stay blank. Stop should release USB. Restart may reuse this boot's handshake cache without assuming unlimited firmware handshake replies.
 
-   Dans **Couleurs de l’écran**, essayer couleur fixe rouge/vert/bleu, luminosité 25/100 %, couleurs par zone puis respiration/arc-en-ciel. Vérifier la cible chiffres/décorations selon les capacités annoncées. Pour le mode température, sélectionner « Température uniquement » : les chiffres °C doivent suivre la palette, tandis que W/MHz/% et décorations gardent leurs couleurs fixes par zone. Vérifier ensuite une combinaison de catégories et le filtre chiffres/décorations. Comparer la couleur aux seuils et à la sonde affichée ; le lissage doit agir sur la couleur, pas sur la mesure.
+   Under **Display colors**, try red/green/blue fixed colors, brightness at 25/100%, category colors, breathing and rainbow. Check digits/decorations targeting against reported capabilities. In temperature mode, click **Temperature only**: °C digits should follow the palette while W/MHz/% and decorations retain fixed colors. Then test multiple categories and the global scope filter. Compare colors with thresholds and the displayed sensor; smoothing must affect color only.
 
-   Cliquer **Tester les couleurs et les segments** : séquence rouge/vert/bleu/segments pendant 8 secondes, indication de test dans la page puis retour automatique. Le test ne doit pas enregistrer un brouillon de paramètres. Les mesures de la page restent réelles.
+   Click **Test colors and segments**: expect an 8-second red/green/blue/segment sequence, an active-test message and automatic return. An unsaved settings draft must remain unsaved. Page readings must remain real.
 
-   Pour les MHz et watts, contrôler les sources en lecture seule :
+   Inspect MHz/watt sources read-only:
 
    ```bash
    for f in /sys/devices/system/cpu/cpufreq/policy*/{affected_cpus,cpuinfo_cur_freq,scaling_cur_freq}; do
@@ -58,16 +58,16 @@ Ces opérations nécessitent votre Unraid ; elles n’ont pas été exécutées 
    cat /var/run/thermalright-digital/driver/status.json
    ```
 
-   cpufreq est en kHz, hwmon power en µW ; powercap est un compteur d’énergie en µJ, pas des watts instantanés. Le premier échantillon d’énergie reste indisponible. `enabled=0` dans une zone RAPL décrit la limitation de puissance et ne bloque pas un compteur lisible qui progresse ; la version .6 corrige ce cas. `scaling_cur_freq` est signalé comme fréquence demandée. Sur un noyau sans source CPU de puissance, **Indisponible** et chiffres W éteints sont attendus. La puissance d’un rail explicitement choisi n’est pas celle du package complet. Vérifier `capabilities.power` / `frequency` : une mesure hôte peut exister sans zone physique correspondante.
+   cpufreq uses kHz, hwmon power uses µW and powercap provides energy counters in µJ. The first energy sample is unavailable. RAPL `enabled=0` controls power limiting and does not invalidate a readable advancing counter. `scaling_cur_freq` is labeled requested frequency. Without a supported CPU power source, **Unavailable** and blank W digits are expected. An individually selected rail is not a whole-package measurement. Check `capabilities.power` / `frequency`: host readings may exist without corresponding physical display groups.
 
-5. Activer l’autostart et redémarrer lors d’une fenêtre de maintenance. Vérifier après démarrage de l’array et Docker qu’il existe un seul conteneur et un seul superviseur. Arrêter puis redémarrer Docker depuis Unraid et vérifier de nouveau. Tester aussi un démarrage array arrêté : attente bornée et absence de conteneur prématuré.
+5. Enable autostart and reboot during a maintenance window. After the array and Docker start, verify one backend and one supervisor. Stop/restart Docker through Unraid and check again. Test with the array stopped: bounded waiting and no premature backend.
 
-6. Test de déconnexion : **ne pas manipuler un connecteur interne de carte mère sous tension s’il n’est pas prévu pour cela.** Un écran débranché avant le démarrage permet déjà le test d’absence. Avec une liaison USB permettant un rebranchement sûr, noter l’ancien lsusb, débrancher/rebrancher puis vérifier la nouvelle adresse et les devices inspectés. Laisser jusqu’à 30 secondes entre tentatives. Après 180 secondes d’absence, cliquer Démarrer une fois l’écran revenu.
+6. For USB absence/reconnection, use a connection designed for safe hot plugging; do not manipulate an internal motherboard connector live. Disconnecting before startup already tests absence. Record old/new USB addresses and inspect delegated devices after reconnecting. Allow 30 seconds between retries. After 180 seconds of absence, click Start once the device returns.
 
-7. Mise à jour/réinstallation : utiliser Force Install avec le même bundle ; contrôler la conservation des paramètres. Pour un futur bundle de version différente, vérifier la mise à jour et le retour au manifeste précédent avec `force`. Le retour automatique en cas de panne est testé avec un faux Docker local, mais doit être vérifié sur une future vraie version avant usage sans surveillance.
+7. Reinstall the same bundle with Force Install and check settings retention. For a future different backend, test updates, explicit rollback with `force` and automatic rollback after backend failure. Automatic rollback is simulated locally but still needs a real differing backend test before unattended reliance.
 
-8. Exporter le diagnostic avant retrait et conserver `audit-residuals.sh` sous `/tmp` ou sur le poste. Supprimer le plugin depuis Plugins avec Docker actif. Après 10 secondes, lancer l’audit. Aucun fichier privé/conteneur/image exclusivement créée pour lui ne doit rester. Vérifier que l’ancien conteneur/image/appdata éventuel est intact. Les logs système peuvent rappeler l’opération.
+8. Export diagnostics before removal and keep `audit-residuals.sh` under `/tmp` or on your workstation. Remove the plugin with Docker available. After 10 seconds, run the audit: no private files or exclusively owned container/image should remain. Verify any unrelated legacy container/image/appdata survived. Native UI caches and system logs are managed separately by Unraid.
 
-9. Pour vérifier le chemin d’échec Docker sans casser un serveur en production, utiliser une fenêtre de maintenance : arrêter Docker avec les commandes natives de l’interface, demander le retrait du plugin, confirmer le message d’échec et la présence de l’inventaire ; réactiver Docker et relancer Supprimer. Ne pas effacer l’inventaire pour forcer le résultat.
+9. To test removal with Docker unavailable, use a maintenance window and native UI controls. Stop Docker, request plugin removal, confirm failure and retained inventory, then enable Docker and retry. Do not delete inventory to force success.
 
-La suite locale simule déjà les interruptions d’installation. Éviter de couper l’alimentation de votre serveur pour reproduire ce test : le comportement de la clé FAT et de l’array dépasse le périmètre du plugin.
+Local tests already simulate interrupted installations. Do not cut server power to reproduce them; boot flash and array failure behavior extend beyond this plugin's scope.

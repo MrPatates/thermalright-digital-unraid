@@ -17,7 +17,7 @@ def fetch(base=BASE):
             print('OK cache:', item['path'])
             continue
         if path.exists():
-            raise RuntimeError('Archive locale modifiée, conservée : ' + str(path))
+            raise RuntimeError('Modified local archive preserved : ' + str(path))
         path.parent.mkdir(parents=True, exist_ok=True)
         temporary = None
         try:
@@ -29,9 +29,9 @@ def fetch(base=BASE):
                         digest.update(data)
                         stream.write(data)
             if digest.hexdigest() != item['sha256']:
-                raise RuntimeError('SHA-256 incorrect : ' + item['path'])
+                raise RuntimeError('SHA-256 mismatch: ' + item['path'])
             temporary.replace(path)
-            print('OK téléchargement:', item['path'])
+            print('Download verified:', item['path'])
         finally:
             if temporary is not None:
                 temporary.unlink(missing_ok=True)

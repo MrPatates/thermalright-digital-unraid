@@ -18,15 +18,15 @@ function json_read(string $p, array $default=[]): array {
     clearstatcache(true,$p);
     if (!is_file($p)) return $default;
     $d = json_decode((string)file_get_contents($p), true, 32, JSON_THROW_ON_ERROR);
-    if (!is_array($d)) fail('JSON invalide : '.$p);
+    if (!is_array($d)) fail('Invalid JSON : '.$p);
     return $d;
 }
 function atomic(string $p, string $data): void {
-    if (is_link($p) || is_link(dirname($p))) fail('Lien symbolique refusé : '.$p);
+    if (is_link($p) || is_link(dirname($p))) fail('Symbolic link refused : '.$p);
     $t = $p.'.tmp.'.getmypid();
-    if (file_put_contents($t, $data, LOCK_EX) === false) fail('Écriture impossible : '.$t);
+    if (file_put_contents($t, $data, LOCK_EX) === false) fail('Cannot write : '.$t);
     chmod($t, 0600);
-    if (!rename($t, $p)) { unlink($t); fail('Renommage impossible : '.$p); }
+    if (!rename($t, $p)) { unlink($t); fail('Cannot rename : '.$p); }
 }
 function json_write(string $p, array $d): void {
     atomic($p, json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)."\n");
@@ -38,34 +38,34 @@ function inventory(): array { return json_read(state_dir().'/inventory.json'); }
 function inv_save(array $i): void { json_write(state_dir().'/inventory.json', $i); }
 function owned_state(): array {
     $i = inventory();
-    if (($i['owner'] ?? '') !== TD_NAME || !preg_match('/^[a-f0-9]{32}$/D', $i['instance'] ?? '')) fail('Inventaire d’appartenance absent ou invalide');
+    if (($i['owner'] ?? '') !== TD_NAME || !preg_match('/^[a-f0-9]{32}$/D', $i['instance'] ?? '')) fail('Ownership inventory missing or invalid');
     return $i;
 }
 function init_run(): void {
     $r = run_dir();
-    if (is_link($r)) fail('Répertoire RAM remplacé par un lien');
-    if (is_dir($r) && !is_file($r.'/.owner')) fail('Répertoire RAM préexistant sans marqueur');
+    if (is_link($r)) fail('RAM directory replaced by a symbolic link');
+    if (is_dir($r) && !is_file($r.'/.owner')) fail('Pre-existing RAM directory has no ownership marker');
     if (!is_dir($r)) { mkdir($r,0700,true); file_put_contents($r.'/.owner', TD_NAME); }
-    if (trim((string)file_get_contents($r.'/.owner')) !== TD_NAME) fail('Marqueur RAM incorrect');
+    if (trim((string)file_get_contents($r.'/.owner')) !== TD_NAME) fail('Invalid RAM ownership marker');
     foreach (['feed','driver'] as $sub) if (!is_dir($r.'/'.$sub)) mkdir($r.'/'.$sub,0700);
 }
 function version_check(): string {
     $text = (string)@file_get_contents(root_path('/etc/unraid-version'));
-    if (!preg_match('/version="?([0-9]+\.[0-9]+\.[0-9]+)"?\s*$/m', trim($text), $m)) fail('Version stable Unraid indéterminable');
-    if (!preg_match('/^(6\.12\.[0-9]+|7\.[0-3]\.[0-9]+)$/D', $m[1])) fail('Version Unraid hors cible : '.$m[1]);
-    if (php_uname('m') !== 'x86_64') fail('Architecture x86_64 requise');
+    if (!preg_match('/version="?([0-9]+\.[0-9]+\.[0-9]+)"?\s*$/m', trim($text), $m)) fail('Cannot determine stable Unraid version');
+    if (!preg_match('/^(6\.12\.[0-9]+|7\.[0-3]\.[0-9]+)$/D', $m[1])) fail('Unsupported Unraid version : '.$m[1]);
+    if (php_uname('m') !== 'x86_64') fail('x86_64 architecture required');
     return $m[1];
 }
 function command(array $args, int $seconds=10): array {
     $pipes=[];
     $p=proc_open($args,[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes,null,null,['bypass_shell'=>true]);
-    if (!is_resource($p)) fail('Impossible de lancer la commande');
+    if (!is_resource($p)) fail('Cannot start command');
     fclose($pipes[0]);
     stream_set_blocking($pipes[1],false); stream_set_blocking($pipes[2],false);
     $out=''; $err=''; $until=microtime(true)+$seconds; $code=-1;
     do {
         $out.=stream_get_contents($pipes[1]); $err.=stream_get_contents($pipes[2]);
-        if (strlen($out)+strlen($err)>2097152) { proc_terminate($p,9); fail('Sortie de commande excessive'); }
+        if (strlen($out)+strlen($err)>2097152) { proc_terminate($p,9); fail('Command output too large'); }
         $s=proc_get_status($p);
         if (!$s['running']) { $code=$s['exitcode']; break; }
         if (microtime(true)>$until) { proc_terminate($p,15); usleep(100000); proc_terminate($p,9); $code=124; break; }
@@ -86,12 +86,12 @@ function inspect(string $kind,string $id): ?array {
     [$code,$out,$err]=docker([$kind,'inspect',$id]);
     if ($code!==0) {
         if ($code===1 && preg_match('/No such (object|image|container)/i',$err)) return null;
-        fail('Inspection Docker impossible : '.$err);
+        fail('Cannot inspect Docker resource : '.$err);
     }
     return json_decode($out,true,64,JSON_THROW_ON_ERROR)[0];
 }
 function labels(array $object): array { return $object['Config']['Labels'] ?? []; }
-function container_name(): string { return TD_NAME.'-backend'; }
+function container_name(): string { return 'THERMALRIGHT-DIGITAL-BACKEND'; }
 function own_container(array $c,array $i): bool {
     $l=labels($c);
     return ($l[TD_LABEL.'.owner']??'')===TD_NAME && ($l[TD_LABEL.'.instance']??'')===$i['instance'];
@@ -166,19 +166,19 @@ function save_settings(array $d): void {
     foreach (['frequency_mode','power_sensor','rgb'] as $key) if (!array_key_exists($key,$d)) $clean[$key]=$existing[$key];
     if (isset($d['rgb']) && !array_key_exists('temperature_zones',$d['rgb'])) $clean['rgb']['temperature_zones']=$existing['rgb']['temperature_zones'];
     $ids=array_column(sensors(),'id');
-    if ($clean['sensor']!=='auto' && !in_array($clean['sensor'],$ids,true) && $clean['sensor']!==$existing['sensor']) fail('Sonde CPU inconnue');
+    if ($clean['sensor']!=='auto' && !in_array($clean['sensor'],$ids,true) && $clean['sensor']!==$existing['sensor']) fail('Unknown CPU sensor');
     $powers=array_column(td_extra_metric_sources()['power'],'id');
-    if (!in_array($clean['power_sensor'],['auto','off'],true) && !in_array($clean['power_sensor'],$powers,true) && $clean['power_sensor']!==$existing['power_sensor']) fail('Sonde de puissance inconnue');
+    if (!in_array($clean['power_sensor'],['auto','off'],true) && !in_array($clean['power_sensor'],$powers,true) && $clean['power_sensor']!==$existing['power_sensor']) fail('Unknown power sensor');
     if ($clean!==$existing) json_write(state_dir().'/settings.json',$clean);
 }
 function display_test(): void {
     $i=owned_state(); init_run();
     $backend=json_read(run_dir().'/driver/status.json');
     $maxAge=max(10,config()['interval']*2+2);
-    if (!supervisor_alive() || !($backend['ready']??false) || time()-($backend['timestamp']??0)>$maxAge) fail('Démarrer le backend et attendre sa connexion avant le test visuel');
-    if (!docker_ok()) fail('Docker indisponible : test visuel refusé');
+    if (!supervisor_alive() || !($backend['ready']??false) || time()-($backend['timestamp']??0)>$maxAge) fail('Start the backend and wait for it to connect before running a visual test');
+    if (!docker_ok()) fail('Docker unavailable : visual test refused');
     $container=inspect('container',container_name());
-    if (!$container || !own_container($container,$i) || !($container['State']['Running']??false)) fail('Le backend du plugin doit être actif avant le test visuel');
+    if (!$container || !own_container($container,$i) || !($container['State']['Running']??false)) fail('The plugin backend must be running before a visual test');
     json_write(run_dir().'/display-test.json',['id'=>bin2hex(random_bytes(8)),'started_at'=>microtime(true),'duration'=>8]);
     sample(config());
 }
@@ -187,40 +187,40 @@ function ensure_image(array &$i): string {
     $rel=release(); $id=$rel['image_id']; $tag=$rel['image_tag'];
     $existing=inspect('image',$id);
     if ($existing!==null) {
-        if ((labels($existing)[TD_LABEL.'.owner']??'')!==TD_NAME) fail('Image existante sans label attendu');
+        if ((labels($existing)[TD_LABEL.'.owner']??'')!==TD_NAME) fail('Existing image is missing the expected label');
         if (!isset($i['images'][$id])) { $i['images'][$id]=['tag'=>$tag,'created'=>false]; inv_save($i); }
         return $id;
     }
     $conflict=inspect('image',$tag);
-    if ($conflict!==null) fail('Tag image occupé par une autre image, préservé');
+    if ($conflict!==null) fail('Image tag belongs to another image; preserved');
     // Write-ahead ownership: an interrupted load can be cleaned up by exact ID.
     $before=$i;
     $i['docker_touched']=true; $i['images'][$id]=['tag'=>$tag,'created'=>true];
     if ($i!==$before) inv_save($i);
     $archive=state_dir().'/packages/'.$rel['version'].'/backend-image.tar.xz';
-    if (!is_file($archive) || hash_file('sha256',$archive)!==$rel['image_sha256']) fail('Archive Docker absente ou SHA-256 incorrect');
+    if (!is_file($archive) || hash_file('sha256',$archive)!==$rel['image_sha256']) fail('Docker archive missing or SHA-256 mismatch');
     [$code,$out,$err]=docker(['image','load','--input',$archive],180);
-    if ($code!==0) fail('Chargement image : '.$err);
+    if ($code!==0) fail('Loading image : '.$err);
     $loaded=inspect('image',$id);
-    if ($loaded===null || (labels($loaded)[TD_LABEL.'.owner']??'')!==TD_NAME) fail('ID ou label image incorrect après chargement');
+    if ($loaded===null || (labels($loaded)[TD_LABEL.'.owner']??'')!==TD_NAME) fail('Incorrect image ID or label after loading');
     return $id;
 }
 function remove_containers(array $i): void {
     [$code,$out,$err]=docker(['container','ls','--all','--quiet','--filter','label='.TD_LABEL.'.instance='.$i['instance']]);
-    if ($code!==0) fail('Inventaire conteneurs : '.$err);
+    if ($code!==0) fail('Container inventory : '.$err);
     foreach (array_filter(explode("\n",$out)) as $id) {
         $c=inspect('container',$id);
         if ($c===null) continue;
-        if (!own_container($c,$i)) fail('Conteneur avec label instance mais propriétaire différent, préservé');
+        if (!own_container($c,$i)) fail('Container has the instance label but a different owner; preserved');
         [$code,,$err]=docker(['container','stop','--time','5',$id],10);
-        if ($code!==0) fail('Arrêt conteneur : '.$err);
+        if ($code!==0) fail('Stopping container : '.$err);
         [$code,,$err]=docker(['container','rm',$id]);
-        if ($code!==0) fail('Suppression conteneur : '.$err);
+        if ($code!==0) fail('Removing container : '.$err);
     }
 }
 function create_backend(array &$i,array $usb,array $cfg): void {
     $c=inspect('container',container_name());
-    if ($c!==null && !own_container($c,$i)) fail('Nom de conteneur préexistant, aucune prise de contrôle');
+    if ($c!==null && !own_container($c,$i)) fail('Container name already in use; refusing takeover');
     remove_containers($i);
     $id=ensure_image($i);
     if (!($i['docker_touched']??false)) { $i['docker_touched']=true; inv_save($i); }
@@ -229,6 +229,9 @@ function create_backend(array &$i,array $usb,array $cfg): void {
     // --privileged, host PID, wildcard device cgroup rule or host network.
     $args=['container','create','--name',container_name(),'--label',TD_LABEL.'.owner='.TD_NAME,
            '--label',TD_LABEL.'.instance='.$i['instance'],'--label',TD_LABEL.'.version='.release()['version'],
+           '--label','net.unraid.docker.managed='.TD_NAME,
+           '--label','net.unraid.docker.icon=file:///usr/local/emhttp/plugins/'.TD_NAME.'/logo.png',
+           '--label','net.unraid.docker.webui=/Settings/ThermalrightDigital',
            '--restart=no','--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges',
            '--pids-limit=64','--memory=192m','--cpus=0.5','--log-driver=none',
            '--tmpfs','/tmp:rw,noexec,nosuid,size=16m','--tmpfs','/run:rw,noexec,nosuid,size=1m',
@@ -237,9 +240,9 @@ function create_backend(array &$i,array $usb,array $cfg): void {
            '--mount','type=bind,src='.run_dir().'/driver,dst=/state',
            '--env','TD_INTERVAL='.$cfg['interval'],$id];
     [$code,,$err]=docker($args);
-    if ($code!==0) fail('Création backend : '.$err);
+    if ($code!==0) fail('Creating backend : '.$err);
     [$code,,$err]=docker(['container','start',container_name()]);
-    if ($code!==0) fail('Démarrage backend : '.$err);
+    if ($code!==0) fail('Starting backend : '.$err);
 }
 function supervisor_alive(): bool {
     $p=json_read(run_dir().'/supervisor.json');
@@ -251,13 +254,13 @@ function supervisor_alive(): bool {
 }
 function start_service(): void {
     owned_state(); init_run();
-    if (is_file(state_dir().'/uninstall-pending.json')) fail('Nettoyage en attente : réessayer la désinstallation');
+    if (is_file(state_dir().'/uninstall-pending.json')) fail('Cleanup pending: retry uninstall');
     atomic(run_dir().'/desired','1');
     if (supervisor_alive()) return;
     $cmd='nohup setsid '.escapeshellarg(PHP_BINARY).' '.escapeshellarg(__FILE__).' supervise </dev/null >/dev/null 2>&1 &';
     exec($cmd);
     for ($n=0;$n<30;$n++) { if (supervisor_alive()) return; usleep(100000); }
-    fail('Superviseur non démarré : consulter les journaux');
+    fail('Supervisor did not start: check the logs');
 }
 function stop_service(): void {
     @unlink(run_dir().'/desired');
@@ -269,7 +272,7 @@ function stop_service(): void {
         $f=preg_split('/\s+/',substr($stat,(int)strrpos($stat,')')+2));
         // setsid gives the supervisor its own process group; verify before
         // terminating it AND its pending Docker CLI child (e.g. image load).
-        if (($f[2]??'')!==(string)$pid || ($f[3]??'')!==(string)$pid) fail('Groupe du superviseur inattendu');
+        if (($f[2]??'')!==(string)$pid || ($f[3]??'')!==(string)$pid) fail('Unexpected supervisor process group');
         command(['/bin/kill','-TERM','--','-'.(string)$pid],2);
         for ($n=0;$n<20 && supervisor_alive();$n++) usleep(100000);
         if (supervisor_alive()) command(['/bin/kill','-KILL','--','-'.(string)$pid],2);
@@ -277,8 +280,8 @@ function stop_service(): void {
     }
     $i=owned_state();
     if (docker_ok()) remove_containers($i);
-    elseif ($i['docker_touched']??false) fail('Docker indisponible : arrêt physique et nettoyage non confirmés');
-    if (is_dir(run_dir().'/driver')) json_write(run_dir().'/driver/status.json',['ready'=>false,'timestamp'=>time(),'message'=>'Arrêté']);
+    elseif ($i['docker_touched']??false) fail('Docker unavailable : device stop and cleanup not confirmed');
+    if (is_dir(run_dir().'/driver')) json_write(run_dir().'/driver/status.json',['ready'=>false,'timestamp'=>time(),'message'=>'Stopped']);
 }
 function supervise(): void {
     init_run();
@@ -293,28 +296,28 @@ function supervise(): void {
             $cfg=config(); sample($cfg);
             $message='';
             try {
-                if (!array_ready()) fail('En attente de l’array démarré');
-                if (!docker_ok()) fail('En attente de Docker');
+                if (!array_ready()) fail('Waiting for the array to start');
+                if (!docker_ok()) fail('Waiting for Docker');
                 $usbs=usb_devices();
-                if (count($usbs)!==1) { remove_containers($i); $address=''; fail(count($usbs)?'Plusieurs écrans 0416:8001 : sélection ambiguë':'Écran 0416:8001 absent'); }
+                if (count($usbs)!==1) { remove_containers($i); $address=''; fail(count($usbs)?'Multiple 0416:8001 displays: ambiguous selection':'Display 0416:8001 not found'); }
                 $usb=$usbs[0]; $signature=$usb['node'].'|'.$usb['port'].'|'.$cfg['interval'];
-                if (!file_exists(root_path($usb['node']))) fail('Nœud USB non encore disponible');
+                if (!file_exists(root_path($usb['node']))) fail('USB device node not yet available');
                 $c=inspect('container',container_name());
-                if ($c!==null && !own_container($c,$i)) fail('Nom du backend occupé par un conteneur préexistant');
+                if ($c!==null && !own_container($c,$i)) fail('Backend name already used by a pre-existing container');
                 if ($signature!==$address || $c===null || !($c['State']['Running']??false)) {
                     if (time()>=$retry) {
                         $retry=time()+30; create_backend($i,$usb,$cfg); $address=$signature;
                     }
                 }
                 $bs=json_read(run_dir().'/driver/status.json');
-                if (($bs['ready']??false) && time()-($bs['timestamp']??0)<max(10,$cfg['interval']*2+2)) { $until=time()+180; $message='Backend actif, trames USB transmises'; }
+                if (($bs['ready']??false) && time()-($bs['timestamp']??0)<max(10,$cfg['interval']*2+2)) { $until=time()+180; $message='Backend running, USB frames sent'; }
                 else {
-                    $message=$bs['error']??'Connexion au pilote en cours';
-                    if (time()>$until) { event_log('Pilote non opérationnel après 180 s : '.$message); break; }
+                    $message=$bs['error']??'Connecting to driver';
+                    if (time()>$until) { event_log('Driver not ready after 180 s : '.$message); break; }
                 }
             } catch (Throwable $e) {
                 $message=$e->getMessage();
-                if (time()>$until) { event_log('Attente abandonnée après 180 s : '.$message); break; }
+                if (time()>$until) { event_log('Stopped waiting after 180 s : '.$message); break; }
             }
             if ($message!==$last) { event_log($message); $last=$message; }
             json_write(run_dir().'/service.json',['message'=>$message,'timestamp'=>time()]);
@@ -356,22 +359,22 @@ function logs(): string {
     return $out;
 }
 function erase_tree(string $dir): void {
-    if (is_link($dir)) fail('Lien non supprimé : '.$dir);
+    if (is_link($dir)) fail('Symbolic link preserved : '.$dir);
     if (!is_dir($dir)) return;
     foreach (new FilesystemIterator($dir) as $f) {
-        if ($f->isLink()) fail('Lien inattendu, conservé : '.$f->getPathname());
-        if ($f->isDir()) erase_tree($f->getPathname()); else if (!unlink($f->getPathname())) fail('Suppression échouée');
+        if ($f->isLink()) fail('Unexpected symbolic link preserved : '.$f->getPathname());
+        if ($f->isDir()) erase_tree($f->getPathname()); else if (!unlink($f->getPathname())) fail('Removal failed');
     }
-    if (!rmdir($dir)) fail('Répertoire non supprimé : '.$dir);
+    if (!rmdir($dir)) fail('Directory not removed : '.$dir);
 }
 function residuals(): array {
     $paths=[state_dir(),run_dir(),ui_dir(),dirname(ui_dir()).'/.'.TD_NAME.'-stage',dirname(ui_dir()).'/.'.TD_NAME.'-backup',root_path('/boot/config/plugins/'.TD_NAME.'.plg'),root_path('/var/log/plugins/'.TD_NAME.'.plg'),root_path('/boot/config/plugins-removed/'.TD_NAME.'.plg')];
-    $r=['paths'=>array_values(array_filter($paths,fn($p)=>file_exists($p)||is_link($p))),'docker'=>'indisponible : contrôle incomplet'];
+    $r=['paths'=>array_values(array_filter($paths,fn($p)=>file_exists($p)||is_link($p))),'docker'=>'unavailable: incomplete check'];
     if (docker_ok()) {
         $r['docker']=[];
         foreach (['container','image','volume','network'] as $kind) {
             [$code,$out,$err]=docker([$kind,'ls','--quiet','--filter','label='.TD_LABEL.'.owner='.TD_NAME]);
-            $r['docker'][$kind]=$code===0?array_values(array_filter(explode("\n",$out))):['ERREUR: '.$err];
+            $r['docker'][$kind]=$code===0?array_values(array_filter(explode("\n",$out))):['ERROR: '.$err];
         }
     }
     return $r;
@@ -380,7 +383,7 @@ function schedule_manifest_cleanup(array $i): void {
     $native=root_path('/boot/config/plugins/'.TD_NAME.'.plg');
     if (!is_file($native)) return;
     $hash=hash_file('sha256',$native);
-    if (!in_array($hash,array_column($i['bundles']??[],'plg_sha256'),true)) fail('Manifeste installé non inventorié; préservé');
+    if (!in_array($hash,array_column($i['bundles']??[],'plg_sha256'),true)) fail('Installed manifest not in inventory; preserved');
     // Unraid moves the .plg AFTER the remove hook returns. A bounded job
     // removes only that exact manifest from its native archive. No script,
     // PID file, private log or cron job is left behind.
@@ -391,13 +394,13 @@ function schedule_manifest_cleanup(array $i): void {
  fi
  sleep 0.1
 done
-logger -t thermalright-digital "Désinstallation incomplète : manifeste natif encore présent; exécuter audit-residuals.sh."
+logger -t thermalright-digital "Uninstall incomplete: native manifest still present; run audit-residuals.sh."
 exit 1';
     $args=['nohup','setsid','/bin/bash','-c',$script,'td-finalize-manifest',$native,root_path('/boot/config/plugins-removed/'.TD_NAME.'.plg'),$hash];
     exec(implode(' ',array_map('escapeshellarg',$args)).' </dev/null >/dev/null 2>&1 &');
 }
 function uninstall(): void {
-    if (!is_dir(state_dir())) { echo "Aucun état persistant du plugin.\n"; return; }
+    if (!is_dir(state_dir())) { echo "No persistent plugin state.\n"; return; }
     $i=owned_state();
     // Disable future events BEFORE trying Docker. On failure keep the .plg,
     // inventory, packages, UI and diagnostic so the removal is retryable.
@@ -405,14 +408,14 @@ function uninstall(): void {
     $cfg=config(); $cfg['autostart']=false; json_write(state_dir().'/settings.json',$cfg);
     stop_service();
     if ($i['docker_touched']??false) {
-        if (!docker_ok()) fail('Désinstallation incomplète : Docker requis, inventaire conservé');
+        if (!docker_ok()) fail('Uninstall incomplete: Docker required; inventory preserved');
         remove_containers($i);
         foreach ($i['images']??[] as $id=>$record) {
             if (!($record['created']??false)) continue;
             $image=inspect('image',$id); if ($image===null) continue;
-            if ((labels($image)[TD_LABEL.'.owner']??'')!==TD_NAME) fail('Image sans preuve d’appartenance, conservée');
+            if ((labels($image)[TD_LABEL.'.owner']??'')!==TD_NAME) fail('Image ownership unverified; preserved');
             [$code,$refs,$err]=docker(['container','ls','-aq','--filter','ancestor='.$id]);
-            if ($code!==0) fail('Contrôle références image impossible : '.$err);
+            if ($code!==0) fail('Cannot check image references : '.$err);
             $tags=$image['RepoTags']??[];
             $tag=$record['tag'];
             if ($refs!=='' || array_diff($tags,[$tag,'<none>:<none>'])) {
@@ -420,42 +423,42 @@ function uninstall(): void {
                 if (in_array($tag,$tags,true) && count($tags)>1) {
                     [$code,,$err]=docker(['image','rm',$tag]); if ($code!==0) fail($err);
                 }
-                if (in_array($tag,$tags,true) && count($tags)<=1) fail('Image du plugin utilisée par un autre conteneur; supprimer cette dépendance avant de réessayer');
+                if (in_array($tag,$tags,true) && count($tags)<=1) fail('Plugin image used by another container; remove that dependency before retrying');
                 continue;
             }
-            [$code,,$err]=docker(['image','rm',$id]); if ($code!==0) fail('Suppression image : '.$err);
+            [$code,,$err]=docker(['image','rm',$id]); if ($code!==0) fail('Removing image : '.$err);
         }
     }
     // Persistent files must be known. An unexpected file blocks removal
     // instead of being silently claimed (especially a pre-existing folder).
     $allowed=['inventory.json','settings.json','uninstall-pending.json','installed.json','previous.json','previous.plg','maintenance.json','packages'];
-    foreach (new FilesystemIterator(state_dir()) as $f) if (!in_array($f->getFilename(),$allowed,true) || $f->isLink()) fail('Fichier préexistant/inconnu conservé : '.$f->getPathname());
+    foreach (new FilesystemIterator(state_dir()) as $f) if (!in_array($f->getFilename(),$allowed,true) || $f->isLink()) fail('Pre-existing or unknown file preserved : '.$f->getPathname());
     foreach (glob(state_dir().'/packages/*')?:[] as $pkg) {
         $m=json_read($pkg.'/release.json');
-        if (($m['owner']??'')!==TD_NAME) fail('Paquet sans marqueur conservé : '.$pkg);
-        foreach (new FilesystemIterator($pkg) as $f) if (!in_array($f->getFilename(),['payload.txz','backend-image.tar.xz','release.json',TD_NAME.'.plg','.download-origin'],true) || $f->isLink()) fail('Fichier de paquet inconnu conservé');
-        if (is_file($pkg.'/.download-origin') && trim((string)file_get_contents($pkg.'/.download-origin'))!==TD_NAME) fail('Marqueur de téléchargement invalide');
+        if (($m['owner']??'')!==TD_NAME) fail('Package has no ownership marker; preserved : '.$pkg);
+        foreach (new FilesystemIterator($pkg) as $f) if (!in_array($f->getFilename(),['payload.txz','backend-image.tar.xz','release.json',TD_NAME.'.plg','.download-origin'],true) || $f->isLink()) fail('Unknown package file preserved');
+        if (is_file($pkg.'/.download-origin') && trim((string)file_get_contents($pkg.'/.download-origin'))!==TD_NAME) fail('Invalid download marker');
         foreach (['payload.txz'=>'payload_sha256','backend-image.tar.xz'=>'image_sha256'] as $file=>$key)
-            if (is_file($pkg.'/'.$file) && hash_file('sha256',$pkg.'/'.$file)!==($m[$key]??'')) fail('Paquet modifié conservé : '.$file);
+            if (is_file($pkg.'/'.$file) && hash_file('sha256',$pkg.'/'.$file)!==($m[$key]??'')) fail('Modified package preserved : '.$file);
         $plg=$pkg.'/'.TD_NAME.'.plg';
-        if (is_file($plg) && hash_file('sha256',$plg)!==($i['bundles'][$m['version']]['plg_sha256']??'')) fail('Manifeste source non inventorié ou modifié : '.$plg);
+        if (is_file($plg) && hash_file('sha256',$plg)!==($i['bundles'][$m['version']]['plg_sha256']??'')) fail('Source manifest untracked or modified : '.$plg);
     }
     foreach (['stage','backup'] as $suffix) {
         $p=dirname(ui_dir()).'/.'.TD_NAME.'-'.$suffix;
-        if (is_dir($p) && trim((string)@file_get_contents($p.'/.td-owner'))!==TD_NAME) fail('Répertoire de transaction préexistant conservé : '.$p);
+        if (is_dir($p) && trim((string)@file_get_contents($p.'/.td-owner'))!==TD_NAME) fail('Pre-existing transaction directory preserved : '.$p);
     }
     schedule_manifest_cleanup($i);
     // Keep the audit helper runnable outside the removed tree.
     foreach (['stage','backup'] as $suffix) erase_tree(dirname(ui_dir()).'/.'.TD_NAME.'-'.$suffix);
     erase_tree(ui_dir()); erase_tree(run_dir()); erase_tree(state_dir());
-    echo "Ressources privées supprimées. Le gestionnaire Unraid termine le retrait du manifeste; audit disponible après 10 secondes.\n";
+    echo "Private resources removed. The Unraid manager will finish removing the manifest; run the audit after 10 seconds.\n";
 }
 function cli(array $argv): int {
     $action=$argv[1]??'status';
     try {
         if ($action==='residuals') { echo json_encode(residuals(),JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)."\n"; return 0; }
         if ($action==='version-check') { echo version_check()."\n"; return 0; }
-        if ($action==='selftest') { version_check(); $rel=json_read(__DIR__.'/release.json'); if (($rel['owner']??'')!==TD_NAME) fail('Métadonnées de version incorrectes'); echo "OK\n"; return 0; }
+        if ($action==='selftest') { version_check(); $rel=json_read(__DIR__.'/release.json'); if (($rel['owner']??'')!==TD_NAME) fail('Incorrect release metadata'); echo "OK\n"; return 0; }
         if ($action==='is-active') { echo supervisor_alive()?'1':'0'; return 0; }
         if ($action==='is-ready') { $s=json_read(run_dir().'/driver/status.json'); echo (supervisor_alive() && ($s['ready']??false) && time()-($s['timestamp']??0)<max(10,config()['interval']*2+2))?'1':'0'; return 0; }
         if ($action==='supervise') { supervise(); return 0; }
@@ -488,25 +491,25 @@ function cli(array $argv): int {
         }
         if ($action==='status') { echo json_encode(status(),JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)."\n"; return 0; }
         if ($action==='logs') { echo logs(); return 0; }
-        if ($action==='uninstall' && !is_dir(state_dir())) { echo "Déjà désinstallé.\n"; return 0; }
+        if ($action==='uninstall' && !is_dir(state_dir())) { echo "Already uninstalled.\n"; return 0; }
         init_run();
         $lock=fopen(run_dir().'/control.lock','c');
-        if (!flock($lock,LOCK_EX|LOCK_NB)) fail('Une opération est déjà en cours');
+        if (!flock($lock,LOCK_EX|LOCK_NB)) fail('An operation is already running');
         try {
             if ($action==='start') start_service();
             elseif ($action==='stop' || $action==='event-stop') stop_service();
             elseif ($action==='restart') { stop_service(); start_service(); }
             elseif ($action==='settings') save_settings(json_decode($argv[2]??'',true,16,JSON_THROW_ON_ERROR));
-            elseif ($action==='display-test') { display_test(); echo "Test visuel de 8 secondes lancé ; les valeurs de test ne sont pas des mesures.\n"; }
+            elseif ($action==='display-test') { display_test(); echo "8-second visual test started; test values are synthetic readings.\n"; }
             elseif ($action==='legacy-stop') {
                 $c=inspect('container','thermalright-screen');
-                if ($c===null || (labels($c)['trcc.setup']??'')!=='unraid-thermalright-0416-8001') fail('Ancien conteneur absent ou label non conforme; arrêt manuel requis');
+                if ($c===null || (labels($c)['trcc.setup']??'')!=='unraid-thermalright-0416-8001') fail('Legacy container absent or label mismatch; stop it manually');
                 [$code,,$err]=docker(['container','stop','--time','5','thermalright-screen']);
                 if ($code!==0) fail($err);
-                echo "Ancien conteneur arrêté à votre demande; conteneur, image et appdata conservés.\n";
+                echo "Legacy container stopped at your request; container, image and appdata preserved.\n";
             }
             elseif ($action==='uninstall') uninstall();
-            else fail('Action inconnue');
+            else fail('Unknown action');
         } finally { flock($lock,LOCK_UN); fclose($lock); }
         return 0;
     } catch (Throwable $e) { fwrite(STDERR,$e->getMessage()."\n"); return 1; }

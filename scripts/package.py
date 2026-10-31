@@ -21,19 +21,19 @@ def sha(path):
 
 def package(output, image, image_id, version, image_tag=None, download_base_url=None, repository=None):
     if not re.fullmatch(r'\d{4}\.\d{2}\.\d{2}\.\d+', version):
-        raise ValueError('Version invalide')
+        raise ValueError('Invalid version')
     if not re.fullmatch(r'sha256:[a-f0-9]{64}', image_id):
-        raise ValueError('ID Docker invalide')
+        raise ValueError('Invalid Docker ID')
     if repository and not re.fullmatch(r'[A-Za-z0-9-]+/[A-Za-z0-9_.-]+', repository):
-        raise ValueError('Dépôt GitHub invalide')
+        raise ValueError('Invalid GitHub repository')
     plugin_url = None
     if repository:
         download_base_url = download_base_url or f'https://github.com/{repository}/releases/download/v{version}'
         plugin_url = f'https://github.com/{repository}/releases/latest/download/thermalright-digital.plg'
     if download_base_url and not re.fullmatch(r'https?://[A-Za-z0-9.:-]+(?:/[A-Za-z0-9._/-]+)*', download_base_url):
-        raise ValueError('URL de publication invalide')
+        raise ValueError('Invalid publication URL')
     if not image.is_file():
-        raise SystemExit('Export Docker inexistant')
+        raise SystemExit('Docker export does not exist')
     bundle = output / 'thermalright-digital' / 'packages' / version
     bundle.mkdir(parents=True, exist_ok=True)
     target = bundle / 'backend-image.tar.xz'
@@ -43,6 +43,9 @@ def package(output, image, image_id, version, image_tag=None, download_base_url=
                    image_id=image_id,image_tag=image_tag or f'localhost/thermalright-digital:{version}',
                    image_sha256=sha(target),architecture='amd64',schema=1)
     files = {p.name: p.read_bytes() for p in (BASE/'plugin').iterdir() if p.is_file()}
+    files['logo.png'] = (BASE/'icon.png').read_bytes()
+    # Native Settings titles look under icons/, while plugin/menu icons use root.
+    files['icons/logo.png'] = files['logo.png']
     files['release.json'] = (json.dumps(release,indent=2)+'\n').encode()
     files['.td-owner'] = b'thermalright-digital\n'
     for event in ['docker_started','started','stopping','stopping_docker','stopped']:
@@ -65,16 +68,16 @@ if [[ -f "$active/control.php" ]]; then
   exec /usr/bin/php "$active/control.php" uninstall
 fi
 if [[ -d /boot/config/plugins/thermalright-digital ]]; then
-  echo "Nettoyage incomplet : réinstaller le même bundle puis réessayer. Inventaire conservé." >&2
+  echo "Cleanup incomplete: reinstall the same bundle and retry. Inventory preserved." >&2
   exit 1
 fi
-echo "Déjà désinstallé."
+echo "Already uninstalled."
 '''
     author = repository.split('/')[0] if repository else 'Local'
     update_attribute = ' pluginURL='+quoteattr(plugin_url) if plugin_url else ''
     manifest=f'''<?xml version="1.0" encoding="UTF-8"?>
-<PLUGIN name="thermalright-digital" author={quoteattr(author)} version="{version}" launch="Settings/ThermalrightDigital" min="6.12.0"{update_attribute}>
-<CHANGES>Version {version}. TRCC 9.11.2. RGB, mesures CPU hôte, watts RAPL corrigés, backend isolé et nettoyage par inventaire. Paquets vérifiés SHA-256.</CHANGES>
+<PLUGIN name="thermalright-digital" author={quoteattr(author)} version="{version}" launch="Settings/ThermalrightDigital" icon="logo.png" support={quoteattr('https://github.com/'+repository+'/issues' if repository else 'https://github.com/MrPatates/thermalright-digital-unraid/issues')} min="6.12.0"{update_attribute}>
+<CHANGES>Release {version}. English interface and documentation, shared plugin/Docker icon and uppercase display names. Host CPU metrics, RGB effects and inventory-based cleanup. SHA-256 verified packages.</CHANGES>
 <FILE Run="/bin/bash" Method="install"><INLINE><![CDATA[
 {installer}
 ]]></INLINE></FILE>

@@ -3,6 +3,8 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import struct
+import tarfile
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
@@ -20,6 +22,45 @@ fetcher = module('fetcher', 'fetch-dependencies.py')
 exporter = module('exporter', 'prepare-github.py')
 
 class ReleaseTests(unittest.TestCase):
+    def test_community_apps_metadata_and_source_export_are_consistent(self):
+        repository = json.loads((BASE / 'project.json').read_text())['repository']
+        project = 'https://github.com/' + repository
+        icon = f'https://raw.githubusercontent.com/{repository}/main/icon.png'
+        profile = ET.parse(BASE / 'ca_profile.xml').getroot()
+        self.assertEqual(profile.tag, 'CommunityApplications')
+        self.assertTrue(profile.findtext('Profile', '').strip())
+        self.assertEqual(profile.findtext('WebPage'), project)
+        self.assertEqual(profile.findtext('Icon'), icon)
+        wrapper = ET.parse(BASE / 'plugins/thermalright-digital.xml').getroot()
+        self.assertEqual(wrapper.tag, 'Plugin')
+        self.assertEqual(wrapper.findtext('Name'), 'THERMALRIGHT DIGITAL')
+        self.assertEqual(wrapper.findtext('PluginURL'), project + '/releases/latest/download/thermalright-digital.plg')
+        self.assertEqual(wrapper.findtext('Support'), project + '/issues')
+        self.assertEqual(wrapper.findtext('Project'), project)
+        self.assertEqual(wrapper.findtext('Icon'), icon)
+        self.assertEqual(wrapper.findtext('MinVer'), '6.12.0')
+        self.assertEqual(wrapper.findtext('MaxVer'), '7.3.999')
+        self.assertIn('LF12', wrapper.findtext('Overview'))
+        files = {str(p.relative_to(BASE)) for p in exporter.source_files()}
+        self.assertTrue({'README.md', 'README.fr.md', 'ca_profile.xml', 'plugins/thermalright-digital.xml', 'icon.svg', 'icon.png', 'plugin/README.md'} <= files)
+        self.assertIn('(README.fr.md)', (BASE / 'README.md').read_text())
+
+    def test_native_plugin_identity_and_logo_are_packaged_offline(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); image = root / 'image.xz'; image.write_bytes(b'test image')
+            package = pack.package(root / 'dist', image, 'sha256:' + 'a' * 64, '2026.10.31.9')
+            manifest = ET.parse(package / 'thermalright-digital.plg').getroot()
+            self.assertEqual(manifest.attrib['name'], 'thermalright-digital')
+            self.assertEqual(manifest.attrib['icon'], 'logo.png')
+            with tarfile.open(package / 'payload.txz', 'r:xz') as archive:
+                icon = archive.extractfile(manifest.attrib['icon']).read()
+                self.assertEqual(icon, (BASE / 'icon.png').read_bytes())
+                self.assertEqual(archive.extractfile('icons/logo.png').read(), icon)
+                self.assertEqual(icon[:8], b'\x89PNG\r\n\x1a\n')
+                self.assertEqual(struct.unpack('>II', icon[16:24]), (256, 256))
+                self.assertIn(b'**THERMALRIGHT DIGITAL**', archive.extractfile('README.md').read())
+                self.assertIn(b'file:///usr/local/emhttp/plugins/', archive.extractfile('control.php').read())
+
     def test_github_manifest_pins_annexes_and_updates_from_latest(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); image = root / 'image.xz'; image.write_bytes(b'test image')

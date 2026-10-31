@@ -11,6 +11,6 @@ test_status_under_real_fpm (__main__.FpmTests.test_status_under_real_fpm) ... ok
 test_visual_test_is_explicit_transient_and_requires_ready_backend (__main__.FpmTests.test_visual_test_is_explicit_transient_and_requires_ready_backend) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 4.057s
+Ran 11 tests in 4.102s
 
 OK

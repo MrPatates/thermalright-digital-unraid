@@ -16,7 +16,7 @@ for name in ['worker-tests.log', 'integration-tests.log', 'ui-tests.log', 'http-
     source = BASE / '.build/logs' / name
     if source.exists():
         shutil.copyfile(source, EVIDENCE / name)
-for name in ['README.md', 'LICENSE', 'CHANGELOG.md']:
+for name in ['README.md', 'README.fr.md', 'LICENSE', 'CHANGELOG.md']:
     shutil.copyfile(BASE / name, DIST / name)
 if (DIST / 'docs').exists():
     shutil.rmtree(DIST / 'docs')
@@ -40,11 +40,11 @@ with tarfile.open(source, 'w:xz', preset=6) as archive:
         info.uname = info.gname = ''
         info.mtime = 0
         return info
-    for name in ['README.md', 'LICENSE', 'VERSION', 'CHANGELOG.md', 'CONTRIBUTING.md', 'SECURITY.md', 'project.json', 'dependencies.lock.json', '.gitignore', '.gitattributes', '.editorconfig', '.github', 'backend', 'plugin', 'scripts', 'tests', 'docs', 'licenses', 'third_party']:
+    for name in ['README.md', 'README.fr.md', 'icon.svg', 'icon.png', 'ca_profile.xml', 'plugins', 'LICENSE', 'VERSION', 'CHANGELOG.md', 'CONTRIBUTING.md', 'SECURITY.md', 'project.json', 'dependencies.lock.json', '.gitignore', '.gitattributes', '.editorconfig', '.github', 'backend', 'plugin', 'scripts', 'tests', 'docs', 'licenses', 'third_party']:
         archive.add(BASE / name, arcname=name, filter=accepted)
 
 package = DIST / 'thermalright-digital/packages' / VERSION
-files = [DIST / name for name in ['README.md', 'LICENSE', 'CHANGELOG.md', 'audit-residuals.sh', 'cleanup-thermalright.php', 'cleanup-thermalright.sha256', 'thermalright-digital-source.tar.xz', 'thermalright-digital.plg', f'thermalright-digital-update-{VERSION}.tar.gz', f'update-{VERSION}.sha256']]
+files = [DIST / name for name in ['README.md', 'README.fr.md', 'LICENSE', 'CHANGELOG.md', 'audit-residuals.sh', 'cleanup-thermalright.php', 'cleanup-thermalright.sha256', 'thermalright-digital-source.tar.xz', 'thermalright-digital.plg', f'thermalright-digital-update-{VERSION}.tar.gz', f'update-{VERSION}.sha256']]
 files += sorted(p for p in (DIST / 'docs').rglob('*') if p.is_file())
 files += sorted(p for p in package.iterdir() if p.is_file())
 (DIST / 'SHA256SUMS').write_text(''.join(f'{digest(p)}  {p.relative_to(DIST)}\n' for p in sorted(files)))
@@ -65,4 +65,4 @@ for path in [*package.iterdir(), output, source, DIST / 'audit-residuals.sh', DI
         shutil.copyfile(path, assets / path.name)
 (assets / 'SHA256SUMS').write_text(''.join(f'{digest(p)}  {p.name}\n' for p in sorted(assets.iterdir())))
 print(output)
-print('Assets GitHub :', assets)
+print('GitHub assets :', assets)

@@ -1,4 +1,4 @@
-name: Release en brouillon
+name: Draft release
 on:
   push:
     tags: ['v*']
@@ -18,18 +18,18 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
-      - name: Vérifier le tag
+      - name: Check release tag
         shell: bash
         run: |
           version=$(cat VERSION)
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             [[ "$GITHUB_REF_NAME" == "v$version" ]]
           fi
-      - name: Construire et vérifier les fichiers de release
+      - name: Build and verify release assets
         env:
           CONTAINER_ENGINE: docker
         run: bash scripts/build.sh
-      - name: Préparer le brouillon GitHub
+      - name: Prepare GitHub draft release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -40,10 +40,10 @@ jobs:
           if gh release view "$tag" --json isDraft >/dev/null 2>&1; then
             [[ "$(gh release view "$tag" --json isDraft --jq .isDraft)" == true ]]
           else
-            gh release create "$tag" --draft --target "$GITHUB_SHA" --title "Thermalright Digital $version" --notes-file docs/RELEASE-NOTES.md
+            gh release create "$tag" --draft --target "$GITHUB_SHA" --title "THERMALRIGHT DIGITAL $version" --notes-file docs/RELEASE-NOTES.md
           fi
           gh release upload "$tag" dist/release/* --clobber
-      - name: Conserver les résultats
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

@@ -1,78 +1,86 @@
-# Thermalright Digital pour Unraid
+<img src="icon.png" alt="THERMALRIGHT DIGITAL icon" width="88" align="right">
 
-Plugin communautaire pour piloter l’écran USB d’un Thermalright Peerless Assassin 140 Digital depuis les paramètres Unraid. Interface française, mesures CPU de l’hôte et pilote TRCC 9.11.2 dans un conteneur Docker isolé. Aucun Python, pip, User Scripts ou systemd n’est ajouté à Unraid.
+# THERMALRIGHT DIGITAL for Unraid
 
-Version : **2026.10.31.8**, sous **GPL-3.0-or-later**. Le fonctionnement de la .7, incluant les watts CPU et le ciblage thermique par catégorie, est confirmé par l’utilisateur sur **Unraid 7.3.4**, USB **0416:8001**, profil **LF12**. Les autres profils et versions acceptés restent à valider sur matériel.
+[Français](README.fr.md) · [Releases](https://github.com/MrPatates/thermalright-digital-unraid/releases) · [Report an issue](https://github.com/MrPatates/thermalright-digital-unraid/issues)
 
-## Fonctions
+A community plugin that controls the USB display of a Thermalright Peerless Assassin 140 Digital from Unraid Settings. It provides an English interface, real host CPU metrics and a TRCC 9.11.2 driver in an isolated Docker container. It adds no global Python, pip, User Scripts or systemd installation to Unraid.
 
-- Température CPU par hwmon, charge par `/proc/stat`, fréquence MHz par cpufreq et puissance CPU par hwmon ou compteur RAPL package.
-- RGB fixe, couleurs par zone, température, respiration, arc-en-ciel, luminosité et lissage.
-- Choix des catégories affectées par la température : uniquement les chiffres °C, ou une combinaison avec charge, watts, MHz et décorations ; les autres gardent leurs couleurs fixes.
-- Test visuel de 8 secondes, démarrage automatique facultatif après l’array et Docker, reconnexion USB par VID/PID.
-- Installation et recherche de mises à jour via les releases GitHub, bundle hors ligne, réglages persistants et retour arrière.
-- Nettoyage explicite des anciennes versions et d’une installation manuelle identifiée, avec conservation des ressources étrangères ou partagées.
+Version **2026.10.31.9**, licensed under **GPL-3.0-or-later**. Core functionality, including CPU watts and temperature colors by category, was confirmed by the user with version .7 on **Unraid 7.3.4**, USB **0416:8001**, **LF12** profile. Other accepted versions and layouts still need hardware validation. Version .9 adds English text, branding and Community Applications metadata; see the [test report](docs/TEST-REPORT.md) for validation limits.
 
-## Installer une release publiée
+## Features
 
-Dans **Plugins → Installer un Plugin**, saisir :
+- CPU temperature from hwmon, load from `/proc/stat`, MHz from cpufreq and CPU power from hwmon or RAPL package energy counters.
+- Static RGB, independent zone colors, temperature colors, breathing, rainbow, brightness and color smoothing.
+- Choose which categories follow temperature: only the °C digits, or any combination of load, watts, MHz and decorations. Other categories keep their fixed colors.
+- An 8-second visual test, optional autostart after the array and Docker, and USB rediscovery by VID/PID.
+- Installation and updates through GitHub releases, a complete offline bundle, persistent settings and rollback.
+- Explicit cleanup of verified old plugin versions and a recognized legacy manual installation, preserving shared or unrelated resources.
+
+## Install
+
+In **Plugins → Install Plugin**, enter:
 
 ```text
 https://github.com/MrPatates/thermalright-digital-unraid/releases/latest/download/thermalright-digital.plg
 ```
 
-Ce lien devient disponible après publication d’une release stable publique. Les brouillons ne sont pas accessibles depuis Unraid. Les annexes versionnées sont téléchargées et vérifiées par SHA-256 ; une image identique déjà présente est réutilisée. Les redémarrages suivants fonctionnent hors ligne.
+Use a published stable release; draft assets are inaccessible to Unraid. Versioned downloads are verified using SHA-256. An identical existing image is reused, and subsequent server boots can work offline.
 
-Ouvrir **Paramètres → Écran Thermalright Digital**, choisir la sonde CPU puis **Démarrer**, avec l’array et Docker actifs. L’autostart est désactivé par défaut. Après mise à jour, recharger la page avec **Ctrl+F5**. Les réglages sont conservés. Les mises à jour publiques se vérifient dans l’onglet Plugins.
+Open **Settings → THERMALRIGHT DIGITAL**, select the CPU sensor and click **Start** while the array and Docker are running. Autostart is disabled by default. After updating, reload with **Ctrl+F5**. Settings are retained. Check for public updates in the Plugins tab.
 
-Compatibilité visée : Unraid x86_64 stable **6.12.x et 7.0.x à 7.3.x**. Les versions hors de cette plage et les préversions sont refusées ; cette garde ne constitue pas une certification de chaque version.
+The plugin accepts stable x86_64 Unraid **6.12.x and 7.0.x–7.3.x**. Other versions and prereleases are refused; this compatibility guard does not certify every accepted version.
 
-### Installation hors ligne
+### Offline installation
 
-Télécharger le ZIP complet de la release, vérifier `SHA256SUMS` puis copier **le dossier `thermalright-digital` entier** dans `/boot/config/plugins/`. Dans l’installateur Unraid, choisir :
+Download the complete release ZIP, verify `SHA256SUMS`, then copy the **entire `thermalright-digital` directory** to `/boot/config/plugins/`. Select this file in the Unraid plugin installer:
 
 ```text
-/boot/config/plugins/thermalright-digital/packages/2026.10.31.8/thermalright-digital.plg
+/boot/config/plugins/thermalright-digital/packages/2026.10.31.9/thermalright-digital.plg
 ```
 
-Alternative terminal :
+Or run:
 
 ```bash
-plugin install /boot/config/plugins/thermalright-digital/packages/2026.10.31.8/thermalright-digital.plg
+plugin install /boot/config/plugins/thermalright-digital/packages/2026.10.31.9/thermalright-digital.plg
 ```
 
-Prévoir environ 85 Mio sur la clé et 250 Mio dans le stockage Docker. Le plugin ne crée pas d’appdata, de volume ou de réseau privé.
+Allow about 85 MiB on the boot flash and 250 MiB in Docker storage. The plugin creates no appdata, Docker volume or private network.
 
-## Réglages et mesures
+## Settings and readings
 
-Dans les couleurs, choisir **Couleur selon la température CPU** et sélectionner **Température** seule pour que les chiffres comme **42 °C** suivent la palette, tandis que W/MHz/% conservent leurs couleurs par zone. Les seuils, les quatre couleurs et le lissage sont réglables. Le lissage affecte uniquement la couleur ; les chiffres gardent leur mesure réelle. Les effets sont appliqués en direct à l’écran USB. L’ARGB de la carte mère et des ventilateurs relève de leur propre contrôleur.
+Under **Display colors**, select **CPU temperature colors**, then **Temperature only**. Digits such as **42 °C** will follow the palette while W/MHz/% keep their fixed category colors. Configure thresholds, four palette colors and smoothing. Smoothing affects colors only; digits show actual readings. Effects update the USB display live. Motherboard and fan ARGB are controlled separately by their own hardware.
 
-Les mesures indisponibles restent `null` dans le statut et leurs chiffres/unités sont éteints. Une vraie mesure zéro reste affichable. Les capacités W/MHz sont annoncées après le handshake : LF8/LF12/LF15 les possèdent, AK120 possède les watts. Les valeurs dépassant le nombre de chiffres disponibles sont masquées.
+Unavailable readings remain `null` in status and their display digits/units are switched off. A genuine zero remains displayable. W/MHz capabilities are reported after the handshake: LF8/LF12/LF15 support both, while AK120 supports watts. Values exceeding the available digits are hidden.
 
-La fréquence correspond au maximum des politiques cpufreq actives uniques, ou à leur moyenne arithmétique sans pondération par nombre de cœurs. Le repli `scaling_cur_freq` est signalé comme **fréquence demandée** ; il peut différer de la fréquence physique.
+Frequency uses the maximum of unique active cpufreq policies, or their arithmetic mean without weighting by core count. The `scaling_cur_freq` fallback is labeled **driver-requested frequency** and may differ from physical frequency.
 
-Les watts concernent la source CPU sélectionnée, jamais la consommation totale à la prise. RAPL utilise les deltas d’énergie du package et un temps monotone ; les sous-domaines et fournisseurs dupliqués ne sont pas additionnés. Le premier échantillon, un compteur illisible ou un delta invalide restent indisponibles. `enabled=0` décrit les contrôles de limitation RAPL et ne bloque pas un compteur d’énergie lisible. Les rails individuels se sélectionnent explicitement avec leur libellé. Aucune puissance n’est estimée depuis le TDP ou la charge. Les mesures GPU ne sont pas fournies.
+Watts refer to the selected CPU source, not total power at the wall. RAPL uses package energy deltas and monotonic time; subdomains and duplicate providers are not added together. The first sample, an unreadable counter or an invalid delta remains unavailable. `enabled=0` describes RAPL power-limit controls and does not invalidate a readable energy counter. Individual CPU rails can be selected explicitly by label. Power is never estimated from TDP or load. GPU metrics are not provided.
 
-Les animations tournent à 10 Hz. L’intervalle de 1 à 60 secondes règle l’alternance des petits écrans. Le test couleurs/segments utilise des chiffres artificiels pendant 8 secondes, conserve les mesures du statut et revient automatiquement à l’affichage normal.
+Animations run at 10 Hz. The 1–60 second interval controls small-display alternation. The color/segment test shows synthetic digits for 8 seconds, keeps real readings in status and automatically returns to normal.
 
-## Mise à jour, retrait et dépannage
+The plugin and backend share an original screen/thermometer icon. The Docker instance is named **THERMALRIGHT-DIGITAL-BACKEND**; upgrades remove an owned older lowercase instance through the existing ownership labels. Persistent paths and plugin IDs remain compatible with earlier versions.
 
-Une mise à jour prépare le code en RAM, vérifie les paquets et conserve réglages/inventaire. Si un backend actif ne redevient pas prêt, l’ancien code est restauré. Les anciens paquets permettent un retour explicite avec **Force Install**. Ne lancer qu’un pilote à la fois sur l’écran.
+## Update, uninstall and troubleshooting
 
-Pour désinstaller : **Plugins → Supprimer**, avec Docker disponible, ou `plugin remove thermalright-digital.plg`. Les ressources privées vérifiées sont retirées ; les ressources partagées et préexistantes sont conservées. Si Docker est indisponible, l’inventaire est maintenu et le retrait doit être repris. Voir [le nettoyage](docs/NETTOYAGE.md), [la validation Unraid](docs/VALIDATION-UNRAID.md) et [le rapport de tests](docs/TEST-REPORT.md).
+Updates stage code in RAM, verify packages and preserve settings/inventory. If a previously active backend fails to become ready, the old code is restored. Older packages allow explicit rollback with **Force Install**. Run only one driver against the display at a time.
 
-En cas de problème, exporter le diagnostic depuis la page. Il peut contenir des chemins et identifiants privés : les retirer avant de le joindre à une issue.
+To uninstall, use **Plugins → Remove** with Docker available, or `plugin remove thermalright-digital.plg`. Verified private resources are removed; shared or pre-existing resources are preserved. If Docker is unavailable, inventory is retained and removal must be retried. See [cleanup](docs/CLEANUP.md), [Unraid validation](docs/VALIDATION-UNRAID.md) and the [test report](docs/TEST-REPORT.md).
 
-## Développement et publication
+Export diagnostics from the settings page when reporting a problem. Remove private paths, identifiers and tokens before attaching them to an issue.
+
+## Development and Community Applications
 
 ```bash
 python3 scripts/fetch-dependencies.py
 CONTAINER_ENGINE=podman bash scripts/build.sh
-# Ou : CONTAINER_ENGINE=docker bash scripts/build.sh
+# Or: CONTAINER_ENGINE=docker bash scripts/build.sh
 ```
 
-Prérequis et fonctionnement des tests : [CONTRIBUTING.md](CONTRIBUTING.md). La construction vérifie les dépendances, exécute les suites, exporte une vraie image Docker et produit le ZIP hors ligne, les sources complètes et `dist/release/`. Les fichiers générés sont ignorés par Git.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for prerequisites and tests. The build verifies dependencies, runs the suites, exports a real Docker archive and produces an offline ZIP, complete source package and `dist/release/`. Generated files are ignored by Git.
 
-Pour préparer le dépôt et publier la release : [GITHUB-PUBLICATION.md](docs/GITHUB-PUBLICATION.md). Les workflows créent des releases **en brouillon** ; leur publication reste une action explicite dans GitHub.
+[GitHub publication](docs/GITHUB-PUBLICATION.md) describes release publishing. Workflows create **draft releases**; publishing them is an explicit GitHub action.
 
-Le paquet source comprend les sources du plugin et des composants tiers. Voir [l’architecture](docs/ARCHITECTURE.md), [les licences](licenses/THIRD-PARTY-NOTICES.md) et [l’historique](CHANGELOG.md). Projet sans affiliation avec Thermalright, Unraid ou le mainteneur TRCC.
+This repository includes `ca_profile.xml`, the [plugin wrapper](plugins/thermalright-digital.xml) and a dedicated icon for Community Applications submission. These files prepare the project for review; they do not mean the plugin is already listed. See the [submission guide](docs/COMMUNITY-APPLICATIONS.md).
+
+The source package includes plugin and third-party sources. See [architecture](docs/ARCHITECTURE.md), [licenses](licenses/THIRD-PARTY-NOTICES.md) and [changelog](CHANGELOG.md). This project is not affiliated with Thermalright, Unraid or TRCC. The [French README](README.fr.md) preserves the documentation from release .8.

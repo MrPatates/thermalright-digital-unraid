@@ -5,7 +5,7 @@ if (PHP_SAPI!=='cli') { http_response_code(404); exit; }
 $tdControl=(getenv('TD_TEST_ROOT')?:'').'/usr/local/emhttp/plugins/thermalright-digital/control.php';
 // A downloaded CLI must never include an unrelated /tmp/control.php.
 if (!is_file($tdControl) && defined('TD_CLEANUP_TESTING')) $tdControl=__DIR__.'/control.php';
-if (!is_file($tdControl)) { fwrite(STDERR,"Installer le plugin avant de lancer ce nettoyage.\n"); exit(1); }
+if (!is_file($tdControl)) { fwrite(STDERR,"Install the plugin before running cleanup.\n"); exit(1); }
 require_once $tdControl;
 const TD_OLD_LABEL='unraid-thermalright-0416-8001';
 
@@ -26,23 +26,23 @@ function clean_appdata_paths(): array {
 }
 
 function clean_pkg_check(string $dir,array $i): array {
-    if (is_link($dir) || !is_dir($dir)) fail('Dossier de paquet non reconnu : '.$dir);
+    if (is_link($dir) || !is_dir($dir)) fail('Unrecognized package directory : '.$dir);
     $r=json_read($dir.'/release.json'); $version=$r['version']??'';
-    if (($r['owner']??'')!==TD_NAME || basename($dir)!==$version) fail('Paquet sans appartenance vérifiée : '.$dir);
+    if (($r['owner']??'')!==TD_NAME || basename($dir)!==$version) fail('Package ownership unverified : '.$dir);
     $plg=$dir.'/'.TD_NAME.'.plg';
-    if (!is_file($plg) || hash_file('sha256',$plg)!==($i['bundles'][$version]['plg_sha256']??'')) fail('Manifeste non inventorié/modifié : '.$dir);
-    if (!str_contains((string)file_get_contents($plg),"release_sha='".hash_file('sha256',$dir.'/release.json')."'")) fail('Métadonnées de paquet modifiées : '.$dir);
+    if (!is_file($plg) || hash_file('sha256',$plg)!==($i['bundles'][$version]['plg_sha256']??'')) fail('Manifest untracked or modified : '.$dir);
+    if (!str_contains((string)file_get_contents($plg),"release_sha='".hash_file('sha256',$dir.'/release.json')."'")) fail('Modified package metadata : '.$dir);
     foreach (new FilesystemIterator($dir) as $f) {
-        if ($f->isLink() || !$f->isFile() || !in_array($f->getFilename(),['payload.txz','backend-image.tar.xz','release.json',TD_NAME.'.plg','.download-origin'],true)) fail('Fichier inconnu conservé : '.$f->getPathname());
+        if ($f->isLink() || !$f->isFile() || !in_array($f->getFilename(),['payload.txz','backend-image.tar.xz','release.json',TD_NAME.'.plg','.download-origin'],true)) fail('Unknown file preserved : '.$f->getPathname());
     }
     foreach (['payload.txz'=>'payload_sha256','backend-image.tar.xz'=>'image_sha256'] as $name=>$key)
-        if (is_file($dir.'/'.$name) && hash_file('sha256',$dir.'/'.$name)!==($r[$key]??'')) fail('Archive modifiée conservée : '.$dir.'/'.$name);
-    if (is_file($dir.'/.download-origin') && trim((string)file_get_contents($dir.'/.download-origin'))!==TD_NAME) fail('Marqueur de téléchargement incorrect');
+        if (is_file($dir.'/'.$name) && hash_file('sha256',$dir.'/'.$name)!==($r[$key]??'')) fail('Modified archive preserved : '.$dir.'/'.$name);
+    if (is_file($dir.'/.download-origin') && trim((string)file_get_contents($dir.'/.download-origin'))!==TD_NAME) fail('Incorrect download marker');
     return $r;
 }
 function clean_containers(): array {
     [$code,$out,$err]=docker(['container','ls','--all','--quiet']);
-    if ($code) fail('Inventaire Docker impossible : '.$err);
+    if ($code) fail('Cannot read Docker inventory : '.$err);
     $all=[];
     foreach (array_filter(explode("\n",$out)) as $id) { $c=inspect('container',$id); if ($c) $all[$c['Id']]=$c; }
     return $all;
@@ -51,8 +51,8 @@ function clean_legacy_plan(array $all,array $saved): array {
     $plan=array_merge(['containers'=>[],'images'=>[],'paths'=>[],'volumes'=>[],'networks'=>[]],$saved);
     foreach ($all as $id=>$c) {
         if (ltrim($c['Name']??'','/')!=='thermalright-screen') continue;
-        if ((labels($c)['trcc.setup']??'')!==TD_OLD_LABEL) { echo "CONSERVÉ : conteneur homonyme sans le label ancien attendu ($id).\n"; continue; }
-        if ((labels($c)[TD_LABEL.'.owner']??'')===TD_NAME) { echo "CONSERVÉ : conteneur du plugin actif.\n"; continue; }
+        if ((labels($c)['trcc.setup']??'')!==TD_OLD_LABEL) { echo "KEPT : container name matches but the expected legacy label is missing ($id).\n"; continue; }
+        if ((labels($c)[TD_LABEL.'.owner']??'')===TD_NAME) { echo "KEPT : active plugin container.\n"; continue; }
         $plan['containers'][$id]=['name'=>'thermalright-screen','label'=>TD_OLD_LABEL];
         $image=$c['Image']??''; if ($image!=='') $plan['images'][$image]=['container_proof'=>$id];
         foreach ($c['Mounts']??[] as $mount) {
@@ -63,14 +63,14 @@ function clean_legacy_plan(array $all,array $saved): array {
     }
     // A separately labelled image remains identifiable after container removal.
     [$code,$ids,$err]=docker(['image','ls','--quiet','--filter','label=trcc.setup='.TD_OLD_LABEL]);
-    if ($code) fail('Inventaire des anciennes images impossible : '.$err);
+    if ($code) fail('Cannot inventory legacy images : '.$err);
     foreach (array_filter(explode("\n",$ids)) as $id) {
         $im=inspect('image',$id);
         if ($im && (labels($im)['trcc.setup']??'')===TD_OLD_LABEL) $plan['images'][$im['Id']]=['label'=>TD_OLD_LABEL];
     }
     foreach (['volume','network'] as $kind) {
         [$code,$ids,$err]=docker([$kind,'ls','--quiet','--filter','label=trcc.setup='.TD_OLD_LABEL]);
-        if ($code) fail('Inventaire '.$kind.' impossible : '.$err);
+        if ($code) fail('Inventory '.$kind.' failed: '.$err);
         foreach (array_filter(explode("\n",$ids)) as $id) $plan[$kind.'s'][$id]=['label'=>TD_OLD_LABEL];
     }
     return $plan;
@@ -88,8 +88,8 @@ function clean_legacy_apply(array $plan,array $all,bool $apply): array {
     foreach ($plan['containers'] as $id=>$proof) {
         $c=$all[$id]??null;
         if (!$c) { unset($remaining['containers'][$id]); continue; }
-        if ((labels($c)['trcc.setup']??'')!==TD_OLD_LABEL || ltrim($c['Name']??'','/')!=='thermalright-screen') fail('Identité du conteneur modifiée, arrêt du nettoyage');
-        echo ($apply?'SUPPRESSION':'CANDIDAT')." conteneur ancien : $id\n";
+        if ((labels($c)['trcc.setup']??'')!==TD_OLD_LABEL || ltrim($c['Name']??'','/')!=='thermalright-screen') fail('Container identity changed; cleanup stopped');
+        echo ($apply?'REMOVING':'CANDIDATE')." legacy container : $id\n";
         if ($apply) {
             [$code,,$err]=docker(['container','stop','--time','5',$id],10); if ($code) fail($err);
             [$code,,$err]=docker(['container','rm',$id]); if ($code) fail($err);
@@ -98,41 +98,41 @@ function clean_legacy_apply(array $plan,array $all,bool $apply): array {
     }
     foreach ($plan['images'] as $id=>$proof) {
         $im=inspect('image',$id); if (!$im) { unset($remaining['images'][$id]); continue; }
-        if ((labels($im)[TD_LABEL.'.owner']??'')===TD_NAME) { echo "CONSERVÉ : image du plugin courant $id\n"; unset($remaining['images'][$id]); continue; }
+        if ((labels($im)[TD_LABEL.'.owner']??'')===TD_NAME) { echo "KEPT : current plugin image $id\n"; unset($remaining['images'][$id]); continue; }
         $tags=$im['RepoTags']??[];
         $named=(bool)array_filter($tags,'clean_old_tag');
         $label=(labels($im)['trcc.setup']??'')===TD_OLD_LABEL;
-        if (!$label && !(isset($proof['container_proof']) && $named)) { echo "CONSERVÉ : image sans preuve suffisante $id\n"; continue; }
+        if (!$label && !(isset($proof['container_proof']) && $named)) { echo "KEPT : image with insufficient ownership evidence $id\n"; continue; }
         $foreign=array_diff($tags,array_filter($tags,'clean_old_tag'),['<none>:<none>']);
         $shared=false; foreach ($all as $cid=>$c) if (($c['Image']??'')===$id && !isset($plan['containers'][$cid])) $shared=true;
-        if ($shared || $foreign) { echo "CONSERVÉ : image partagée $id\n"; continue; }
-        echo ($apply?'SUPPRESSION':'CANDIDAT')." image ancienne : $id\n";
+        if ($shared || $foreign) { echo "KEPT : shared image $id\n"; continue; }
+        echo ($apply?'REMOVING':'CANDIDATE')." legacy image : $id\n";
         if ($apply) { [$code,,$err]=docker(['image','rm',$id]); if ($code) fail($err); unset($remaining['images'][$id]); }
     }
     foreach ($plan['paths'] as $path=>$proof) {
         $disk=root_path($path);
         if (!file_exists($disk)) { unset($remaining['paths'][$path]); continue; }
-        if (is_link($disk) || clean_shared_path($path,clean_containers(),$plan['containers'])) { echo "CONSERVÉ : chemin partagé ou lien $path\n"; continue; }
+        if (is_link($disk) || clean_shared_path($path,clean_containers(),$plan['containers'])) { echo "KEPT : shared path or symbolic link $path\n"; continue; }
         // Do not cross nested mount points or delete files currently bind-mounted elsewhere.
         foreach (@file(root_path('/proc/self/mountinfo'),FILE_IGNORE_NEW_LINES)?:[] as $line) {
             $fields=explode(' ',$line); $mount=str_replace(['\\040','\\011','\\134'],[' ',"\t",'\\'],$fields[4]??'');
-            if (str_starts_with($mount,$path.'/')) fail('Montage imbriqué conservé : '.$mount);
+            if (str_starts_with($mount,$path.'/')) fail('Nested mount preserved : '.$mount);
         }
-        echo ($apply?'SUPPRESSION':'CANDIDAT')." appdata ancien vérifié par son montage : $path\n";
+        echo ($apply?'REMOVING':'CANDIDATE')." legacy appdata verified through its mount : $path\n";
         if ($apply) { erase_tree($disk); unset($remaining['paths'][$path]); }
     }
     foreach (['volume','network'] as $kind) foreach ($plan[$kind.'s'] as $id=>$proof) {
         [$code,$out,$err]=docker([$kind,'inspect',$id]);
         if ($code) { if (str_contains($err,'No such')) { unset($remaining[$kind.'s'][$id]); continue; } fail($err); }
         $object=json_decode($out,true,32,JSON_THROW_ON_ERROR)[0];
-        if (($object['Labels']['trcc.setup']??'')!==TD_OLD_LABEL) { echo "CONSERVÉ : $kind sans label attendu $id\n"; continue; }
+        if (($object['Labels']['trcc.setup']??'')!==TD_OLD_LABEL) { echo "KEPT : $kind missing expected label $id\n"; continue; }
         $shared=false;
         foreach ($all as $cid=>$c) if (!isset($plan['containers'][$cid])) {
             foreach ($c['Mounts']??[] as $m) if ($kind==='volume' && ($m['Name']??'')===$id) $shared=true;
             if ($kind==='network' && isset($object['Containers'][$cid])) $shared=true;
         }
-        if ($shared) { echo "CONSERVÉ : $kind partagé $id\n"; continue; }
-        echo ($apply?'SUPPRESSION':'CANDIDAT')." $kind ancien étiqueté : $id\n";
+        if ($shared) { echo "KEPT : $kind shared $id\n"; continue; }
+        echo ($apply?'REMOVING':'CANDIDATE')." $kind labeled legacy resource : $id\n";
         if ($apply) { [$code,,$err]=docker([$kind,'rm',$id]); if ($code) fail($err); unset($remaining[$kind.'s'][$id]); }
     }
     return $remaining;
@@ -142,11 +142,11 @@ function clean_automation_audit(): array {
     foreach (['/boot/config/plugins/user.scripts/scripts/*/script','/boot/config/plugins/user.scripts/*.cron','/etc/cron.d/*','/boot/config/plugins/dockerMan/templates-user/*.xml'] as $pattern) $files=array_merge($files,glob(root_path($pattern))?:[]);
     $found=[];
     foreach ($files as $file) if (is_file($file) && !is_link($file) && filesize($file)<1048576 && str_contains((string)file_get_contents($file),'thermalright-screen')) $found[]=$file;
-    foreach ($found as $file) echo "À EXAMINER, CONSERVÉ : référence dans $file\n";
+    foreach ($found as $file) echo "REVIEW, KEPT : reference in $file\n";
     foreach (clean_appdata_paths() as $p)
-        if (is_dir(root_path($p))) { echo "Appdata encore présent : $p (ne sera supprimé que sur preuve de montage du conteneur étiqueté).\n"; $found[]=$p; }
+        if (is_dir(root_path($p))) { echo "Appdata still present : $p (removed only with mount evidence from the labeled container).\n"; $found[]=$p; }
     $old=inspect('image','thermalright-screen');
-    if ($old) { echo 'Image portant encore le nom thermalright-screen : '.$old['Id']."\n"; $found[]=$old['Id']; }
+    if ($old) { echo 'Image still named thermalright-screen : '.$old['Id']."\n"; $found[]=$old['Id']; }
     return $found;
 }
 function clean_legacy_metadata(array $plan,array $all,bool $apply): void {
@@ -159,16 +159,16 @@ function clean_legacy_metadata(array $plan,array $all,bool $apply): void {
         $lines=preg_split('/(?<=\n)/',$old);
         $new=implode('',array_filter($lines,fn($line)=>!preg_match('/^\s*thermalright-screen(?:\s|$)/',$line)));
         if ($new!==$old) {
-            echo ($apply?'RETRAIT':'CANDIDAT')." entrée autostart Unraid : thermalright-screen\n";
-            if ($apply) { $mode=fileperms($auto)&0777; if (file_get_contents($auto)!==$old) fail('Autostart modifié simultanément, réessayer'); atomic($auto,$new); chmod($auto,$mode); }
+            echo ($apply?'REMOVING':'CANDIDATE')." Unraid autostart entry : thermalright-screen\n";
+            if ($apply) { $mode=fileperms($auto)&0777; if (file_get_contents($auto)!==$old) fail('Autostart changed concurrently; retry'); atomic($auto,$new); chmod($auto,$mode); }
         }
     }
     foreach (glob(root_path('/boot/config/plugins/dockerMan/templates-user/*.xml'))?:[] as $p) {
         if (is_link($p)) continue;
         $xml=@simplexml_load_file($p,'SimpleXMLElement',LIBXML_NONET);
         if (!$xml || (string)$xml->Name!=='thermalright-screen' || !clean_old_tag((string)$xml->Repository)) continue;
-        echo ($apply?'SUPPRESSION':'CANDIDAT')." modèle Docker ancien vérifié : $p\n";
-        if ($apply && !unlink($p)) fail('Modèle Docker non supprimé');
+        echo ($apply?'REMOVING':'CANDIDATE')." verified legacy Docker template : $p\n";
+        if ($apply && !unlink($p)) fail('Docker template not removed');
     }
 }
 function clean_downloads(bool $apply): array {
@@ -180,34 +180,34 @@ function clean_downloads(bool $apply): array {
     $left=[];
     foreach (array_merge(['/tmp'],array_diff(clean_storage_roots(),['/mnt/user'])) as $root) foreach ($catalogue as $name=>$hash) {
         $p=root_path($root.'/'.$name); if (!file_exists($p) && !is_link($p)) continue;
-        if (is_link($p) || !is_file($p) || hash_file('sha256',$p)!==$hash) { echo "CONSERVÉ : téléchargement non reconnu $p\n"; $left[]=$p; continue; }
-        echo ($apply?'SUPPRESSION':'CANDIDAT')." ancien téléchargement vérifié : $p\n";
-        if ($apply && !unlink($p)) fail('Téléchargement non supprimé');
+        if (is_link($p) || !is_file($p) || hash_file('sha256',$p)!==$hash) { echo "KEPT : unrecognized download $p\n"; $left[]=$p; continue; }
+        echo ($apply?'REMOVING':'CANDIDATE')." verified old download : $p\n";
+        if ($apply && !unlink($p)) fail('Download not removed');
     }
     return $left;
 }
 function clean_main(array $args): int {
     $apply=in_array('--apply',$args,true);
-    if (array_diff(array_slice($args,1),['--apply','--audit'])) fail('Utiliser --audit (lecture seule) ou --apply');
+    if (array_diff(array_slice($args,1),['--apply','--audit'])) fail('Use --audit (read-only) or --apply');
     $i=owned_state(); $current=json_read(state_dir().'/installed.json')['version']??'';
-    if ($current==='' || $current!==(release()['version']??'')) fail('Version active indéterminée : nettoyage refusé');
-    if (!docker_ok()) fail('Docker indisponible : nettoyage non confirmé, aucune suppression');
+    if ($current==='' || $current!==(release()['version']??'')) fail('Cannot determine active version; cleanup refused');
+    if (!docker_ok()) fail('Docker unavailable : cleanup not confirmed; nothing removed');
     $all=clean_containers();
     $saved=json_read(state_dir().'/maintenance.json');
-    if ($saved && (($saved['owner']??'')!==TD_NAME || ($saved['instance']??'')!==$i['instance'])) fail('Journal de nettoyage non reconnu');
+    if ($saved && (($saved['owner']??'')!==TD_NAME || ($saved['instance']??'')!==$i['instance'])) fail('Unrecognized cleanup journal');
     $plan=clean_legacy_plan($all,$saved['legacy']??[]);
-    echo ($apply?'NETTOYAGE':'AUDIT SANS MODIFICATION')." ; version active protégée : $current\n";
+    echo ($apply?'CLEANUP':'READ-ONLY AUDIT')." ; active version protected : $current\n";
     $packages=[]; $staging=[]; $blocked=[]; $hashes=array_column($i['bundles']??[],'plg_sha256');
     foreach (glob(state_dir().'/packages/*')?:[] as $p) {
         if (basename($p)===$current) continue;
-        try { clean_pkg_check($p,$i); $packages[]=$p; echo ($apply?'SUPPRESSION':'CANDIDAT')." ancienne version : ".basename($p)."\n"; }
-        catch (Throwable $e) { echo 'CONSERVÉ : '.$e->getMessage()."\n"; $blocked[]=$p; }
+        try { clean_pkg_check($p,$i); $packages[]=$p; echo ($apply?'REMOVING':'CANDIDATE')." old version : ".basename($p)."\n"; }
+        catch (Throwable $e) { echo 'KEPT : '.$e->getMessage()."\n"; $blocked[]=$p; }
     }
     foreach (array_map(fn($p)=>$p.'/thermalright-digital',array_diff(clean_storage_roots(),['/mnt/user'])) as $root) {
-        if (is_link(root_path($root)) || is_link(root_path($root.'/packages'))) { echo "CONSERVÉ : copie d’installation derrière un lien $root\n"; $blocked[]=$root; continue; }
+        if (is_link(root_path($root)) || is_link(root_path($root.'/packages'))) { echo "KEPT : installation copy behind a symbolic link $root\n"; $blocked[]=$root; continue; }
         foreach (glob(root_path($root.'/packages/*'))?:[] as $p) {
-            try { clean_pkg_check($p,$i); if (clean_shared_path($root,$all,[])) fail('Copie utilisée par un conteneur'); $staging[]=$p; echo ($apply?'SUPPRESSION':'CANDIDAT')." copie d’installation : $p\n"; }
-            catch (Throwable $e) { echo 'CONSERVÉ : '.$e->getMessage()."\n"; $blocked[]=$p; }
+            try { clean_pkg_check($p,$i); if (clean_shared_path($root,$all,[])) fail('Copy used by a container'); $staging[]=$p; echo ($apply?'REMOVING':'CANDIDATE')." installation copy : $p\n"; }
+            catch (Throwable $e) { echo 'KEPT : '.$e->getMessage()."\n"; $blocked[]=$p; }
         }
     }
     if ($apply) json_write(state_dir().'/maintenance.json',['owner'=>TD_NAME,'instance'=>$i['instance'],'legacy'=>$plan]);
@@ -222,12 +222,12 @@ function clean_main(array $args): int {
             if ($id===(release()['image_id']??'') || !($record['created']??false)) continue;
             $image=inspect('image',$id);
             if (!$image) { unset($i['images'][$id]); continue; }
-            if ((labels($image)[TD_LABEL.'.owner']??'')!==TD_NAME) { echo "CONSERVÉ : ancienne image du plugin non vérifiée $id\n"; $blocked[]=$id; continue; }
+            if ((labels($image)[TD_LABEL.'.owner']??'')!==TD_NAME) { echo "KEPT : unverified old plugin image $id\n"; $blocked[]=$id; continue; }
             [$code,$refs,$err]=docker(['container','ls','-aq','--filter','ancestor='.$id]);
             if ($code) fail($err);
-            if ($refs!=='' || array_diff($image['RepoTags']??[],[$record['tag'],'<none>:<none>'])) { echo "CONSERVÉ : ancienne image du plugin partagée $id\n"; $blocked[]=$id; continue; }
+            if ($refs!=='' || array_diff($image['RepoTags']??[],[$record['tag'],'<none>:<none>'])) { echo "KEPT : shared old plugin image $id\n"; $blocked[]=$id; continue; }
             [$code,,$err]=docker(['image','rm',$id]); if ($code) fail($err);
-            unset($i['images'][$id]); echo "SUPPRESSION ancienne image du plugin : $id\n";
+            unset($i['images'][$id]); echo "REMOVING old plugin image : $id\n";
         }
         inv_save($i);
         if ($packages) {
@@ -244,14 +244,14 @@ function clean_main(array $args): int {
     $blocked=array_merge($blocked,clean_downloads($apply));
     $pending=(bool)array_filter($left);
     if ($apply && !$pending) @unlink(state_dir().'/maintenance.json');
-    echo $apply?"Nettoyage des ressources vérifiées terminé. Les éléments signalés CONSERVÉ/À EXAMINER restent en place.\n":"Relancer avec --apply pour supprimer uniquement les candidats vérifiés ci-dessus.\n";
+    echo $apply?"Verified resource cleanup complete. Items marked KEPT/REVIEW remain in place.\n":"Run again with --apply to remove only the verified candidates above.\n";
     return (($apply && $pending) || $automation || $blocked)?2:0;
 }
 if (realpath($_SERVER['SCRIPT_FILENAME'])===__FILE__) {
     try {
         if (in_array('--apply',$argv,true)) {
             init_run(); $lock=fopen(run_dir().'/control.lock','c');
-            if (!flock($lock,LOCK_EX|LOCK_NB)) fail('Une opération du plugin est en cours');
+            if (!flock($lock,LOCK_EX|LOCK_NB)) fail('A plugin operation is running');
             try { $code=clean_main($argv); } finally { flock($lock,LOCK_UN); fclose($lock); }
         } else $code=clean_main($argv);
         exit($code);

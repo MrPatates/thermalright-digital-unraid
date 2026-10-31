@@ -60,7 +60,7 @@ function td_metric_frequency(array $policies, string $mode): array {
     $values=array_column($valid,'mhz');
     $requested=in_array('requested',array_column($valid,'kind'),true);
     $attributes=array_values(array_unique(array_column($valid,'source')));
-    $aggregation=$mode==='average' ? 'moyenne arithmétique des politiques actives uniques' : 'maximum des politiques actives uniques';
+    $aggregation=$mode==='average' ? 'arithmetic mean of unique active policies' : 'maximum of unique active policies';
     return ['cpu_mhz'=>$mode==='average' ? array_sum($values)/count($values) : max($values),
             'frequency_source'=>'cpufreq — '.$aggregation.' ; '.implode(' + ',$attributes),
             // A mixture is conservatively marked requested, never all measured.
@@ -96,7 +96,7 @@ function td_metric_hwmon_power(): array {
                 if ($raw!==null) { $value=$raw/1000000; $attribute=$kind; break; }
             }
             $id=substr(hash('sha256','hwmon-power|'.td_metric_stable($real).'|'.$name.'|'.$channel),0,24);
-            $out[$id]=['id'=>$id,'label'=>$name.' — '.$label.($package ? ' (package CPU)' : ' (composant CPU)'),
+            $out[$id]=['id'=>$id,'label'=>$name.' — '.$label.($package ? ' (CPU package)' : ' (CPU component)'),
                 'kind'=>'hwmon_'.$attribute,'available'=>$value!==null,
                 '_type'=>'direct','_value'=>$value,'_package'=>$package];
         }
@@ -154,7 +154,7 @@ function td_metric_power_scan(): array {
             $id=substr(hash('sha256','powercap-total|'.implode('|',$members)),0,24);
             $available=true;
             foreach ($members as $member) $available=$available && $sources[$member]['available'];
-            $sources[$id]=['id'=>$id,'label'=>'CPU — total des packages powercap ('.count($members).' sockets)',
+            $sources[$id]=['id'=>$id,'label'=>'CPU — powercap package total ('.count($members).' sockets)',
                 'kind'=>'powercap_energy_total','available'=>$available,'_type'=>'group','_members'=>$members];
             $auto=$id;
         }
@@ -174,9 +174,9 @@ function td_extra_metric_sources(): array {
     return ['power'=>$power,'frequency'=>[
         'available'=>(bool)array_filter($policies,fn(array $p): bool => $p['available']),
         'policies'=>$policies,'aggregation'=>[
-            'max'=>'Maximum des politiques actives uniques',
-            'average'=>'Moyenne arithmétique des politiques actives uniques, non pondérée par le nombre de cœurs'],
-        'fallback'=>'scaling_cur_freq : fréquence demandée, susceptible de différer de la fréquence réelle']];
+            'max'=>'Maximum of unique active policies',
+            'average'=>'Arithmetic mean of unique active policies, without weighting by core count'],
+        'fallback'=>'scaling_cur_freq: requested frequency, which may differ from actual frequency']];
 }
 
 function td_metric_energy_watts(array $current, ?array $previous, float $now, string $boot): ?float {

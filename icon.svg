@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">THERMALRIGHT DIGITAL community plugin</title>
+  <rect x="12" y="12" width="232" height="232" rx="48" fill="#17212b"/>
+  <rect x="38" y="42" width="180" height="172" rx="20" fill="#0d141c" stroke="#47d6e8" stroke-width="10"/>
+  <path d="M58 66h92" stroke="#ff9e45" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="184" cy="66" r="5" fill="#47d6e8"/>
+  <path d="M78 158v-52a12 12 0 0 1 24 0v52a23 23 0 1 1-24 0Z" fill="#47d6e8"/>
+  <path d="M90 116v55" stroke="#0d141c" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="90" cy="177" r="8" fill="#0d141c"/>
+  <path d="M140 108h38m-38 25h24m-24 25h38m-38 25h24" stroke="#47d6e8" stroke-width="10" stroke-linecap="round"/>
+</svg>

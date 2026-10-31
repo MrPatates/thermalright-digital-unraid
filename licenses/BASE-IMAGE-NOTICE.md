@@ -1,7 +1,7 @@
-# Composants de l’image
+# Base image and component licenses
 
-Le plugin et worker sont GPL-3.0-or-later (LICENSE). TRCC 9.11.2 reste non modifié sous GPL-3.0-or-later. PyUSB 1.3.1 est BSD-3-Clause. Libusb 1.0.26 est LGPL-2.1-or-later. Les archives de leurs sources sont dans third_party dans le paquet source.
+The plugin, worker and original icon use GPL-3.0-or-later (LICENSE). Unmodified TRCC 9.11.2 uses GPL-3.0-or-later. PyUSB 1.3.1 uses BSD-3-Clause; libusb 1.0.26 uses LGPL-2.1-or-later. Their source archives are in `third_party` in the complete release source package.
 
-La base officielle Python slim-bookworm est un agrégat Debian avec CPython sous licence PSF et diverses bibliothèques système. Le Dockerfile fixe son digest. L’image conserve `/usr/share/doc/*/copyright` et `/usr/share/common-licenses/`. Une copie des notices est dans `docs/evidence/base-copyrights.txt`, l’inventaire exact dans `docs/evidence/image-packages-and-licenses.txt`.
+The official Python slim-bookworm base combines Debian packages, CPython under the PSF license and system libraries with their respective licenses. The Dockerfile pins its digest. The image retains `/usr/share/doc/*/copyright` and `/usr/share/common-licenses/`. Copied notices are in `docs/evidence/base-copyrights.txt`; the exact package inventory is in `docs/evidence/image-packages-and-licenses.txt`.
 
-Sources de la base : https://github.com/docker-library/python et https://sources.debian.org/ (versions de l’inventaire). Le bundle ne prétend pas attribuer la licence GPL du plugin à l’ensemble de Debian ou de CPython. Les logos, polices et autres actifs éventuellement présents dans le wheel TRCC conservent leurs notices amont ; le plugin n’affiche aucun de ces actifs. Il n’est affilié ni à Thermalright, ni à Unraid, ni au mainteneur TRCC.
+Base sources: https://github.com/docker-library/python and https://sources.debian.org/ using the inventory versions. The plugin's GPL license does not relicense Debian or CPython. Logos, fonts and other assets present in the upstream TRCC wheel retain their upstream notices; the plugin does not display those assets. This project is unaffiliated with Thermalright, Unraid and the TRCC maintainer.

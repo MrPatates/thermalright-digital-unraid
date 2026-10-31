@@ -62,35 +62,35 @@ function harness(status) {
     assert.equal(req.body.get('csrf_token'),token);
     assert.equal(req.headers['X-Thermalright-CSRF-Token'],token);
   }
-  assert.equal(ui.node('td-backend').textContent,'Arrêté');
-  for(const id of ['temp','load','frequency','power']) assert.equal(ui.node('td-'+id).textContent,'Indisponible');
+  assert.equal(ui.node('td-backend').textContent,'Stopped');
+  for(const id of ['temp','load','frequency','power']) assert.equal(ui.node('td-'+id).textContent,'Unavailable');
   assert.doesNotMatch(ui.node('td-message').textContent,/CSRF/);
   assert.equal(ui.node('td-rgb-mode').value,'static');
   assert.equal(ui.node('td-rgb-color').value,'#00b4ff');
   assert.equal(ui.node('td-frequency-mode').value,'max');
   assert.equal(ui.node('td-power-sensor').value,'auto');
   for (const z of ['temperature','load','power','frequency','decoration']) assert.equal(ui.node(`td-rgb-temperature-zone-${z}`).checked,true);
-  console.log('PASS UI : jeton natif conservé dans formulaire/en-tête ; anciens réglages et mesures indisponibles');
+  console.log('PASS UI : native token in form/header; legacy settings and unavailable metrics');
 
   const failures=[
-    [{status:500,ok:false,text:async()=>''},/Réponse vide.*HTTP 500/],
-    [{status:502,ok:false,text:async()=>'<html>Bad gateway</html>'},/JSON invalide.*HTTP 502/],
-    [{status:403,ok:false,text:async()=>JSON.stringify({error:'Jeton CSRF invalide'})},/Jeton CSRF invalide/],
-    [{status:200,ok:true,redirected:true,url:'http://unraid/login',text:async()=>'<html>Login</html>'},/Session Unraid expirée/],
-    [{status:200,ok:true,text:async()=>'null'},/JSON inattendue/],
-    [{status:500,ok:false,text:async()=>JSON.stringify({error:'Erreur PHP interne dans control.php:4'})},/Erreur PHP interne dans control.php:4/]
+    [{status:500,ok:false,text:async()=>''},/Empty server response.*HTTP 500/],
+    [{status:502,ok:false,text:async()=>'<html>Bad gateway</html>'},/Invalid JSON.*HTTP 502/],
+    [{status:403,ok:false,text:async()=>JSON.stringify({error:'Invalid CSRF token'})},/Invalid CSRF token/],
+    [{status:200,ok:true,redirected:true,url:'http://unraid/login',text:async()=>'<html>Login</html>'},/Unraid session expired/],
+    [{status:200,ok:true,text:async()=>'null'},/Unexpected JSON/],
+    [{status:500,ok:false,text:async()=>JSON.stringify({error:'Internal PHP error in control.php:4'})},/Internal PHP error in control.php:4/]
   ];
   for(const [response,expected] of failures) {
     ui.setResponder(()=>response);
     await ui.poll();
     assert.match(ui.node('td-message').textContent,expected);
-    console.log('PASS UI erreur : '+ui.node('td-message').textContent);
+    console.log('PASS UI error : '+ui.node('td-message').textContent);
   }
   ui.resetResponder();
   await ui.poll();
-  assert.equal(ui.node('td-backend').textContent,'Arrêté');
-  assert.doesNotMatch(ui.node('td-message').textContent,/Erreur|Réponse|Session/);
-  console.log('PASS UI : reprise après réponse serveur réparée');
+  assert.equal(ui.node('td-backend').textContent,'Stopped');
+  assert.doesNotMatch(ui.node('td-message').textContent,/Error|response|session/);
+  console.log('PASS UI : recovery after the server response is fixed');
 
   const zones=['temperature','load','power','frequency','decoration'];
   const powerId='0123456789abcdef01234567';
@@ -105,61 +105,61 @@ function harness(status) {
   const configured=harness(modern);
   await flush();
   assert.equal(configured.node('td-frequency').textContent,'5500 MHz');
-  assert.match(configured.node('td-frequency-summary').textContent,/Moyenne.*fréquence demandée/);
+  assert.match(configured.node('td-frequency-summary').textContent,/Average.*driver-requested frequency/);
   assert.equal(configured.node('td-frequency-source').textContent,'scaling_cur_freq');
   assert.equal(configured.node('td-power').textContent,'0.0 W');
   assert.equal(configured.node('td-power-source').textContent,'CPU package');
   assert.equal(configured.node('td-temp').textContent,'38.8 °C');
   assert.match(configured.node('td-temp-source').textContent,/k10temp/);
-  assert.match(configured.node('td-capabilities').textContent,/Watts : non pris en charge ; MHz : pris en charge/);
-  assert.match(configured.node('td-rgb-capabilities').textContent,/température, charge, watts, MHz/);
-  assert.match(configured.node('td-rgb-capabilities').textContent,/décorations ne sont pas pilotables/);
+  assert.match(configured.node('td-capabilities').textContent,/Watts : unsupported ; MHz : supported/);
+  assert.match(configured.node('td-rgb-capabilities').textContent,/temperature, load, watts, MHz/);
+  assert.match(configured.node('td-rgb-capabilities').textContent,/Decorations cannot be controlled/);
   assert.equal(configured.node('td-rgb-temperature').hidden,false);
   assert.equal(configured.node('td-rgb-zones').hidden,false);
   assert.equal(configured.node('td-rgb-zone-temperature').disabled,true);
   assert.equal(configured.node('td-rgb-zone-power').disabled,true);
   assert.equal(configured.node('td-rgb-zone-frequency').disabled,false);
-  assert.match(configured.node('td-rgb-temperature-summary').textContent,/température, watts/);
+  assert.match(configured.node('td-rgb-temperature-summary').textContent,/temperature, watts/);
   assert.equal(configured.node('td-rgb-brightness-value').textContent,'72 %');
   assert.equal(configured.node('td-power-sensor').value,powerId);
-  assert.match(configured.node('td-power-sensor').options.find(o=>o.value===powerId).text,/indisponible/);
+  assert.match(configured.node('td-power-sensor').options.find(o=>o.value===powerId).text,/unavailable/);
   await configured.fire('td-form','submit');
   const firstSave=configured.requests.find(r=>r.body.get('action')==='settings');
   assert.deepEqual(JSON.parse(firstSave.body.get('settings')),modern.settings);
-  console.log('PASS UI : rendu watts/MHz, source demandée, capacités physiques et restitution exacte des réglages RGB');
+  console.log('PASS UI : watts/MHz, requested source, physical capabilities and exact RGB settings');
 
   await configured.fire('td-temperature-only','click');
   for(const z of zones) assert.equal(configured.node(`td-rgb-temperature-zone-${z}`).checked,z==='temperature');
   assert.equal(configured.node('td-rgb-target').value,'all');
   assert.equal(configured.node('td-rgb-zone-temperature').disabled,true);
   for(const z of zones.filter(z=>z!=='temperature')) assert.equal(configured.node(`td-rgb-zone-${z}`).disabled,false);
-  assert.match(configured.node('td-rgb-temperature-summary').textContent,/Dégradé actif sur : température\./);
-  assert.equal(configured.node('td-rgb-zone-note-power').textContent,'Couleur fixe');
+  assert.match(configured.node('td-rgb-temperature-summary').textContent,/Gradient active on: temperature\./);
+  assert.equal(configured.node('td-rgb-zone-note-power').textContent,'Fixed color');
   await configured.poll();
   assert.equal(configured.node('td-rgb-temperature-zone-power').checked,false);
   await configured.fire('td-form','submit');
   const temperatureSave=configured.requests.filter(r=>r.body.get('action')==='settings').at(-1);
   assert.deepEqual(JSON.parse(temperatureSave.body.get('settings')).rgb.temperature_zones,['temperature']);
   assert.deepEqual(JSON.parse(temperatureSave.body.get('settings')).rgb.zone_colors,rgb.zone_colors);
-  console.log('PASS UI : température seule dynamique, autres couleurs fixes et sélection conservée pendant le polling');
+  console.log('PASS UI : dynamic temperature only, fixed other colors and selection preserved during polling');
 
   configured.node('td-rgb-target').value='decoration';
   await configured.fire('td-rgb-target','change');
   assert.equal(configured.node('td-rgb-zone-temperature').disabled,false);
-  assert.match(configured.node('td-rgb-temperature-summary').textContent,/Aucune catégorie dans le périmètre/);
+  assert.match(configured.node('td-rgb-temperature-summary').textContent,/No categories within the selected scope/);
   configured.node('td-rgb-temperature-zone-decoration').checked=true;
   await configured.fire('td-rgb-temperature-zone-decoration','change');
   assert.equal(configured.node('td-rgb-zone-decoration').disabled,true);
-  assert.match(configured.node('td-rgb-temperature-summary').textContent,/Dégradé actif sur : décorations\./);
-  console.log('PASS UI : périmètre général et catégories dynamiques affichés sans ambiguïté');
+  assert.match(configured.node('td-rgb-temperature-summary').textContent,/Gradient active on: decorations\./);
+  console.log('PASS UI : effect scope and dynamic categories displayed clearly');
 
   for(const z of zones) configured.node(`td-rgb-temperature-zone-${z}`).checked=false;
   const beforeInvalid=configured.requests.filter(r=>r.body.get('action')==='settings').length;
   await configured.fire('td-form','submit');
   assert.equal(configured.requests.filter(r=>r.body.get('action')==='settings').length,beforeInvalid);
-  assert.match(configured.node('td-message').textContent,/Choisissez au moins une catégorie/);
+  assert.match(configured.node('td-message').textContent,/Select at least one category/);
   await configured.fire('td-temperature-only','click');
-  console.log('PASS UI : sélection dynamique vide refusée avant l’envoi');
+  console.log('PASS UI : empty dynamic selection rejected before sending');
 
   configured.node('td-rgb-mode').value='zones';
   await configured.fire('td-rgb-mode','change');
@@ -174,8 +174,8 @@ function harness(status) {
   modern.metrics.cpu_watts=null;
   modern.metrics.cpu_mhz=null;
   await configured.poll();
-  assert.equal(configured.node('td-power').textContent,'Indisponible');
-  assert.equal(configured.node('td-frequency').textContent,'Indisponible');
+  assert.equal(configured.node('td-power').textContent,'Unavailable');
+  assert.equal(configured.node('td-frequency').textContent,'Unavailable');
   assert.equal(configured.node('td-rgb-mode').value,'zones');
   assert.equal(configured.node('td-rgb-zone-power').value,'#abcdef');
   assert.equal(configured.node('td-rgb-brightness').value,'34');
@@ -191,7 +191,7 @@ function harness(status) {
   assert.equal(saved.power_sensor,'off');
   assert.deepEqual(saved.rgb.thresholds,[35,55,75]);
   assert.deepEqual(saved.rgb.temperature_zones,['temperature']);
-  console.log('PASS UI : polling sans perte du brouillon et sérialisation des nouvelles valeurs');
+  console.log('PASS UI : polling retains drafts and serializes new values');
 
   modern.backend.test_active=true;
   await configured.fire('td-display-test','click');
@@ -200,22 +200,22 @@ function harness(status) {
   assert.equal(tests[0].body.has('settings'),false);
   assert.equal(configured.requests.filter(r=>r.body.get('action')==='settings').length,3);
   assert.equal(configured.node('td-rgb-zone-power').value,'#abcdef');
-  assert.match(configured.node('td-test-state').textContent,/Test visuel en cours.*chiffres artificiels.*8 secondes.*restent réelles/);
+  assert.match(configured.node('td-test-state').textContent,/Visual test running.*synthetic digits.*8 seconds.*remain real/);
   modern.backend.test_active=false;
   await configured.poll();
-  assert.match(configured.node('td-test-state').textContent,/retour automatique.*réglages enregistrés.*ne sont pas enregistrées/);
-  configured.setResponder(opts=>opts.body.get('action')==='display-test'?{status:409,ok:false,text:async()=>JSON.stringify({error:'Démarrez le backend avant le test.'})}:jsonResponse(opts.body.get('action')==='status'?modern:{logs:''}));
+  assert.match(configured.node('td-test-state').textContent,/automatic return.*saved settings.*unsaved changes/);
+  configured.setResponder(opts=>opts.body.get('action')==='display-test'?{status:409,ok:false,text:async()=>JSON.stringify({error:'Start the backend before testing.'})}:jsonResponse(opts.body.get('action')==='status'?modern:{logs:''}));
   await configured.fire('td-display-test','click');
-  assert.equal(configured.node('td-message').textContent,'Démarrez le backend avant le test.');
+  assert.equal(configured.node('td-message').textContent,'Start the backend before testing.');
   assert.ok(configured.buttons.every(b=>b.disabled===false));
-  configured.setResponder(opts=>opts.body.get('action')==='display-test'?jsonResponse({message:'Test lancé.'}):{status:500,ok:false,text:async()=>''});
+  configured.setResponder(opts=>opts.body.get('action')==='display-test'?jsonResponse({message:'Test started.'}):{status:500,ok:false,text:async()=>''});
   await configured.fire('td-display-test','click');
-  assert.match(configured.node('td-message').textContent,/Réponse vide.*HTTP 500/);
-  console.log('PASS UI : test temporaire sans sauvegarde du brouillon, état visuel et erreur action conservée');
+  assert.match(configured.node('td-message').textContent,/Empty server response.*HTTP 500/);
+  console.log('PASS UI : temporary test without saving draft; visual state and action error retained');
 
   const missing=harness({...status,settings:{...status.settings,power_sensor:powerId}});
   await flush();
   assert.equal(missing.node('td-power-sensor').value,powerId);
-  assert.equal(missing.node('td-power-sensor').options.find(o=>o.value===powerId).text,'Source configurée disparue');
-  console.log('PASS UI : source configurée disparue conservée explicitement');
+  assert.equal(missing.node('td-power-sensor').options.find(o=>o.value===powerId).text,'Configured source missing');
+  console.log('PASS UI : missing configured source retained explicitly');
 })().catch(error=>{console.error(error);process.exit(1);});

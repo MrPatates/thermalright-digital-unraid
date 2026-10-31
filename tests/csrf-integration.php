@@ -26,7 +26,7 @@ foreach ($cases as [$name,$post,$header,$expected]) {
  preg_match('/HTTP=(\d+)/',$err,$matches);$actual=(int)($matches[1]??0);
  $json=json_decode(trim($out),true);
  if($actual!==$expected || !is_array($json) || ($expected===200 && !array_key_exists('logs',$json)) || ($expected!==200 && !array_key_exists('error',$json))) {
-  fwrite(STDERR,'FAIL '.$name.'; attendu '.$expected.', reçu '.$actual.'; '.$out.' '.$err."\n");exit(1);
+  fwrite(STDERR,'FAIL '.$name.'; expected '.$expected.', received '.$actual.'; '.$out.' '.$err."\n");exit(1);
  }
  echo 'PASS native CSRF : '.$name.' (HTTP '.$actual.")\n";
 }
@@ -34,5 +34,5 @@ foreach ($cases as [$name,$post,$header,$expected]) {
 ob_start();
 (static function(){include '/work/plugin/ThermalrightDigital.page';})();
 $html=ob_get_clean();
-if(!preg_match('/name="csrf_token" value="([^"]+)"/',$html,$match) || $match[1]!=='native-token')throw new RuntimeException('Jeton absent du rendu de page');
-echo "PASS native CSRF : rendu de page sans variable héritée\n";
+if(!preg_match('/name="csrf_token" value="([^"]+)"/',$html,$match) || $match[1]!=='native-token')throw new RuntimeException('Token missing from rendered page');
+echo "PASS native CSRF : page renders without inherited variable\n";

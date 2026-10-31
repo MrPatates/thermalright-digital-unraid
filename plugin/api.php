@@ -23,10 +23,10 @@ register_shutdown_function(function(): void {
     if ($tdApiResponded) return;
     $last=error_get_last();
     if ($last && in_array($last['type'],[E_ERROR,E_PARSE,E_CORE_ERROR,E_COMPILE_ERROR,E_USER_ERROR],true)) {
-        td_error(500,'Erreur PHP interne dans '.basename($last['file']).':'.$last['line'].'. Consulter le journal PHP du serveur.');
+        td_error(500,'Internal PHP error in '.basename($last['file']).':'.$last['line'].'. Check the server PHP log.');
     }
 });
-if ($_SERVER['REQUEST_METHOD']!=='POST') td_error(405,'POST requis');
+if ($_SERVER['REQUEST_METHOD']!=='POST') td_error(405,'POST required');
 // Unraid's local_prepend.php validates and UNSETS $_POST['csrf_token'].
 // Keep sending that native form field, and independently verify the same
 // native token from our namespaced header, which the prepend leaves intact.
@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD']!=='POST') td_error(405,'POST requis');
 $tdVars=@parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [];
 $expected=$tdVars['csrf_token']??'';
 $provided=$_SERVER['HTTP_X_THERMALRIGHT_CSRF_TOKEN']??($_POST['csrf_token']??'');
-if (!is_string($provided) || !is_string($expected) || $expected==='' || !hash_equals($expected,$provided)) td_error(403,'Jeton CSRF invalide');
+if (!is_string($provided) || !is_string($expected) || $expected==='' || !hash_equals($expected,$provided)) td_error(403,'Invalid CSRF token');
 $action=$_POST['action']??'';
-if (!is_string($action) || !in_array($action,['status','logs','diagnostic','start','stop','restart','settings','legacy-stop','display-test'],true)) td_error(400,'Action invalide');
+if (!is_string($action) || !in_array($action,['status','logs','diagnostic','start','stop','restart','settings','legacy-stop','display-test'],true)) td_error(400,'Invalid action');
 try {
     require __DIR__.'/control.php';
     if ($action==='status') $data=status();
@@ -46,14 +46,14 @@ try {
         $args=[PHP_BINARY,__DIR__.'/control.php',$action];
         if ($action==='settings') {
             $settings=$_POST['settings']??'';
-            if (!is_string($settings) || strlen($settings)>4096) td_error(400,'Paramètres invalides');
+            if (!is_string($settings) || strlen($settings)>4096) td_error(400,'Invalid settings');
             $args[]=$settings;
         }
         // FPM's PHP_BINARY may be php-fpm; use the native Unraid CLI.
         $args[0]='/usr/bin/php';
         [$code,$out,$err]=command($args,35);
-        if ($code!==0) td_error(409,$err ?: 'Commande échouée');
-        $data=['message'=>$out ?: 'Commande prise en compte'];
+        if ($code!==0) td_error(409,$err ?: 'Command failed');
+        $data=['message'=>$out ?: 'Command accepted'];
     }
     td_json($data);
 } catch (Throwable $e) {

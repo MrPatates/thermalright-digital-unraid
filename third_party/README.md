@@ -1,3 +1,3 @@
-# Sources tierces
+# Third-party source archives
 
-Les archives de sources sont téléchargées par `python3 scripts/fetch-dependencies.py` et vérifiées contre `dependencies.lock.json`. Elles restent ignorées par Git et sont incluses dans le paquet source distribué avec les releases, afin d’accompagner le backend binaire avec ses sources et licences.
+`python3 scripts/fetch-dependencies.py` downloads source archives and verifies them against `dependencies.lock.json`. They are ignored by Git and included in the complete source package distributed with releases, providing corresponding sources and license notices alongside the binary backend.

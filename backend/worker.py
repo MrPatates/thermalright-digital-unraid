@@ -28,7 +28,7 @@ SUPPORTED = (LedStyle.PA120, LedStyle.AX120, LedStyle.AK120, LedStyle.LF8,
 def layout_for(style):
     """Accept only upstream layouts whose absent-value groups are mapped."""
     if style not in SUPPORTED:
-        raise ValueError(f'Style {style!s} non pris en charge par cet adaptateur; aucun chiffre envoyé')
+        raise ValueError(f'Style {style!s} unsupported by this adapter; no digits sent')
     return get_display(style)
 
 
@@ -133,18 +133,18 @@ def mask_for(style, sample, tick=0):
 def parse_color(value):
     if (not isinstance(value, str) or len(value) != 7 or value[0] != '#' or
         any(ch not in '0123456789abcdefABCDEF' for ch in value[1:])):
-        raise ValueError('Couleur RGB invalide')
+        raise ValueError('Invalid RGB color')
     try:
         return tuple(int(value[i:i + 2], 16) for i in (1, 3, 5))
     except ValueError:
-        raise ValueError('Couleur RGB invalide') from None
+        raise ValueError('Invalid RGB color') from None
 
 
 def rgb_settings(raw=None):
     """Defensive parsing: the host validates settings before publishing them."""
     raw = {} if raw is None else raw
     if not isinstance(raw, dict):
-        raise ValueError('Réglages RGB invalides')
+        raise ValueError('Invalid RGB settings')
     cfg = dict(mode=raw.get('mode', 'static'), color=raw.get('color', DEFAULT_COLOR),
                brightness=raw.get('brightness', 100), period=raw.get('period', 6),
                target=raw.get('target', 'all'), thresholds=raw.get('thresholds', [40, 60, 80]),
@@ -153,27 +153,27 @@ def rgb_settings(raw=None):
                smoothing=raw.get('smoothing', 3),
                zone_colors=raw.get('zone_colors', {name: DEFAULT_COLOR for name in ZONE_NAMES}))
     if cfg['mode'] not in ('static', 'zones', 'temperature', 'breathing', 'rainbow'):
-        raise ValueError('Mode RGB invalide')
+        raise ValueError('Invalid RGB mode')
     if cfg['target'] not in ('all', 'digits', 'decoration'):
-        raise ValueError('Cible RGB invalide')
+        raise ValueError('Invalid RGB target')
     temperature_zones = cfg['temperature_zones']
     if (not isinstance(temperature_zones, list) or not 1 <= len(temperature_zones) <= len(ZONE_NAMES) or
         any(not isinstance(zone, str) or zone not in ZONE_NAMES for zone in temperature_zones) or
         len(set(temperature_zones)) != len(temperature_zones)):
-        raise ValueError('Catégories de température invalides')
+        raise ValueError('Invalid temperature categories')
     for key, low, high in (('brightness', 0, 100), ('period', 1, 60), ('smoothing', 0, 30)):
         value = cfg[key]
         if type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= high:
-            raise ValueError(f'Réglage RGB invalide: {key}')
+            raise ValueError(f'Invalid RGB setting: {key}')
     thresholds = cfg['thresholds']
     if (not isinstance(thresholds, list) or len(thresholds) != 3 or
         any(type(v) not in (int, float) or not math.isfinite(v) or not 0 <= v <= 125 for v in thresholds) or
         not thresholds[0] < thresholds[1] < thresholds[2]):
-        raise ValueError('Seuils RGB invalides')
+        raise ValueError('Invalid RGB thresholds')
     if not isinstance(cfg['temperature_colors'], list) or len(cfg['temperature_colors']) != 4:
-        raise ValueError('Couleurs de température invalides')
+        raise ValueError('Invalid temperature colors')
     if not isinstance(cfg['zone_colors'], dict):
-        raise ValueError('Couleurs par zone invalides')
+        raise ValueError('Invalid zone colors')
     cfg['zone_colors'] = {name: cfg['zone_colors'].get(name, DEFAULT_COLOR) for name in ZONE_NAMES}
     for color in [cfg['color'], *cfg['temperature_colors'], *cfg['zone_colors'].values()]:
         parse_color(color)
@@ -299,13 +299,13 @@ def read_sample(path, now=None):
     now = time.time() if now is None else now
     if (not isinstance(sample, dict) or type(sample.get('timestamp')) not in (float, int) or
         not math.isfinite(sample['timestamp']) or not 0 <= now - sample['timestamp'] <= 10):
-        raise ValueError('Mesures hôte périmées')
+        raise ValueError('Stale host metrics')
     for key, low, high in [('cpu_temp', -20, 150), ('cpu_load', 0, 100),
                             ('cpu_watts', 0, 100000), ('cpu_mhz', 0, 1000000)]:
         value = sample.get(key)
         if value is not None and (type(value) not in (float, int) or
                                   not math.isfinite(value) or not low <= value <= high):
-            raise ValueError(f'Mesure hôte invalide: {key}')
+            raise ValueError(f'Invalid host metric: {key}')
     return sample
 
 
@@ -335,7 +335,7 @@ def main():
         style = handshake.style
         # Validate a supported layout before sending a metric packet.
         colors_for(style, {})
-        logging.info('Modèle détecté: %s, PM=%s, style=%s', handshake.model_name, handshake.pm, style)
+        logging.info('Detected model: %s, PM=%s, style=%s', handshake.model_name, handshake.pm, style)
         started = time.monotonic()
         engine, visual_test = RgbEngine(), DisplayTest()
         capabilities = capabilities_for(style)
@@ -363,7 +363,7 @@ def main():
             # have partially reached USB and still needs an all-off cleanup.
             last_colors = colors
             if not device.send(LedPayload(colors=colors)):
-                raise RuntimeError('Échec de transmission USB')
+                raise RuntimeError('USB transmission failed')
             write_status(ready=True, model=handshake.model_name, style=style.value,
                          cpu_temp=sample.get('cpu_temp'), cpu_load=sample.get('cpu_load'),
                          cpu_watts=sample.get('cpu_watts'), cpu_mhz=sample.get('cpu_mhz'),
@@ -372,7 +372,7 @@ def main():
                          error=error)
             STOP.wait(max(0, 0.1 - (time.monotonic() - frame_started)))
     except Exception as exc:
-        logging.exception('Backend arrêté')
+        logging.exception('Backend stopped')
         write_status(ready=False, error=str(exc))
         return 1
     finally:

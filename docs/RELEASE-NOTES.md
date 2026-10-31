@@ -1,15 +1,13 @@
-Première release publique de Thermalright Digital pour Unraid, version 2026.10.31.8.
+THERMALRIGHT DIGITAL for Unraid — 2026.10.31.9.
 
-Elle reprend le code fonctionnel de la .7 confirmée sur le serveur de l’utilisateur. Le nouveau numéro évite les collisions avec les paquets .7 de validation locale.
+- English interface, diagnostics, maintenance output, documentation and GitHub contribution templates.
+- Previous French README preserved as `README.fr.md`, linked from the English README.
+- Original icon shared by the plugin and its Docker instance; uppercase visible plugin name and THERMALRIGHT-DIGITAL-BACKEND container name.
+- Community Applications profile and plugin wrapper added, with real support/install links and compatibility limits. Catalog inclusion still requires submission and manual review.
+- Both READMEs and all branding/catalog files included in source packages.
 
-- Interface native française, température et charge CPU hôte.
-- Watts CPU par hwmon/RAPL et MHz par cpufreq ; correction de RAPL enabled=0.
-- Interface compacte : cartes de mesures, sources repliables et réglages regroupés.
-- RGB fixe, zones, température, respiration, arc-en-ciel et test visuel de 8 secondes.
-- Ciblage thermique par catégorie : les chiffres °C peuvent suivre la température seuls, avec couleurs fixes pour W/MHz/%.
-- Backend Docker isolé, installation et mises à jour par URL GitHub.
-- Réglages persistants, retour arrière et nettoyage des ressources vérifiées.
+Existing settings, plugin identifiers and ownership inventory are preserved. An older owned lowercase backend is removed when the new instance starts. After updating, reload the page with Ctrl+F5; the Docker icon appears when the backend is recreated.
 
-Fonctionnement confirmé par l’utilisateur sur Unraid 7.3.4, USB 0416:8001, profil LF12, incluant les watts CPU, la nouvelle interface et le ciblage thermique par catégorie en version .7. Les autres dispositions restent à valider physiquement. Les tests locaux utilisent Podman et un Docker simulé pour les opérations de cycle de vie ; ils ne certifient pas toutes les versions Unraid acceptées.
+Core functionality, including CPU watts/MHz and temperature targeting by category, was confirmed by the user with .7 on Unraid 7.3.4 and an LF12 display. This release adds English text and branding; physical verification of .9, other layouts, reboot/replug behavior and uninstall remains part of the validation procedure. See docs/TEST-REPORT.md and docs/VALIDATION-UNRAID.md.
 
-Installer `thermalright-digital.plg` depuis cette release, ou utiliser le ZIP complet pour une installation hors ligne. `SHA256SUMS` vérifie les fichiers joints. `thermalright-digital-source.tar.xz` contient les sources du plugin et des composants tiers.
+Install the `thermalright-digital.plg` asset through Plugins → Install Plugin. Versioned annexes are fetched and verified using SHA-256. The complete ZIP supports offline installation. Keep files from the same build together. Full sources and third-party license notices are included.

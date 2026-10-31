@@ -416,13 +416,13 @@ class DisplayTestTests(unittest.TestCase):
              patch.object(worker, 'STOP', stopper), \
              patch.object(worker.signal, 'signal'), \
              patch.object(worker, 'RotatingFileHandler', return_value=logging.NullHandler()), \
-             patch.object(worker, 'read_sample', side_effect=ValueError('Mesures hôte périmées')), \
+             patch.object(worker, 'read_sample', side_effect=ValueError('Stale host metrics')), \
              patch.object(worker, 'write_status') as status:
             self.assertEqual(worker.main(), 0)
         self.assertEqual(device.send.call_args_list[0].args[0].colors, [worker.BLACK] * 124)
         self.assertIsNone(status.call_args.kwargs['cpu_watts'])
         self.assertFalse(status.call_args.kwargs['test_active'])
-        self.assertEqual(status.call_args.kwargs['error'], 'Mesures hôte périmées')
+        self.assertEqual(status.call_args.kwargs['error'], 'Stale host metrics')
 
     def test_failed_usb_frame_still_attempts_all_off_and_disconnects(self):
         device = Mock()
@@ -439,7 +439,7 @@ class DisplayTestTests(unittest.TestCase):
              patch.object(worker, 'write_status') as status:
             self.assertEqual(worker.main(), 1)
         self.assertFalse(status.call_args.kwargs['ready'])
-        self.assertEqual(status.call_args.kwargs['error'], 'Échec de transmission USB')
+        self.assertEqual(status.call_args.kwargs['error'], 'USB transmission failed')
         self.assertEqual(device.send.call_count, 2)
         self.assertFalse(device.send.call_args.args[0].global_on)
         device.disconnect.assert_called_once()

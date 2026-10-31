@@ -184,7 +184,7 @@ php_admin_value[auto_prepend_file] = /work/tests/fixtures/unraid-local-prepend.p
         self.assertFalse((RUN/'display-test.json').exists())
         code,data=self.request('start');self.assertEqual(code,200,data)
         fake=json.loads(self.fake.read_text())
-        fake['containers']['test-current']={'Id':'test-current','Name':'thermalright-digital-backend','Image':'fake',
+        fake['containers']['test-current']={'Id':'test-current','Name':'THERMALRIGHT-DIGITAL-BACKEND','Image':'fake',
           'Config':{'Labels':{'io.local.thermalright-digital.owner':'thermalright-digital','io.local.thermalright-digital.instance':'b'*32}},'State':{'Running':True}}
         self.fake.write_text(json.dumps(fake))
         (RUN/'driver/status.json').write_text(json.dumps(dict(ready=True,timestamp=time.time(),model='TEST ONLY')))

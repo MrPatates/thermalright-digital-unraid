@@ -3,20 +3,20 @@
 downloaded_pkg=0
 if [[ ! -f "$pkg/payload.txz" || ! -f "$pkg/release.json" || ! -f "$pkg/backend-image.tar.xz" || ! -f "$pkg/$name.plg" ]]; then
   download_base='@DOWNLOAD_BASE@'
-  [[ -n "$download_base" ]] || { echo "Copier le bundle COMPLET dans $pkg avant installation"; exit 1; }
-  [[ ! -e "$pkg" ]] || { echo "Paquet partiel préexistant conservé : $pkg ; réparer ce dossier avant de réessayer."; exit 1; }
-  [[ ! -L "$state" && ! -L "$state/packages" && ! -L "$ram" ]] || { echo 'Lien symbolique refusé'; exit 1; }
+  [[ -n "$download_base" ]] || { echo "Copy the COMPLETE bundle to $pkg before installation"; exit 1; }
+  [[ ! -e "$pkg" ]] || { echo "Pre-existing partial package preserved : $pkg ; repair this directory before retrying."; exit 1; }
+  [[ ! -L "$state" && ! -L "$state/packages" && ! -L "$ram" ]] || { echo 'Symbolic link refused'; exit 1; }
   if [[ -d "$state" && ! -f "$state/inventory.json" ]]; then
-    for existing in "$state"/*; do [[ ! -e "$existing" || "$existing" == "$state/packages" ]] || { echo "Dossier préexistant inconnu conservé : $existing"; exit 1; }; done
+    for existing in "$state"/*; do [[ ! -e "$existing" || "$existing" == "$state/packages" ]] || { echo "Unknown pre-existing directory preserved : $existing"; exit 1; }; done
   fi
   if [[ -f "$state/inventory.json" ]]; then
-    php -r '$i=json_decode(file_get_contents($argv[1]),true);exit(($i["owner"]??"")==="thermalright-digital" && preg_match("/^[a-f0-9]{32}$/D",$i["instance"]??"")?0:1);' "$state/inventory.json" || { echo 'Inventaire préexistant inconnu conservé'; exit 1; }
+    php -r '$i=json_decode(file_get_contents($argv[1]),true);exit(($i["owner"]??"")==="thermalright-digital" && preg_match("/^[a-f0-9]{32}$/D",$i["instance"]??"")?0:1);' "$state/inventory.json" || { echo 'Unknown pre-existing inventory preserved'; exit 1; }
   fi
-  if [[ -e "$ram" && ( ! -f "$ram/.owner" || $(cat "$ram/.owner") != "$name" ) ]]; then echo 'Répertoire RAM inconnu conservé'; exit 1; fi
+  if [[ -e "$ram" && ( ! -f "$ram/.owner" || $(cat "$ram/.owner") != "$name" ) ]]; then echo 'Unknown RAM directory preserved'; exit 1; fi
   fetch_new_ram=0
   if [[ ! -d "$ram" ]]; then mkdir -p "$ram"; printf '%s' "$name" > "$ram/.owner"; fetch_new_ram=1; fi
   exec 8>"$ram/download.lock"
-  flock -n 8 || { echo 'Un téléchargement du plugin est déjà en cours'; exit 1; }
+  flock -n 8 || { echo 'A plugin download is already running'; exit 1; }
   fetch_stage="$ram/download"
   fetch_publish=''
   rm -rf -- "$fetch_stage"
@@ -35,7 +35,7 @@ if [[ ! -f "$pkg/payload.txz" || ! -f "$pkg/release.json" || ! -f "$pkg/backend-
   trap 'exit 143' TERM HUP
   fetch_file() {
     local file=$1 expected=$2
-    echo "Téléchargement vérifié : $file"
+    echo "Verified download : $file"
     if command -v curl >/dev/null; then
       curl --fail --location --silent --show-error --connect-timeout 10 --max-time 300 --retry 1 "$download_base/$file" -o "$fetch_stage/$file"
     else
@@ -48,7 +48,7 @@ if [[ ! -f "$pkg/payload.txz" || ! -f "$pkg/release.json" || ! -f "$pkg/backend-
   image_sha='@IMAGE_SHA@'
   for cached in "$state"/packages/*/backend-image.tar.xz; do
     if [[ -f "$cached" && ! -L "$cached" ]] && printf '%s  %s\n' "$image_sha" "$cached" | sha256sum -c - >/dev/null 2>&1; then
-      echo 'Réutilisation de l’image Docker déjà présente.'
+      echo 'Reusing the existing Docker image.'
       cp -- "$cached" "$fetch_stage/backend-image.tar.xz"
       break
     fi
@@ -61,7 +61,7 @@ if [[ ! -f "$pkg/payload.txz" || ! -f "$pkg/release.json" || ! -f "$pkg/backend-
   $m=simplexml_load_file($argv[1],"SimpleXMLElement",LIBXML_NONET);
   if(!$m || (string)$m["name"]!=="thermalright-digital" || (string)$m["version"]!==$argv[3])exit(1);
   foreach($m->FILE as $f)if((string)$f["Method"]==="install" && hash_equals(hash("sha256",(string)$f->INLINE),hash_file("sha256",$argv[2])))exit(0);
-  exit(1);' "$native_manifest" "$0" "$version" || { echo 'Le manifeste téléchargé par le gestionnaire ne correspond pas au script exécuté.'; exit 1; }
+  exit(1);' "$native_manifest" "$0" "$version" || { echo 'The manifest downloaded by the manager does not match the running script.'; exit 1; }
   cp -- "$native_manifest" "$fetch_stage/$name.plg"
   mkdir -p "$state/packages"
   # Publish by rename on the flash filesystem; interrupted copies are marked.

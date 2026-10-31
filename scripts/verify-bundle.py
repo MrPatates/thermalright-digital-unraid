@@ -26,6 +26,9 @@ with zipfile.ZipFile(dist/f'thermalright-digital-{version}.zip') as z:
     assert hashlib.sha256(z.read(prefix+'payload.txz')).hexdigest() in install
     assert hashlib.sha256(z.read(prefix+'release.json')).hexdigest() in install
     with tarfile.open(fileobj=io.BytesIO(z.read(prefix+'payload.txz')),mode='r:xz') as tar:
+        assert xml.attrib['icon']=='logo.png'
+        assert tar.extractfile('logo.png').read()==(base/'icon.png').read_bytes()
+        assert tar.extractfile('icons/logo.png').read()==(base/'icon.png').read_bytes()
         for p in (base/'plugin').iterdir():
             if p.is_file():assert tar.extractfile(p.name).read()==p.read_bytes(),p.name
         for event in ['docker_started','started','stopping','stopping_docker','stopped']:
@@ -35,4 +38,8 @@ with zipfile.ZipFile(dist/f'thermalright-digital-{version}.zip') as z:
             assert tar.getmember(name).isfile(),name
         assert tar.extractfile('backend/worker.py').read()==(base/'backend/worker.py').read_bytes()
         assert tar.extractfile('plugin/control.php').read()==(base/'plugin/control.php').read_bytes()
-print('OK: ZIP/CRC, toutes les sommes, manifestes identiques, scripts install/remove, payload courant, événements exécutables et sources complètes')
+        for name in ['README.md','README.fr.md','icon.svg','icon.png','ca_profile.xml','plugins/thermalright-digital.xml']:
+            assert tar.extractfile(name).read()==(base/name).read_bytes(),name
+    for name in ['README.md','README.fr.md']:
+        assert z.read(name)==(base/name).read_bytes(),name
+print('OK: ZIP/CRC, all checksums, identical manifests, install/remove scripts, current payload, executable events and complete sources')

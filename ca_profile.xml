@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CommunityApplications>
+  <Profile>Community-maintained Unraid plugins by MrPatates. THERMALRIGHT DIGITAL controls supported Thermalright USB cooler displays using host CPU metrics and configurable RGB effects. Source code, documentation and support are available on GitHub; report issues at https://github.com/MrPatates/thermalright-digital-unraid/issues.</Profile>
+  <Icon>https://raw.githubusercontent.com/MrPatates/thermalright-digital-unraid/main/icon.png</Icon>
+  <WebPage>https://github.com/MrPatates/thermalright-digital-unraid</WebPage>
+</CommunityApplications>

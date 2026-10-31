@@ -18,4 +18,4 @@ run_check .build/logs/http-fpm-tests.log "$engine" run --rm -v "$PWD:/work:ro,z"
 run_check .build/logs/worker-tests.log "$engine" run --rm -v "$PWD:/work:ro,z" -w /work --entrypoint python "$tag" -m unittest discover -s tests -p test_worker.py -v
 run_check .build/logs/ui-tests.log node tests/test_ui.js
 run_check .build/logs/release-tests.log python3 -m unittest discover -s tests -p test_release.py -v
-printf '%s\n' 'OK : suites PHP, PHP-FPM, worker TRCC, interface et publication'
+printf '%s\n' 'OK: PHP, PHP-FPM, TRCC worker, UI and release suites'
