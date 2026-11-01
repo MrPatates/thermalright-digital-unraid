@@ -2,6 +2,7 @@ No syntax errors detected in plugin/control.php
 No syntax errors detected in plugin/api.php
 No syntax errors detected in plugin/cleanup.php
 No syntax errors detected in plugin/settings.php
+No syntax errors detected in plugin/schedule.php
 No syntax errors detected in plugin/metrics.php
 No syntax errors detected in tests/fake-docker.php
 PASS native initialization
@@ -40,13 +41,21 @@ PASS pre-existing container name refused and preserved
 Private resources removed. The Unraid manager will finish removing the manifest; run the audit after 10 seconds.
 PASS uninstall preserves unrelated same-name container
 PASS native initialization
-PASS upgrade replaces owned lowercase backend with one uppercase instance
+PASS upgrade refreshes container inventory without changing ownership
+PASS upgrade replaces an owned old backend with one compact-name instance
 PASS native Docker branding uses an offline local icon and plugin manager label
 PASS Docker WebUI links to native plugin settings
 Private resources removed. The Unraid manager will finish removing the manifest; run the audit after 10 seconds.
-PASS uppercase instance is removed through the ownership inventory
+PASS compact-name instance is removed through the ownership inventory
 PASS native initialization
-Pre-existing or unknown file preserved : /tmp/td-test-5d838d02/boot/config/plugins/thermalright-digital/unknown.txt
+PASS upgrade refreshes container inventory without changing ownership
+PASS upgrade replaces an owned old backend with one compact-name instance
+PASS native Docker branding uses an offline local icon and plugin manager label
+PASS Docker WebUI links to native plugin settings
+Private resources removed. The Unraid manager will finish removing the manifest; run the audit after 10 seconds.
+PASS compact-name instance is removed through the ownership inventory
+PASS native initialization
+Pre-existing or unknown file preserved : /tmp/td-test-d5617e2b/boot/config/plugins/thermalright-digital/unknown.txt
 PASS unknown file preserved and incomplete cleanup reported
 Private resources removed. The Unraid manager will finish removing the manifest; run the audit after 10 seconds.
 PASS cleanup can be retried
@@ -54,7 +63,7 @@ PASS native initialization
 Private resources removed. The Unraid manager will finish removing the manifest; run the audit after 10 seconds.
 PASS uninstall finalizes native manifest
 PASS exact native archive removed after Unraid moves it
-TOTAL 41 checks passed
+TOTAL 48 checks passed
 PASS API method/CSRF/action : HTTP 405
 PASS API method/CSRF/action : HTTP 403
 PASS API method/CSRF/action : HTTP 400
@@ -69,22 +78,22 @@ READ-ONLY AUDIT ; active version protected : 2026.10.31.3
 CANDIDATE old version : 2026.10.31.1
 CANDIDATE old version : 2026.10.31.2
 CANDIDATE Unraid autostart entry : thermalright-screen
-CANDIDATE verified legacy Docker template : /tmp/td-clean-8aef79f0/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+CANDIDATE verified legacy Docker template : /tmp/td-clean-569fcbc8/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 CANDIDATE legacy container : old
 CANDIDATE legacy image : old-image
 CANDIDATE legacy appdata verified through its mount : /mnt/user/appdata/thermalright-screen
 CANDIDATE volume labeled legacy resource : old-volume
 CANDIDATE network labeled legacy resource : old-network
-REVIEW, KEPT : reference in /tmp/td-clean-8aef79f0/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REVIEW, KEPT : reference in /tmp/td-clean-569fcbc8/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 Appdata still present : /mnt/user/appdata/thermalright-screen (removed only with mount evidence from the labeled container).
 Run again with --apply to remove only the verified candidates above.
 PASS nettoyage : audit reports remaining resources
-PASS nettoyage : audit ne supprime ni ne modifie les ressources
+PASS nettoyage : audit does not remove or modify resources
 CLEANUP ; active version protected : 2026.10.31.3
 REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-8aef79f0/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-569fcbc8/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 REMOVING legacy image : old-image
 REMOVING legacy appdata verified through its mount : /mnt/user/appdata/thermalright-screen
@@ -107,7 +116,7 @@ REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING volume labeled legacy resource : old-volume
 REMOVING network labeled legacy resource : old-network
-REVIEW, KEPT : reference in /tmp/td-clean-49e927a9/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REVIEW, KEPT : reference in /tmp/td-clean-e269d113/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 Appdata still present : /mnt/user/appdata/thermalright-screen (removed only with mount evidence from the labeled container).
 Verified resource cleanup complete. Items marked KEPT/REVIEW remain in place.
 PASS nettoyage : resources without ownership evidence reported and preserved
@@ -116,7 +125,7 @@ CLEANUP ; active version protected : 2026.10.31.3
 REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-312af913/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-69c072a5/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 KEPT : shared image old-image
 KEPT : shared path or symbolic link /mnt/user/appdata/thermalright-screen
@@ -127,10 +136,10 @@ Verified resource cleanup complete. Items marked KEPT/REVIEW remain in place.
 PASS nettoyage : shared dependencies prevent complete cleanup
 PASS nettoyage : shared image/directory and recovery journal preserved
 CLEANUP ; active version protected : 2026.10.31.3
-KEPT : Unknown file preserved : /tmp/td-clean-54abf7a3/boot/config/plugins/thermalright-digital/packages/2026.10.31.1/foreign.txt
+KEPT : Unknown file preserved : /tmp/td-clean-fe817027/boot/config/plugins/thermalright-digital/packages/2026.10.31.1/foreign.txt
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-54abf7a3/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-fe817027/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 REMOVING legacy image : old-image
 REMOVING legacy appdata verified through its mount : /mnt/user/appdata/thermalright-screen
@@ -143,7 +152,7 @@ CLEANUP ; active version protected : 2026.10.31.3
 REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-00846ab9/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-5f316370/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 REMOVING legacy image : old-image
 REMOVING legacy appdata verified through its mount : /mnt/fast_pool/appdata/thermalright-screen
@@ -157,7 +166,7 @@ CLEANUP ; active version protected : 2026.10.31.3
 REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-e24f6e75/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-15f8c2fb/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 REMOVING legacy image : old-image
 REMOVING volume labeled legacy resource : old-volume
@@ -165,7 +174,7 @@ REMOVING network labeled legacy resource : old-network
 Appdata still present : /mnt/user/appdata/thermalright-screen (removed only with mount evidence from the labeled container).
 Verified resource cleanup complete. Items marked KEPT/REVIEW remain in place.
 PASS nettoyage : appdata behind storage symlink preserved
-PASS nettoyage : parent appdata symbolique exclu des chemins supprimables
+PASS nettoyage : symbolic appdata parent excluded from removable paths
 TOTAL cleanup : 20 checks passed
 PASS settings : legacy settings migrate while preserving cyan appearance
 PASS settings : normalization is idempotent
@@ -215,6 +224,66 @@ PASS settings : missing sensor ID rejected
 PASS settings : visual test refused without ready backend
 PASS settings : legacy RGB form retains category selection
 TOTAL settings : 47 checks passed
+PASS schedule: legacy/default schedule never blanks the display
+PASS schedule: same-day boundary 2026-11-02 08:59:59
+PASS schedule: same-day boundary 2026-11-02 09:00:00
+PASS schedule: same-day boundary 2026-11-02 16:59:59
+PASS schedule: same-day boundary 2026-11-02 17:00:00
+PASS schedule: same-day boundary 2026-11-03 12:00
+PASS schedule: overnight interval belongs to its starting day 2026-11-02 06:00
+PASS schedule: overnight interval belongs to its starting day 2026-11-02 22:59:59
+PASS schedule: overnight interval belongs to its starting day 2026-11-02 23:00
+PASS schedule: overnight interval belongs to its starting day 2026-11-03 00:00
+PASS schedule: overnight interval belongs to its starting day 2026-11-03 06:59:59
+PASS schedule: overnight interval belongs to its starting day 2026-11-03 07:00
+PASS schedule: overnight interval belongs to its starting day 2026-11-03 23:30
+PASS schedule: Sunday night wraps into Monday
+PASS schedule: entire-day midnight boundary 2026-11-01 23:59:59
+PASS schedule: entire-day midnight boundary 2026-11-02 00:00
+PASS schedule: entire-day midnight boundary 2026-11-02 23:59:59
+PASS schedule: entire-day midnight boundary 2026-11-03 00:00
+PASS schedule: several selected weekdays stay independent
+PASS schedule: DST follows local wall time 2026-03-29T00:30:00Z
+PASS schedule: DST follows local wall time 2026-03-29T01:30:00Z
+PASS schedule: DST follows local wall time 2026-03-29T05:00:00Z
+PASS schedule: DST follows local wall time 2026-10-25T00:30:00Z
+PASS schedule: DST follows local wall time 2026-10-25T01:30:00Z
+PASS schedule: DST follows local wall time 2026-10-25T06:00:00Z
+PASS schedule: status reports evaluated server timezone and local clock
+PASS schedule: host localtime link takes priority over process/browser timezone
+PASS schedule: native Unraid timeZone is used if localtime is not a symlink
+PASS schedule: invalid timezone falls back to configured PHP timezone
+PASS schedule: timezone changes are read without restarting the service
+PASS schedule: invalid schedule rejected 0
+PASS schedule: invalid schedule rejected 1
+PASS schedule: invalid schedule rejected 2
+PASS schedule: invalid schedule rejected 3
+PASS schedule: invalid schedule rejected 4
+PASS schedule: invalid schedule rejected 5
+PASS schedule: invalid schedule rejected 6
+PASS schedule: invalid schedule rejected 7
+PASS schedule: invalid schedule rejected 8
+PASS schedule: invalid schedule rejected 9
+PASS schedule: invalid schedule rejected 10
+PASS schedule: invalid schedule rejected 11
+PASS schedule: invalid schedule rejected 12
+PASS schedule: invalid schedule rejected 13
+PASS schedule: invalid schedule rejected 14
+PASS schedule: invalid schedule rejected 15
+PASS schedule: invalid schedule rejected 16
+PASS schedule: invalid schedule rejected 17
+PASS schedule: invalid schedule rejected 18
+PASS schedule: invalid schedule rejected 19
+PASS schedule: invalid schedule rejected 20
+PASS schedule: disabled schedule may keep an empty draft day selection
+PASS schedule: entire-day mode does not require different times
+PASS schedule: host feed carries scheduled off independently of metric availability
+PASS schedule: scheduled off cancels an ongoing visual test marker
+PASS schedule: visual test cannot bypass a scheduled off period
+PASS schedule: legacy client preserves saved schedule
+PASS schedule: disabling schedule restores live output on the next sample
+PASS schedule: schedule evaluation does not write persistent settings
+TOTAL schedule: 59 checks passed
 PASS no sources: null, never an invented zero
 PASS empty inventory without reading the real machine
 PASS kHz to MHz and measured cpuinfo_cur_freq priority
@@ -251,10 +320,10 @@ PASS provider fallback keeps first sample unavailable
 PASS unreadable counter clears energy baseline
 PASS multi-socket: explicit package-only total without subdomains
 PASS multi-socket: sum of independent package deltas
-PASS package manquant : aucun total partiel trompeur
+PASS missing package: no misleading partial total
 PASS RAPL enabled=0: readable counter independent of power limits
 PASS RAPL enabled=0: first sample retained in RAM
-PASS RAPL enabled=0 : progression du compteur convertie en watts
+PASS RAPL enabled=0: advancing counter converted to watts
 PASS reading watts preserves RAPL controls
 PASS RAPL enabled=0: unreadable counter stays unavailable
 TOTAL 42 metric checks passed
@@ -267,17 +336,17 @@ test_preexisting_configuration_folder_is_preserved (__main__.InstallerTests.test
 test_preexisting_unmarked_ui_folder_is_preserved (__main__.InstallerTests.test_preexisting_unmarked_ui_folder_is_preserved) ... ok
 test_sigkill_interruption_is_recoverable (__main__.InstallerTests.test_sigkill_interruption_is_recoverable) ... ok
 test_unsupported_unraid_is_refused (__main__.InstallerTests.test_unsupported_unraid_is_refused) ... ok
-test_url_corrupt_download_preserves_current_install (__main__.InstallerTests.test_url_corrupt_download_preserves_current_install) ... 127.0.0.1 - - [31/Oct/2026 22:24:49] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+test_url_corrupt_download_preserves_current_install (__main__.InstallerTests.test_url_corrupt_download_preserves_current_install) ... 127.0.0.1 - - [01/Nov/2026 01:27:22] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
 ok
-test_url_failed_activation_removes_downloaded_package (__main__.InstallerTests.test_url_failed_activation_removes_downloaded_package) ... 127.0.0.1 - - [31/Oct/2026 22:24:50] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
-127.0.0.1 - - [31/Oct/2026 22:24:50] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
+test_url_failed_activation_removes_downloaded_package (__main__.InstallerTests.test_url_failed_activation_removes_downloaded_package) ... 127.0.0.1 - - [01/Nov/2026 01:27:22] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 01:27:22] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
 ok
-test_url_fetches_missing_files_and_boots_offline (__main__.InstallerTests.test_url_fetches_missing_files_and_boots_offline) ... 127.0.0.1 - - [31/Oct/2026 22:24:50] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
-127.0.0.1 - - [31/Oct/2026 22:24:50] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
-127.0.0.1 - - [31/Oct/2026 22:24:50] "GET /thermalright-digital/packages/2026.10.31.3/backend-image.tar.xz HTTP/1.1" 200 -
+test_url_fetches_missing_files_and_boots_offline (__main__.InstallerTests.test_url_fetches_missing_files_and_boots_offline) ... 127.0.0.1 - - [01/Nov/2026 01:27:23] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 01:27:23] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 01:27:23] "GET /thermalright-digital/packages/2026.10.31.3/backend-image.tar.xz HTTP/1.1" 200 -
 ok
 
 ----------------------------------------------------------------------
-Ran 12 tests in 11.729s
+Ran 12 tests in 11.505s
 
 OK

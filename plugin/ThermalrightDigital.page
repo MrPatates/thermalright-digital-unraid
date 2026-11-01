@@ -30,6 +30,7 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
 #td-panel label { width:auto; text-align:left; text-align-last:auto; }
 #td-panel select { display:block; width:100%; max-width:none; margin:0; }
 #td-panel input[type=number] { width:100px; margin:0; }
+#td-panel input[type=time] { width:150px; max-width:100%; margin:0; }
 #td-panel input[type=color] { width:54px; height:34px; padding:2px; vertical-align:middle; margin:0; cursor:pointer; }
 #td-panel input[type=color]:disabled { cursor:default; opacity:.55; }
 #td-panel input[type=checkbox] { margin:0 6px 0 0; vertical-align:middle; }
@@ -86,6 +87,30 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
 </div>
 <div class="td-actions"><button type="button" data-action="start">Start</button><button type="button" data-action="stop">Stop</button><button type="button" data-action="restart">Restart</button></div>
 </fieldset>
+<fieldset class="td-section"><legend>Scheduled display off</legend>
+<label class="td-inline"><input type="checkbox" id="td-quiet-enabled"> Enable scheduled display off</label>
+<p class="td-help" id="td-quiet-status">Waiting for display status.</p>
+<p class="td-help" id="td-quiet-clock">Schedule follows the Unraid server clock.</p>
+<div id="td-quiet-options" hidden>
+<p class="td-subheading">Days the off period starts</p>
+<div class="td-checks" role="group" aria-label="Display off days">
+<label for="td-quiet-day-1"><input id="td-quiet-day-1" type="checkbox" checked> Mon</label>
+<label for="td-quiet-day-2"><input id="td-quiet-day-2" type="checkbox" checked> Tue</label>
+<label for="td-quiet-day-3"><input id="td-quiet-day-3" type="checkbox" checked> Wed</label>
+<label for="td-quiet-day-4"><input id="td-quiet-day-4" type="checkbox" checked> Thu</label>
+<label for="td-quiet-day-5"><input id="td-quiet-day-5" type="checkbox" checked> Fri</label>
+<label for="td-quiet-day-6"><input id="td-quiet-day-6" type="checkbox" checked> Sat</label>
+<label for="td-quiet-day-7"><input id="td-quiet-day-7" type="checkbox" checked> Sun</label>
+</div>
+<label class="td-inline"><input type="checkbox" id="td-quiet-all-day"> Keep display off for the entire selected days</label>
+<div class="td-grid td-subsection" id="td-quiet-times">
+<div class="td-field"><label for="td-quiet-start">Turn off at</label><input id="td-quiet-start" type="time" step="60" value="23:00" required></div>
+<div class="td-field"><label for="td-quiet-end">Turn back on at</label><input id="td-quiet-end" type="time" step="60" value="07:00" required></div>
+</div>
+<p class="td-help">Times use the server timezone shown above. For Monday 23:00–07:00, select Monday: the display stays off until Tuesday at 07:00. Entire-day mode uses midnight to midnight.</p>
+<p class="td-help">All display LEDs turn off, including decorations. Metrics and the backend keep running; the display wakes automatically. Scheduled off takes priority over the visual test. Click Save to apply changes.</p>
+</div>
+</fieldset>
 <fieldset class="td-section"><legend>Display colors</legend>
 <div class="td-grid">
 <div class="td-field"><label for="td-rgb-mode">Mode</label><select id="td-rgb-mode"><option value="static">Fixed color</option><option value="zones">Colors by category</option><option value="temperature">CPU temperature colors</option><option value="breathing">Breathing</option><option value="rainbow">Rainbow</option></select></div>
@@ -139,9 +164,17 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
   const el=id=>document.getElementById('td-'+id);
   const csrf=document.querySelector('#td-form input[name=csrf_token]').value;
   const zones=['temperature','load','power','frequency','decoration'];
+  const weekdays=[1,2,3,4,5,6,7];
+  const quietDefaults={enabled:false,days:[...weekdays],all_day:false,start:'23:00',end:'07:00'};
   const zoneLabels={temperature:'temperature',load:'load',power:'watts',frequency:'MHz',decoration:'decorations'};
   const rgbDefaults={mode:'static',color:'#00b4ff',brightness:100,period:6,target:'all',thresholds:[40,60,80],temperature_colors:['#00b4ff','#00ff00','#ff9900','#ff0000'],temperature_zones:[...zones],smoothing:3,zone_colors:Object.fromEntries(zones.map(z=>[z,'#00b4ff']))};
   let loaded=false, busy=false, fetching=false;
+  function quietVisibility() {
+    const enabled=el('quiet-enabled').checked, allDay=el('quiet-all-day').checked;
+    el('quiet-options').hidden=!enabled;
+    el('quiet-times').hidden=allDay;
+    for (const key of ['start','end']) el(`quiet-${key}`).disabled=!enabled || allDay;
+  }
   const metric=(value,digits,unit)=>Number.isFinite(value)?`${value.toFixed(digits)} ${unit}`:'Unavailable';
   function rgbVisibility() {
     const mode=el('rgb-mode').value;
@@ -163,6 +196,7 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
     return {
       autostart:el('auto').checked,interval:Number(el('interval').value),sensor:el('sensor').value,
       frequency_mode:el('frequency-mode').value,power_sensor:el('power-sensor').value,
+      quiet_hours:{enabled:el('quiet-enabled').checked,days:weekdays.filter(d=>el(`quiet-day-${d}`).checked),all_day:el('quiet-all-day').checked,start:el('quiet-start').value,end:el('quiet-end').value},
       rgb:{mode:el('rgb-mode').value,color:el('rgb-color').value,brightness:Number(el('rgb-brightness').value),period:Number(el('rgb-period').value),target:el('rgb-target').value,
         thresholds:[0,1,2].map(i=>Number(el(`rgb-threshold-${i}`).value)),temperature_colors:[0,1,2,3].map(i=>el(`rgb-temperature-color-${i}`).value),temperature_zones:zones.filter(z=>el(`rgb-temperature-zone-${z}`).checked),smoothing:Number(el('rgb-smoothing').value),
         zone_colors:Object.fromEntries(zones.map(z=>[z,el(`rgb-zone-${z}`).value]))}
@@ -190,7 +224,12 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
       el('usb').textContent=s.usb.length?s.usb.map(u=>`${u.id} — ${u.node} — port ${u.port}`).join(', '):'Not found';
       const backend=s.backend||{}, metrics=s.metrics||{}, settings=s.settings;
       const fresh=backend.timestamp && Date.now()/1000-backend.timestamp<Math.max(10,settings.interval*2+2);
-      el('backend').textContent=!s.docker?'Docker unavailable':(s.supervisor && fresh && backend.ready?`Frames sent — ${backend.model||'display connected'}`:(s.supervisor?'Waiting / connecting':'Stopped'));
+      el('backend').textContent=!s.docker?'Docker unavailable':(s.supervisor && fresh && backend.ready?(backend.display_off && backend.display_reason==='schedule'?'Display off — scheduled':`Frames sent — ${backend.model||'display connected'}`):(s.supervisor?'Waiting / connecting':'Stopped'));
+      const display=s.display||{};
+      el('quiet-clock').textContent=display.local_time && display.timezone?`Server time: ${display.local_time} · ${display.timezone}`:'Schedule follows the Unraid server clock.';
+      el('quiet-status').textContent=s.supervisor && fresh && backend.ready && typeof backend.display_off==='boolean'
+        ? (backend.display_off?(backend.display_reason==='schedule'?'Display off by schedule. Metrics and USB connection remain active.':'Display off: check backend status and logs.'):'Display on.')
+        : 'Display state will be confirmed when the backend connects.';
       el('temp').textContent=metric(metrics.cpu_temp,1,'°C');
       el('temp-source').textContent=metrics.sensor||'';
       el('load').textContent=metric(metrics.cpu_load,1,'%');
@@ -213,6 +252,11 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
         : 'An 8-second visual sequence, then an automatic return to normal display. Test digits are synthetic. The test uses saved settings; unsaved changes are kept as a draft.';
       el('message').textContent=s.pending?'Uninstall incomplete: enable Docker and retry from Plugins.':(s.service.message||`Ready. Autostart ${settings.autostart?'enabled':'disabled'}.`);
       if (!loaded) {
+        const quiet={...quietDefaults,...(settings.quiet_hours||{})};
+        el('quiet-enabled').checked=quiet.enabled; el('quiet-all-day').checked=quiet.all_day;
+        el('quiet-start').value=quiet.start; el('quiet-end').value=quiet.end;
+        for (const day of weekdays) el(`quiet-day-${day}`).checked=quiet.days.includes(day);
+        quietVisibility();
         el('auto').checked=settings.autostart; el('interval').value=settings.interval;
         for (const v of s.sensors) el('sensor').add(new Option(`${v.label} (${v.value===null?'unavailable':v.value+' °C'})`,v.id));
         if (![...el('sensor').options].some(o=>o.value===settings.sensor)) el('sensor').add(new Option('Configured sensor missing',settings.sensor));
@@ -250,10 +294,14 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
   el('form').addEventListener('submit',e=>{
     e.preventDefault();
     const settings=settingsFromForm();
+    if (settings.quiet_hours.enabled && !settings.quiet_hours.days.length) { el('message').textContent='Select at least one day for scheduled display off.'; return; }
+    if (settings.quiet_hours.enabled && !settings.quiet_hours.all_day && settings.quiet_hours.start===settings.quiet_hours.end) { el('message').textContent='Choose different off/on times, or select entire days.'; return; }
     if (!settings.rgb.temperature_zones.length) { el('message').textContent='Select at least one category for temperature colors.'; return; }
     act('settings',{settings:JSON.stringify(settings)});
   });
   el('rgb-mode').addEventListener('change',rgbVisibility);
+  el('quiet-enabled').addEventListener('change',quietVisibility);
+  el('quiet-all-day').addEventListener('change',quietVisibility);
   el('rgb-target').addEventListener('change',rgbVisibility);
   el('rgb-brightness').addEventListener('input',rgbVisibility);
   for (const z of zones) el(`rgb-temperature-zone-${z}`).addEventListener('change',rgbVisibility);

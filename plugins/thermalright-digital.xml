@@ -5,7 +5,7 @@
   <Icon>https://raw.githubusercontent.com/MrPatates/thermalright-digital-unraid/main/icon.png</Icon>
   <Support>https://github.com/MrPatates/thermalright-digital-unraid/issues</Support>
   <Project>https://github.com/MrPatates/thermalright-digital-unraid</Project>
-  <Overview>Control a Thermalright Peerless Assassin 140 Digital USB display (0416:8001) from Unraid Settings. Show host CPU temperature, load, watts and MHz, with configurable RGB effects and temperature colors for selected display categories. Requires Docker and a started array. The driver runs in an isolated container with access to one USB device. CPU power requires a supported hwmon or RAPL source; GPU metrics are not provided. Hardware confirmed on Unraid 7.3.4 with the LF12 profile; other supported layouts require hardware validation. Community project, unaffiliated with Thermalright or Unraid.</Overview>
+  <Overview>Control a Thermalright Peerless Assassin 140 Digital USB display (0416:8001) from Unraid Settings. Show host CPU temperature, load, watts and MHz, with configurable RGB effects and temperature colors for selected display categories. Includes weekly display-off scheduling with overnight intervals or entire days in the server timezone. Requires Docker and a started array. The driver runs in an isolated container with access to one USB device. CPU power requires a supported hwmon or RAPL source; GPU metrics are not provided. Hardware confirmed on Unraid 7.3.4 with the LF12 profile; other supported layouts require hardware validation. Community project, unaffiliated with Thermalright or Unraid.</Overview>
   <Category>Tools:Utilities</Category>
   <MinVer>6.12.0</MinVer>
   <MaxVer>7.3.999</MaxVer>

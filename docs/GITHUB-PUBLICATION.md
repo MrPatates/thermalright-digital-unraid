@@ -1,6 +1,6 @@
 # Publishing on GitHub
 
-Repository: **MrPatates/thermalright-digital-unraid**. The first public release is **2026.10.31.8**; the next version is **2026.10.31.9**. For a fork, change `project.json` and update Community Apps and README links before publishing under another account.
+Repository: **MrPatates/thermalright-digital-unraid**. The first public release is **2026.10.31.8**; the release version in this checkout is **2026.11.01.1**. For a fork, change `project.json` and update Community Apps and README links before publishing under another account.
 
 ## Publish sources
 
@@ -23,8 +23,8 @@ The **Validation** workflow builds the backend and runs the suites. Test logs ca
 After validation succeeds, create a tag matching VERSION exactly:
 
 ```bash
-git tag -a v2026.10.31.9 -m "THERMALRIGHT DIGITAL 2026.10.31.9"
-git push origin v2026.10.31.9
+git tag -a v2026.11.01.1 -m "THERMALRIGHT DIGITAL 2026.11.01.1"
+git push origin v2026.11.01.1
 ```
 
 The **Draft release** workflow rebuilds and verifies the image, creates a draft and attaches `dist/release/`. Review it in **Releases**, leave **This is a pre-release** unchecked, select **Set as latest release** if offered, then click **Publish release**. The stable release is used by `releases/latest`.

@@ -316,6 +316,16 @@ def write_status(**data):
     temp.replace(path)
 
 
+def display_is_off(sample):
+    """The host owns timezone/calendar logic; legacy feeds keep displaying."""
+    if 'display' not in sample:
+        return False
+    state = sample['display']
+    if not isinstance(state, dict) or type(state.get('off')) is not bool:
+        raise ValueError('Invalid host display state')
+    return state['off']
+
+
 def main():
     handler = RotatingFileHandler('/state/driver.log', maxBytes=262144, backupCount=1)
     handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
@@ -346,28 +356,37 @@ def main():
             try:
                 sample = read_sample('/host/metrics.json')
                 cfg = rgb_settings(sample.get('rgb'))
-                colors = colors_for(style, sample, tick, now=frame_started, engine=engine, rgb=cfg)
-                test_colors, test_status = visual_test.frame(sample.get('display_test'), len(colors),
-                                                             time.time(), frame_started)
-                if test_colors is not None:
-                    # This pattern is explicitly reported as a test; no fake
-                    # value is ever substituted into the measured status.
-                    colors = test_colors
+                display_off = display_is_off(sample)
+                display_reason = 'schedule' if display_off else None
+                if display_off:
+                    # Scheduled off overrides every RGB mode and visual test.
+                    # Keep metrics and USB readiness live for automatic wakeup.
+                    colors = [BLACK] * layout_for(style).mask_size
+                else:
+                    colors = colors_for(style, sample, tick, now=frame_started, engine=engine, rgb=cfg)
+                    test_colors, test_status = visual_test.frame(sample.get('display_test'), len(colors),
+                                                                 time.time(), frame_started)
+                    if test_colors is not None:
+                        # Test frames do not replace actual measured status.
+                        colors = test_colors
                 error = None
             except (ValueError, OSError, json.JSONDecodeError) as exc:
                 sample = {}
                 cfg = rgb_settings()
                 colors = [BLACK] * layout_for(style).mask_size
+                display_off, display_reason = True, 'error'
+                test_status = dict(active=False, id=None, phase=None, remaining=0)
                 error = str(exc)
             # Remember the attempted frame as well: a failed transfer may
             # have partially reached USB and still needs an all-off cleanup.
             last_colors = colors
-            if not device.send(LedPayload(colors=colors)):
+            if not device.send(LedPayload(colors=colors, global_on=not display_off)):
                 raise RuntimeError('USB transmission failed')
             write_status(ready=True, model=handshake.model_name, style=style.value,
                          cpu_temp=sample.get('cpu_temp'), cpu_load=sample.get('cpu_load'),
                          cpu_watts=sample.get('cpu_watts'), cpu_mhz=sample.get('cpu_mhz'),
                          capabilities=capabilities, rgb=cfg, test_active=test_status['active'],
+                         display_off=display_off, display_reason=display_reason,
                          display_test=test_status, display_out_of_range=displayed_values(style, sample)[1],
                          error=error)
             STOP.wait(max(0, 0.1 - (time.monotonic() - frame_started)))

@@ -1,3 +1,7 @@
+test_invalid_display_state_is_not_treated_as_on (test_worker.DisplayScheduleTests.test_invalid_display_state_is_not_treated_as_on) ... ok
+test_legacy_feeds_and_explicit_boolean_state (test_worker.DisplayScheduleTests.test_legacy_feeds_and_explicit_boolean_state) ... ok
+test_malformed_host_schedule_blanks_output_and_reports_error (test_worker.DisplayScheduleTests.test_malformed_host_schedule_blanks_output_and_reports_error) ... ok
+test_schedule_blanks_every_led_overrides_test_and_wakes_without_reconnect (test_worker.DisplayScheduleTests.test_schedule_blanks_every_led_overrides_test_and_wakes_without_reconnect) ... ok
 test_failed_usb_frame_still_attempts_all_off_and_disconnects (test_worker.DisplayTestTests.test_failed_usb_frame_still_attempts_all_off_and_disconnects) ... ok
 test_invalid_test_and_missing_test_never_replace_measurements (test_worker.DisplayTestTests.test_invalid_test_and_missing_test_never_replace_measurements) ... ok
 test_main_keeps_actual_measurements_during_test_and_restores_live_rgb (test_worker.DisplayTestTests.test_main_keeps_actual_measurements_during_test_and_restores_live_rgb) ... ok
@@ -40,6 +44,6 @@ test_temperature_gradient_matches_all_customisable_stops (test_worker.RgbTests.t
 test_temperature_smoothing_uses_elapsed_time_but_displays_current_digits (test_worker.RgbTests.test_temperature_smoothing_uses_elapsed_time_but_displays_current_digits) ... ok
 
 ----------------------------------------------------------------------
-Ran 40 tests in 0.025s
+Ran 44 tests in 0.025s
 
 OK

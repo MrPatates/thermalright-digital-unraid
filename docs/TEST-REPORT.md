@@ -2,7 +2,7 @@
 
 ## Automated coverage
 
-Version .9 covers 245 automated tests/checks across the suites below. The build runs the following suites against actual pinned PHP/TRCC dependencies. Docker lifecycle fixtures simulate the Docker API; they do not access a production daemon or USB device.
+Release 2026.11.01.1 covers 322 automated tests/checks, including 59 schedule checks. The build runs the following suites against actual pinned PHP/TRCC dependencies. Docker lifecycle fixtures simulate the Docker API; they do not access a production daemon or USB device.
 
 - Worker tests: TRCC layouts and masks, unavailable/zero/overflow readings, RGB modes, brightness, thermal category selection, smoothing, stale feeds, visual-test lifetime and error paths.
 - PHP lifecycle tests: ownership, version guard, host sampling, single supervisor, USB address change, container isolation, stop/uninstall, unavailable Docker, pre-existing/shared resources and exact native manifest cleanup.
@@ -21,7 +21,7 @@ The official TRCC CLI was exercised in a temporary full-dependency container; wi
 
 Local logs are in `.build/logs/`; release evidence is copied into `docs/evidence/`. Historical reproductions and original logs retain their original wording, including French output. Negative tests intentionally produce errors before their final passing result. Run current suites rather than interpreting an archived failure reproduction as a current failure.
 
-The first public .8 release passed both GitHub workflows and anonymous asset verification. Its published files were checked against the tag. Version .9 changes English text, branding, the backend name and catalog packaging; current runs are recorded in Actions and bundled evidence rather than treated as additional physical confirmation.
+The first public .8 release passed both GitHub workflows and anonymous asset verification. Its published files were checked against the tag. Version .9 added English text, branding and catalog packaging. Current runs are recorded in Actions and bundled evidence rather than treated as additional physical confirmation.
 
 ## Hardware checks
 
@@ -31,7 +31,7 @@ The first public .8 release passed both GitHub workflows and anonymous asset ver
 | CPU k10temp/Tctl detection | Confirmed in user CLI output |
 | RAPL package-0 watts and cpufreq MHz on LF12 | User confirmed after .6 |
 | Compact UI and temperature colors by category | User confirmed with .7; individual combinations still need separate checks |
-| English .9 UI, uppercase instance and native icons | Automated checks; physical server verification still required |
+| Scheduled display off/wake and compact Docker name | Automated checks; physical server verification still required |
 | Real Unraid uninstall and residual audit | Still required |
 | Server/array/Docker restart with autostart | Still required |
 | Physical USB unplug/replug and re-enumeration | Still required with a safe connector |
@@ -43,7 +43,7 @@ The original workstation used Podman for actual image execution and simulated Do
 To rerun after building:
 
 ```bash
-CONTAINER_ENGINE=podman bash scripts/check.sh localhost/thermalright-digital:2026.10.31.9
+CONTAINER_ENGINE=podman bash scripts/check.sh localhost/thermalright-digital:2026.11.01.1
 ```
 
 PHP fixtures remain in disposable containers with no host Docker socket. Their image versions/digests are pinned in `scripts/check.sh`.
@@ -61,3 +61,9 @@ Version .8 separated the first public GitHub build from local .7 packages to avo
 ## Community Applications scope
 
 Local metadata tests check XML structure, real project/support/install destinations, version bounds and shared artwork. They cannot guarantee the portal's scan result or moderator acceptance. No catalog listing is claimed until the submission is reviewed; see [COMMUNITY-APPLICATIONS.md](COMMUNITY-APPLICATIONS.md).
+
+## Scheduled off release
+
+Tests cover strict schedule validation and legacy migration, same-day/overnight/entire-day boundaries, Sunday-to-Monday wrap, multiple selected days, spring/autumn DST, non-browser timezone handling, timezone changes, RAM feed, visual-test cancellation and no persistent sampling writes. Driver tests check global-off frames for all LEDs, real metric retention, test suppression, automatic wake without USB reconnect and invalid state handling. HTTP tests check persistence, legacy clients, invalid input and refused tests during off. UI checks cover server clock, actual worker state, draft retention, weekdays/times/entire-day controls and validation. Lifecycle tests cover migration from both previous container names and updated inventory ownership.
+
+The schedule and compact Docker layout still need the physical checks in VALIDATION-UNRAID.md. Earlier hardware confirmation does not certify the new off/wake behavior.

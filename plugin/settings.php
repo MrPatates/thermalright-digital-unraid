@@ -9,7 +9,23 @@ function td_rgb_defaults(): array {
             'smoothing'=>3.0,'zone_colors'=>['temperature'=>'#00b4ff','load'=>'#00b4ff','power'=>'#00b4ff','frequency'=>'#00b4ff','decoration'=>'#00b4ff']];
 }
 function td_settings_defaults(): array {
-    return ['autostart'=>false,'interval'=>1,'sensor'=>'auto','frequency_mode'=>'max','power_sensor'=>'auto','rgb'=>td_rgb_defaults()];
+    return ['autostart'=>false,'interval'=>1,'sensor'=>'auto','frequency_mode'=>'max','power_sensor'=>'auto','rgb'=>td_rgb_defaults(),'quiet_hours'=>td_quiet_defaults()];
+}
+function td_quiet_defaults(): array {
+    return ['enabled'=>false,'days'=>[1,2,3,4,5,6,7],'all_day'=>false,'start'=>'23:00','end'=>'07:00'];
+}
+function td_quiet_normalize(mixed $value): array {
+    $defaults=td_quiet_defaults();
+    if (!is_array($value) || array_diff(array_keys($value),array_keys($defaults))) fail('Invalid or unknown display schedule settings');
+    $out=array_replace($defaults,$value);
+    if (!is_bool($out['enabled']) || !is_bool($out['all_day'])) fail('Invalid display schedule switches');
+    if (!is_array($out['days']) || !array_is_list($out['days']) || count($out['days'])>7) fail('Invalid display schedule days');
+    foreach ($out['days'] as $day) if (!is_int($day) || $day<1 || $day>7) fail('Invalid display schedule day');
+    if (count(array_unique($out['days']))!==count($out['days'])) fail('Duplicate display schedule days');
+    if ($out['enabled'] && !$out['days']) fail('Select at least one day for scheduled display off');
+    foreach (['start','end'] as $key) if (!is_string($out[$key]) || !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/D',$out[$key])) fail('Schedule times must use HH:MM (00:00–23:59)');
+    if ($out['enabled'] && !$out['all_day'] && $out['start']===$out['end']) fail('Choose different off/on times, or select entire days');
+    return $out;
 }
 function td_setting_number(mixed $value,float $low,float $high,string $label): float {
     if ((!is_int($value) && !is_float($value)) || !is_finite((float)$value) || $value<$low || $value>$high) fail('Invalid value : '.$label);
@@ -48,5 +64,6 @@ function td_settings_normalize(array $data,bool $request=false): array {
     if (!is_array($rgb['zone_colors']) || array_diff(array_keys($rgb['zone_colors']),array_keys($zones))) fail('Invalid zone colors');
     $rgb['zone_colors']=array_map('td_setting_color',array_replace($zones,$rgb['zone_colors']));
     $out['rgb']=$rgb;
+    $out['quiet_hours']=td_quiet_normalize($out['quiet_hours']);
     return $out;
 }

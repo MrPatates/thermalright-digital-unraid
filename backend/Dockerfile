@@ -1,5 +1,5 @@
 FROM docker.io/library/python@sha256:2986c55feb36e6cae00fa1fefb454283e4b33f35e75ff8bdd123b134130be301
-ARG TD_VERSION=2026.10.31.9
+ARG TD_VERSION=2026.11.01.1
 LABEL io.local.thermalright-digital.owner="thermalright-digital" \
       org.opencontainers.image.version="$TD_VERSION" \
       org.opencontainers.image.licenses="GPL-3.0-or-later" \

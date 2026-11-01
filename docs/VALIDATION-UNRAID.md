@@ -29,15 +29,15 @@ These checks require your Unraid server. Only the user-confirmed checks listed i
 3. Click **Start**, wait for the initial image load, then inspect the real Docker contract:
 
    ```bash
-   docker inspect THERMALRIGHT-DIGITAL-BACKEND --format '{{json .HostConfig.Devices}}'
-   docker inspect THERMALRIGHT-DIGITAL-BACKEND --format '{{json .Mounts}}'
-   docker inspect THERMALRIGHT-DIGITAL-BACKEND --format '{{json .Config.Labels}}'
-   docker inspect THERMALRIGHT-DIGITAL-BACKEND --format '{{.HostConfig.Privileged}} {{.HostConfig.NetworkMode}} {{.HostConfig.ReadonlyRootfs}} {{json .HostConfig.CapDrop}}'
+   docker inspect TR-DIGITAL --format '{{json .HostConfig.Devices}}'
+   docker inspect TR-DIGITAL --format '{{json .Mounts}}'
+   docker inspect TR-DIGITAL --format '{{json .Config.Labels}}'
+   docker inspect TR-DIGITAL --format '{{.HostConfig.Privileged}} {{.HostConfig.NetworkMode}} {{.HostConfig.ReadonlyRootfs}} {{json .HostConfig.CapDrop}}'
    cat /var/run/thermalright-digital/driver/status.json
    tail -n 60 /var/run/thermalright-digital/driver/driver.log
    ```
 
-   Expect one `/dev/bus/usb/BBB/DDD` node, two private binds, no boot flash/socket/appdata mounts, and false / none / true / ALL. Check the uppercase name, dedicated Docker icon and WebUI link. After upgrade, no older owned lowercase backend should remain. The log should identify the handshake PM and model. Export diagnostics for unsupported style or USB permission errors; do not bypass isolation with privileged mode.
+   Expect one `/dev/bus/usb/BBB/DDD` node, two private binds, no boot flash/socket/appdata mounts, and false / none / true / ALL. Check the uppercase name, dedicated Docker icon and WebUI link. After upgrade, no older owned lowercase or long uppercase backend should remain. The log should identify the handshake PM and model. Export diagnostics for unsupported style or USB permission errors; do not bypass isolation with privileged mode.
 
 4. **Observe the physical display.** Temperature should match the selected sensor and load should change with host activity. “Frames sent” confirms transfers, not physical rendering. Uninstrumented GPU areas should stay blank. Stop should release USB. Restart may reuse this boot's handshake cache without assuming unlimited firmware handshake replies.
 
@@ -60,14 +60,16 @@ These checks require your Unraid server. Only the user-confirmed checks listed i
 
    cpufreq uses kHz, hwmon power uses µW and powercap provides energy counters in µJ. The first energy sample is unavailable. RAPL `enabled=0` controls power limiting and does not invalidate a readable advancing counter. `scaling_cur_freq` is labeled requested frequency. Without a supported CPU power source, **Unavailable** and blank W digits are expected. An individually selected rail is not a whole-package measurement. Check `capabilities.power` / `frequency`: host readings may exist without corresponding physical display groups.
 
-5. Enable autostart and reboot during a maintenance window. After the array and Docker start, verify one backend and one supervisor. Stop/restart Docker through Unraid and check again. Test with the array stopped: bounded waiting and no premature backend.
+5. Test **Scheduled display off** using a window starting in the next few minutes. Keep the backend running. Check the server clock/timezone in Settings, choose today's weekday, save and wait for the boundary. Every digit and decoration must switch off, the status must report scheduled off, and CPU readings must continue updating. Verify the global switch and wakeup on the real screen, not only in JSON. The container must remain the same instance across both boundaries. During off, a visual test must be refused; disabling the schedule and saving must restore output within the next host sample. Test an overnight interval with its starting day selected, entire-day mode, restart inside an off period and changed settings. Check the compact Docker name beside its icon. Avoid changing a production server clock merely to exercise DST; those transitions have deterministic automated tests.
 
-6. For USB absence/reconnection, use a connection designed for safe hot plugging; do not manipulate an internal motherboard connector live. Disconnecting before startup already tests absence. Record old/new USB addresses and inspect delegated devices after reconnecting. Allow 30 seconds between retries. After 180 seconds of absence, click Start once the device returns.
+6. Enable autostart and reboot during a maintenance window. After the array and Docker start, verify one backend and one supervisor. Stop/restart Docker through Unraid and check again. Test with the array stopped: bounded waiting and no premature backend.
 
-7. Reinstall the same bundle with Force Install and check settings retention. For a future different backend, test updates, explicit rollback with `force` and automatic rollback after backend failure. Automatic rollback is simulated locally but still needs a real differing backend test before unattended reliance.
+7. For USB absence/reconnection, use a connection designed for safe hot plugging; do not manipulate an internal motherboard connector live. Disconnecting before startup already tests absence. Record old/new USB addresses and inspect delegated devices after reconnecting. Allow 30 seconds between retries. After 180 seconds of absence, click Start once the device returns.
 
-8. Export diagnostics before removal and keep `audit-residuals.sh` under `/tmp` or on your workstation. Remove the plugin with Docker available. After 10 seconds, run the audit: no private files or exclusively owned container/image should remain. Verify any unrelated legacy container/image/appdata survived. Native UI caches and system logs are managed separately by Unraid.
+8. Reinstall the same bundle with Force Install and check settings retention. For a future different backend, test updates, explicit rollback with `force` and automatic rollback after backend failure. Automatic rollback is simulated locally but still needs a real differing backend test before unattended reliance.
 
-9. To test removal with Docker unavailable, use a maintenance window and native UI controls. Stop Docker, request plugin removal, confirm failure and retained inventory, then enable Docker and retry. Do not delete inventory to force success.
+9. Export diagnostics before removal and keep `audit-residuals.sh` under `/tmp` or on your workstation. Remove the plugin with Docker available. After 10 seconds, run the audit: no private files or exclusively owned container/image should remain. Verify any unrelated legacy container/image/appdata survived. Native UI caches and system logs are managed separately by Unraid.
+
+10. To test removal with Docker unavailable, use a maintenance window and native UI controls. Stop Docker, request plugin removal, confirm failure and retained inventory, then enable Docker and retry. Do not delete inventory to force success.
 
 Local tests already simulate interrupted installations. Do not cut server power to reproduce them; boot flash and array failure behavior extend beyond this plugin's scope.

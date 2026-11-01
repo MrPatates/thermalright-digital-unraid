@@ -77,7 +77,7 @@ echo "Already uninstalled."
     update_attribute = ' pluginURL='+quoteattr(plugin_url) if plugin_url else ''
     manifest=f'''<?xml version="1.0" encoding="UTF-8"?>
 <PLUGIN name="thermalright-digital" author={quoteattr(author)} version="{version}" launch="Settings/ThermalrightDigital" icon="logo.png" support={quoteattr('https://github.com/'+repository+'/issues' if repository else 'https://github.com/MrPatates/thermalright-digital-unraid/issues')} min="6.12.0"{update_attribute}>
-<CHANGES>Release {version}. English interface and documentation, shared plugin/Docker icon and uppercase display names. Host CPU metrics, RGB effects and inventory-based cleanup. SHA-256 verified packages.</CHANGES>
+<CHANGES>Release {version}. Weekly scheduled display off, server timezone/DST handling and compact TR-DIGITAL container name. Host CPU metrics, RGB effects and inventory-based cleanup. SHA-256 verified packages.</CHANGES>
 <FILE Run="/bin/bash" Method="install"><INLINE><![CDATA[
 {installer}
 ]]></INLINE></FILE>

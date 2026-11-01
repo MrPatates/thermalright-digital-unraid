@@ -75,13 +75,16 @@ try {
  try{$i=inventory();create_backend($i,usb_devices()[0],config());check(false,'conflict');}catch(RuntimeException $e){check(isset(fs_state()['containers']['conflict']),'pre-existing container name refused and preserved');}
  check(cli(['ctl','uninstall'])===0 && isset(fs_state()['containers']['conflict']),'uninstall preserves unrelated same-name container');drop_fixture();
 
- fixture();$i=inventory();$s=fs_state();
- $s['containers']['owned-lowercase']=['Id'=>'owned-lowercase','Name'=>'thermalright-digital-backend','Config'=>['Labels'=>[TD_LABEL.'.owner'=>TD_NAME,TD_LABEL.'.instance'=>$i['instance']]],'State'=>['Running'=>true]];fs_save($s);
+ foreach (['thermalright-digital-backend','THERMALRIGHT-DIGITAL-BACKEND'] as $oldName) {
+ fixture();$i=inventory();$i['resources']['container']=$oldName;inv_save($i);
+ check(cli(['ctl','initialize'])===0 && inventory()['resources']['container']==='TR-DIGITAL' && inventory()['instance']===$i['instance'],'upgrade refreshes container inventory without changing ownership');
+ $s=fs_state();$s['containers']['owned-old']=['Id'=>'owned-old','Name'=>$oldName,'Config'=>['Labels'=>[TD_LABEL.'.owner'=>TD_NAME,TD_LABEL.'.instance'=>$i['instance']]],'State'=>['Running'=>true]];fs_save($s);
  create_backend($i,usb_devices()[0],config());$s=fs_state();$c=inspect('container',container_name());
- check(!isset($s['containers']['owned-lowercase']) && count($s['containers'])===1 && $c['Name']==='THERMALRIGHT-DIGITAL-BACKEND','upgrade replaces owned lowercase backend with one uppercase instance');
+ check(!isset($s['containers']['owned-old']) && count($s['containers'])===1 && $c['Name']==='TR-DIGITAL','upgrade replaces an owned old backend with one compact-name instance');
  check(labels($c)['net.unraid.docker.icon']==='file:///usr/local/emhttp/plugins/thermalright-digital/logo.png' && labels($c)['net.unraid.docker.managed']===TD_NAME,'native Docker branding uses an offline local icon and plugin manager label');
  check(labels($c)['net.unraid.docker.webui']==='/Settings/ThermalrightDigital','Docker WebUI links to native plugin settings');
- check(cli(['ctl','uninstall'])===0 && !fs_state()['containers'],'uppercase instance is removed through the ownership inventory');drop_fixture();
+ check(cli(['ctl','uninstall'])===0 && !fs_state()['containers'],'compact-name instance is removed through the ownership inventory');drop_fixture();
+ }
 
  fixture();put(state_dir().'/unknown.txt','existing');check(cli(['ctl','uninstall'])===1 && is_file(state_dir().'/unknown.txt'),'unknown file preserved and incomplete cleanup reported');unlink(state_dir().'/unknown.txt');check(cli(['ctl','uninstall'])===0,'cleanup can be retried');drop_fixture();
  fixture();

@@ -5,12 +5,14 @@ test_invalid_config_returns_json_error (__main__.FpmTests.test_invalid_config_re
 test_logs_under_real_fpm (__main__.FpmTests.test_logs_under_real_fpm) ... ok
 test_non_utf8_log_is_still_valid_json (__main__.FpmTests.test_non_utf8_log_is_still_valid_json) ... ok
 test_rgb_settings_persist_and_metrics_sources_are_json (__main__.FpmTests.test_rgb_settings_persist_and_metrics_sources_are_json) ... ok
+test_schedule_persists_and_old_client_preserves_it (__main__.FpmTests.test_schedule_persists_and_old_client_preserves_it) ... ok
 test_settings_save_and_reject_invalid_interval (__main__.FpmTests.test_settings_save_and_reject_invalid_interval) ... ok
 test_start_stop_under_real_fpm_without_array (__main__.FpmTests.test_start_stop_under_real_fpm_without_array) ... ok
 test_status_under_real_fpm (__main__.FpmTests.test_status_under_real_fpm) ... ok
 test_visual_test_is_explicit_transient_and_requires_ready_backend (__main__.FpmTests.test_visual_test_is_explicit_transient_and_requires_ready_backend) ... ok
+test_visual_test_refuses_scheduled_off_without_creating_marker (__main__.FpmTests.test_visual_test_refuses_scheduled_off_without_creating_marker) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 4.102s
+Ran 13 tests in 4.689s
 
 OK

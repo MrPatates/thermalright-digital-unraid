@@ -7,7 +7,7 @@ test_offline_manifest_remains_available (test_release.ReleaseTests.test_offline_
 test_source_export_excludes_binary_dependencies (test_release.ReleaseTests.test_source_export_excludes_binary_dependencies) ... ok
 
 ----------------------------------------------------------------------
-Ran 7 tests in 0.099s
+Ran 7 tests in 0.106s
 
 OK
 Download verified: backend/test.whl

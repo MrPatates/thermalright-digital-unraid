@@ -45,7 +45,7 @@ POST `display-test` requires a live supervisor, recent ready status and a runnin
 | UI and native events | `/usr/local/emhttp/plugins/thermalright-digital/`; payload marker | Complete removal |
 | Transaction files | hidden `.thermalright-digital-stage` / `-backup` directories; ownership marker | Recovered on reinstall, removed on cleanup |
 | Metrics, energy/handshake cache, logs, PID/locks | `/var/run/thermalright-digital/` in RAM | Complete removal |
-| Backend container | THERMALRIGHT-DIGITAL-BACKEND; both `io.local.thermalright-digital.owner` and `.instance` | Stop then remove; no global force |
+| Backend container | TR-DIGITAL; both `io.local.thermalright-digital.owner` and `.instance` | Stop then remove; no global force |
 | Imported image | Pinned ID, owner label, write-ahead inventory | Remove only when created by this plugin and unshared |
 | Native manifest/link | Unraid plugin manager | Native removal hook and exact-hash archive finalizer |
 | Volumes/networks/cron/go tasks | None created | None modified |
@@ -62,6 +62,14 @@ Cleanup never runs system prune, forcibly removes shared images or accesses Dock
 
 The `.plg` internal name and all persistent identifiers remain lowercase for compatibility. Its `icon="logo.png"` resolves inside the installed plugin directory. `plugin/README.md` supplies the uppercase visible name in the native plugin list. The Settings title and Community Apps wrapper also use THERMALRIGHT DIGITAL.
 
-The backend name is uppercase. Existing owned containers, including the old lowercase name, are discovered and removed by instance/owner labels before the new backend starts. `net.unraid.docker.icon` uses a local `file://` PNG URL read by Unraid's manager, so the backend needs no network access and no remote logo download. The native Docker manager handles its own icon cache. A manager label identifies plugin control, and the WebUI label links to the native Settings page.
+The backend name is the compact uppercase TR-DIGITAL. Existing owned containers, including the old lowercase and long uppercase names, are discovered and removed by instance/owner labels before the new backend starts. `net.unraid.docker.icon` uses a local `file://` PNG URL read by Unraid's manager, so the backend needs no network access and no remote logo download. The native Docker manager handles its own icon cache. A manager label identifies plugin control, and the WebUI label links to the native Settings page.
 
 The same original icon and real project/support links are included in `ca_profile.xml` and `plugins/thermalright-digital.xml`. Catalog preparation does not imply Community Apps approval; see [submission instructions](COMMUNITY-APPLICATIONS.md).
+
+## Weekly display-off schedule
+
+`quiet_hours` contains enabled, ISO weekdays 1–7, all_day and HH:MM start/end fields. Settings validation rejects unknown fields, invalid switches/times/days, duplicate days and enabled schedules without a day. Timed windows require different endpoints; entire days ignore times. Missing settings default to disabled, and legacy clients retain a saved schedule.
+
+`schedule.php` evaluates on the host at the existing one-second sample cadence, using Unraid's `/etc/localtime` zoneinfo symlink, native var.ini timeZone fallback or the configured PHP timezone. Browser and container clocks do not decide the schedule. Local wall time determines DST behavior; selected weekdays start overnight intervals, including Sunday into Monday. Start is inclusive, end exclusive. Entire days span local midnight to midnight. No cron job, sysfs write, new mount or periodic flash write is added.
+
+The RAM feed carries `display.off`, reason, server timezone and local clock. The worker validates the boolean state, sends all-black frames with `global_on=false`, suppresses visual tests and retains readiness/actual metrics. It sends normal frames with `global_on=true` when the next host sample ends the off period, without reconnecting USB. Invalid/stale feed also blanks output with a distinct error reason. An active visual-test marker is removed on scheduled off; the test API refuses a new test then. UI status distinguishes desired host state from the worker-confirmed frame state and preserves unsaved schedule edits while polling.

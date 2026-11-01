@@ -13,3 +13,8 @@ PASS UI : empty dynamic selection rejected before sending
 PASS UI : polling retains drafts and serializes new values
 PASS UI : temporary test without saving draft; visual state and action error retained
 PASS UI : missing configured source retained explicitly
+PASS UI: legacy settings keep scheduled off disabled
+PASS UI: saved schedule, actual display-off state and server timezone are shown
+PASS UI: polling preserves schedule drafts and waits for worker confirmation
+PASS UI: missing weekdays and equal interval times are rejected before sending
+PASS UI: entire-day mode ignores time fields and schedule can be disabled

@@ -445,5 +445,70 @@ class DisplayTestTests(unittest.TestCase):
         device.disconnect.assert_called_once()
 
 
+class DisplayScheduleTests(unittest.TestCase):
+    def test_legacy_feeds_and_explicit_boolean_state(self):
+        self.assertFalse(worker.display_is_off({}))
+        self.assertFalse(worker.display_is_off({'display': {'off': False}}))
+        self.assertTrue(worker.display_is_off({'display': {'off': True}}))
+
+    def test_invalid_display_state_is_not_treated_as_on(self):
+        for state in (None, [], True, {}, {'off': 'false'}, {'off': 0}, {'off': None}):
+            with self.subTest(state=state), self.assertRaises(ValueError):
+                worker.display_is_off({'display': state})
+
+    def test_schedule_blanks_every_led_overrides_test_and_wakes_without_reconnect(self):
+        device = Mock()
+        device.led_handshake.style = LedStyle.LF12
+        device.led_handshake.model_name = 'LF12'
+        stopper = Mock()
+        stopper.is_set.side_effect = [False, False, False, False, True]
+        sample = {'cpu_temp': 42, 'cpu_load': 5, 'cpu_watts': 30, 'cpu_mhz': 5500,
+                  'rgb': {'mode': 'rainbow'}}
+        off = dict(sample, display={'off': True}, display_test={'id': 'test', 'started_at': 100, 'duration': 8})
+        awake = dict(sample, display={'off': False})
+        with patch.object(worker, 'Led', return_value=device), \
+             patch.object(worker, 'STOP', stopper), \
+             patch.object(worker.signal, 'signal'), \
+             patch.object(worker, 'RotatingFileHandler', return_value=logging.NullHandler()), \
+             patch.object(worker, 'read_sample', side_effect=[awake, off, off, awake]), \
+             patch.object(worker.time, 'time', return_value=100), \
+             patch.object(worker.time, 'monotonic', return_value=200), \
+             patch.object(worker, 'write_status') as status:
+            self.assertEqual(worker.main(), 0)
+        frames = [call.args[0] for call in device.send.call_args_list]
+        self.assertEqual([frame.global_on for frame in frames], [True, False, False, True, False])
+        for frame in frames[1:3]:
+            self.assertEqual(frame.colors, [worker.BLACK] * 124)
+        self.assertEqual(frames[0].colors, frames[3].colors)
+        self.assertTrue(any(any(color) for color in frames[3].colors))
+        statuses = [call.kwargs for call in status.call_args_list]
+        self.assertEqual([s['display_off'] for s in statuses], [False, True, True, False])
+        for s in statuses[1:3]:
+            self.assertEqual(s['display_reason'], 'schedule')
+            self.assertFalse(s['test_active'])
+            self.assertTrue(s['ready'])
+            self.assertEqual((s['cpu_temp'], s['cpu_load'], s['cpu_watts'], s['cpu_mhz']), (42, 5, 30, 5500))
+        device.connect.assert_called_once()
+        device.disconnect.assert_called_once()
+
+    def test_malformed_host_schedule_blanks_output_and_reports_error(self):
+        device = Mock()
+        device.led_handshake.style = LedStyle.LF12
+        stopper = Mock()
+        stopper.is_set.side_effect = [False, True]
+        with patch.object(worker, 'Led', return_value=device), \
+             patch.object(worker, 'STOP', stopper), \
+             patch.object(worker.signal, 'signal'), \
+             patch.object(worker, 'RotatingFileHandler', return_value=logging.NullHandler()), \
+             patch.object(worker, 'read_sample', return_value={'cpu_temp': 42, 'display': {'off': 'false'}}), \
+             patch.object(worker, 'write_status') as status:
+            self.assertEqual(worker.main(), 0)
+        frame = device.send.call_args_list[0].args[0]
+        self.assertFalse(frame.global_on)
+        self.assertEqual(frame.colors, [worker.BLACK] * 124)
+        self.assertEqual(status.call_args.kwargs['display_reason'], 'error')
+        self.assertEqual(status.call_args.kwargs['error'], 'Invalid host display state')
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026.11.01.1 — scheduled display off
+
+- Shortened Docker instance name to TR-DIGITAL to keep its icon and name compact. Older owned names are migrated using the same ownership labels.
+- Weekly display-off schedule: selected weekdays, overnight intervals or entire days, evaluated using the Unraid server timezone and daylight saving rules.
+- All display LEDs turn off while host readings and the USB/backend remain active; output resumes automatically without reconnecting.
+- Scheduled off overrides visual tests and is disabled by default. Legacy clients preserve saved schedules.
+- Tests cover midnight/week boundaries, DST, invalid schedules, live blank/wake frames, HTTP settings and UI draft retention.
+
 ## 2026.10.31.9 — English interface and Community Apps preparation
 
 - English interface, errors, maintenance output, documentation and GitHub templates; previous French README preserved as `README.fr.md`.

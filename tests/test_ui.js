@@ -94,9 +94,10 @@ function harness(status) {
 
   const zones=['temperature','load','power','frequency','decoration'];
   const powerId='0123456789abcdef01234567';
+  const quietDefaults={enabled:false,days:[1,2,3,4,5,6,7],all_day:false,start:'23:00',end:'07:00'};
   const rgb={mode:'temperature',color:'#123456',brightness:72,period:8.5,target:'digits',thresholds:[35,55,75],temperature_colors:['#111111','#222222','#333333','#444444'],temperature_zones:['temperature','power'],smoothing:2.5,zone_colors:Object.fromEntries(zones.map((z,i)=>[z,'#'+String(i+1).repeat(6)]))};
   const modern={...status,
-    settings:{autostart:true,interval:2,sensor:'cpu-sensor',frequency_mode:'average',power_sensor:powerId,rgb},
+    settings:{autostart:true,interval:2,sensor:'cpu-sensor',frequency_mode:'average',power_sensor:powerId,rgb,quiet_hours:quietDefaults},
     metrics:{cpu_temp:38.75,cpu_load:5,cpu_mhz:5500,cpu_watts:0,sensor:'k10temp — Tctl',frequency_mode:'average',frequency_source:'scaling_cur_freq',frequency_kind:'requested',power_source:'CPU package'},
     backend:{ready:true,timestamp:Date.now()/1000,model:'PA140 Digital',capabilities:{power:false,frequency:true,zones:true,decoration:false,zone_names:['temperature','load','power','frequency']}},
     supervisor:true,sensors:[{id:'cpu-sensor',label:'k10temp — Tctl',value:38.75}],
@@ -218,4 +219,52 @@ function harness(status) {
   assert.equal(missing.node('td-power-sensor').value,powerId);
   assert.equal(missing.node('td-power-sensor').options.find(o=>o.value===powerId).text,'Configured source missing');
   console.log('PASS UI : missing configured source retained explicitly');
+
+  assert.equal(ui.node('td-quiet-enabled').checked,false);
+  assert.equal(ui.node('td-quiet-options').hidden,true);
+  assert.equal(ui.node('td-quiet-start').disabled,true);
+  console.log('PASS UI: legacy settings keep scheduled off disabled');
+  const scheduled={...modern,
+    settings:{...modern.settings,quiet_hours:{...quietDefaults,enabled:true,days:[1,5]}},
+    display:{off:true,reason:'schedule',timezone:'Pacific/Auckland',local_time:'Mon 2026-11-02 23:30:00'},
+    backend:{...modern.backend,display_off:true,display_reason:'schedule',timestamp:Date.now()/1000}
+  };
+  const night=harness(scheduled);await flush();
+  assert.equal(night.node('td-quiet-options').hidden,false);
+  for(const d of [1,2,3,4,5,6,7]) assert.equal(night.node(`td-quiet-day-${d}`).checked,[1,5].includes(d));
+  assert.equal(night.node('td-quiet-start').value,'23:00');
+  assert.equal(night.node('td-quiet-end').value,'07:00');
+  assert.match(night.node('td-quiet-clock').textContent,/Mon 2026-11-02 23:30:00.*Pacific\/Auckland/);
+  assert.match(night.node('td-backend').textContent,/Display off.*scheduled/);
+  assert.match(night.node('td-quiet-status').textContent,/off by schedule.*Metrics and USB connection remain active/);
+  assert.equal(night.node('td-temp').textContent,'38.8 °C');
+  console.log('PASS UI: saved schedule, actual display-off state and server timezone are shown');
+  night.node('td-quiet-end').value='08:15';night.node('td-quiet-day-2').checked=true;
+  scheduled.backend.display_off=false;
+  await night.poll();
+  assert.equal(night.node('td-quiet-end').value,'08:15');
+  assert.equal(night.node('td-quiet-day-2').checked,true);
+  assert.equal(night.node('td-quiet-status').textContent,'Display on.');
+  await night.fire('td-form','submit');
+  const nightSave=JSON.parse(night.requests.find(r=>r.body.get('action')==='settings').body.get('settings'));
+  assert.deepEqual(nightSave.quiet_hours,{enabled:true,days:[1,2,5],all_day:false,start:'23:00',end:'08:15'});
+  console.log('PASS UI: polling preserves schedule drafts and waits for worker confirmation');
+  const beforeScheduleErrors=night.requests.filter(r=>r.body.get('action')==='settings').length;
+  for(const d of [1,2,3,4,5,6,7]) night.node(`td-quiet-day-${d}`).checked=false;
+  await night.fire('td-form','submit');
+  assert.match(night.node('td-message').textContent,/Select at least one day/);
+  night.node('td-quiet-day-7').checked=true;night.node('td-quiet-start').value='07:00';night.node('td-quiet-end').value='07:00';
+  await night.fire('td-form','submit');
+  assert.match(night.node('td-message').textContent,/different off\/on times/);
+  assert.equal(night.requests.filter(r=>r.body.get('action')==='settings').length,beforeScheduleErrors);
+  console.log('PASS UI: missing weekdays and equal interval times are rejected before sending');
+  night.node('td-quiet-all-day').checked=true;await night.fire('td-quiet-all-day','change');
+  assert.equal(night.node('td-quiet-times').hidden,true);
+  assert.equal(night.node('td-quiet-start').disabled,true);
+  await night.fire('td-form','submit');
+  const allDaySave=JSON.parse(night.requests.filter(r=>r.body.get('action')==='settings').at(-1).body.get('settings'));
+  assert.deepEqual(allDaySave.quiet_hours,{enabled:true,days:[7],all_day:true,start:'07:00',end:'07:00'});
+  night.node('td-quiet-enabled').checked=false;await night.fire('td-quiet-enabled','change');
+  assert.equal(night.node('td-quiet-options').hidden,true);
+  console.log('PASS UI: entire-day mode ignores time fields and schedule can be disabled');
 })().catch(error=>{console.error(error);process.exit(1);});

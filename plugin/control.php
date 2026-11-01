@@ -12,6 +12,7 @@ function state_dir(): string { return root_path('/boot/config/plugins/'.TD_NAME)
 function run_dir(): string { return root_path('/var/run/'.TD_NAME); }
 function ui_dir(): string { return root_path('/usr/local/emhttp/plugins/'.TD_NAME); }
 require_once __DIR__.'/settings.php';
+require_once __DIR__.'/schedule.php';
 require_once __DIR__.'/metrics.php';
 function fail(string $s): never { throw new RuntimeException($s); }
 function json_read(string $p, array $default=[]): array {
@@ -91,7 +92,7 @@ function inspect(string $kind,string $id): ?array {
     return json_decode($out,true,64,JSON_THROW_ON_ERROR)[0];
 }
 function labels(array $object): array { return $object['Config']['Labels'] ?? []; }
-function container_name(): string { return 'THERMALRIGHT-DIGITAL-BACKEND'; }
+function container_name(): string { return 'TR-DIGITAL'; }
 function own_container(array $c,array $i): bool {
     $l=labels($c);
     return ($l[TD_LABEL.'.owner']??'')===TD_NAME && ($l[TD_LABEL.'.instance']??'')===$i['instance'];
@@ -150,20 +151,22 @@ function sample(array $cfg): array {
         if (isset($prev['total']) && $total>$prev['total']) $load=max(0,min(100,100*(1-($idle-$prev['idle'])/($total-$prev['total']))));
         json_write(run_dir().'/cpu.json',['total'=>$total,'idle'=>$idle]);
     }
+    $display=td_display_state($cfg['quiet_hours']);
     $test=json_read(run_dir().'/display-test.json');
-    if ($test && (microtime(true)-($test['started_at']??0)>8 || microtime(true)<($test['started_at']??0))) {
+    if ($test && ($display['off'] || microtime(true)-($test['started_at']??0)>8 || microtime(true)<($test['started_at']??0))) {
         @unlink(run_dir().'/display-test.json'); $test=[];
     }
     $data=array_merge(['timestamp'=>microtime(true),'cpu_temp'=>$chosen['value']??null,'cpu_load'=>$load,'sensor'=>$chosen['label']??null],td_extra_metrics($cfg));
     $data['rgb']=$cfg['rgb'];
     $data['display_test']=$test?:null;
+    $data['display']=$display;
     json_write(run_dir().'/feed/metrics.json',$data);
     return $data;
 }
 function save_settings(array $d): void {
     $existing=config();
     $clean=td_settings_normalize($d,true);
-    foreach (['frequency_mode','power_sensor','rgb'] as $key) if (!array_key_exists($key,$d)) $clean[$key]=$existing[$key];
+    foreach (['frequency_mode','power_sensor','rgb','quiet_hours'] as $key) if (!array_key_exists($key,$d)) $clean[$key]=$existing[$key];
     if (isset($d['rgb']) && !array_key_exists('temperature_zones',$d['rgb'])) $clean['rgb']['temperature_zones']=$existing['rgb']['temperature_zones'];
     $ids=array_column(sensors(),'id');
     if ($clean['sensor']!=='auto' && !in_array($clean['sensor'],$ids,true) && $clean['sensor']!==$existing['sensor']) fail('Unknown CPU sensor');
@@ -173,6 +176,7 @@ function save_settings(array $d): void {
 }
 function display_test(): void {
     $i=owned_state(); init_run();
+    if (td_display_state(config()['quiet_hours'])['off']) fail('Display is off by schedule; disable the schedule before running a visual test');
     $backend=json_read(run_dir().'/driver/status.json');
     $maxAge=max(10,config()['interval']*2+2);
     if (!supervisor_alive() || !($backend['ready']??false) || time()-($backend['timestamp']??0)>$maxAge) fail('Start the backend and wait for it to connect before running a visual test');
@@ -310,7 +314,10 @@ function supervise(): void {
                     }
                 }
                 $bs=json_read(run_dir().'/driver/status.json');
-                if (($bs['ready']??false) && time()-($bs['timestamp']??0)<max(10,$cfg['interval']*2+2)) { $until=time()+180; $message='Backend running, USB frames sent'; }
+                if (($bs['ready']??false) && time()-($bs['timestamp']??0)<max(10,$cfg['interval']*2+2)) {
+                    $until=time()+180;
+                    $message=($bs['display_off']??false) && ($bs['display_reason']??'')==='schedule'?'Display off by schedule; backend running':'Backend running, USB frames sent';
+                }
                 else {
                     $message=$bs['error']??'Connecting to driver';
                     if (time()>$until) { event_log('Driver not ready after 180 s : '.$message); break; }
@@ -344,6 +351,7 @@ function status(): array {
     $metrics=json_read($r.'/feed/metrics.json',['cpu_temp'=>null,'cpu_load'=>null]);
     if (time()-($metrics['timestamp']??0)>10) $metrics=['cpu_temp'=>null,'cpu_load'=>null];
     return ['unraid'=>version_check(),'release'=>release()['version']??null,'settings'=>$cfg,
+            'display'=>td_display_state($cfg['quiet_hours']),
             'supervisor'=>supervisor_alive(),'docker'=>docker_ok(),'usb'=>usb_devices(),'metrics'=>$metrics,
             'sensors'=>array_map(fn($s)=>array_diff_key($s,['path'=>true]),sensors()),
             'metric_sources'=>td_extra_metric_sources(),
@@ -478,6 +486,9 @@ function cli(array $argv): int {
                     'events'=>['docker_started','started','stopping','stopping_docker','stopped'],
                     'volumes'=>[],'networks'=>[],'scheduled_tasks'=>[]];
                 inv_save($i);
+            }
+            if (($i['resources']['container']??'')!==container_name()) {
+                $i['resources']['container']=container_name(); inv_save($i);
             }
             $plg=state_dir().'/packages/'.$rel['version'].'/'.TD_NAME.'.plg';
             if (is_file($plg) && !isset($i['bundles'][$rel['version']])) {

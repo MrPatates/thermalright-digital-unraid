@@ -184,7 +184,7 @@ php_admin_value[auto_prepend_file] = /work/tests/fixtures/unraid-local-prepend.p
         self.assertFalse((RUN/'display-test.json').exists())
         code,data=self.request('start');self.assertEqual(code,200,data)
         fake=json.loads(self.fake.read_text())
-        fake['containers']['test-current']={'Id':'test-current','Name':'THERMALRIGHT-DIGITAL-BACKEND','Image':'fake',
+        fake['containers']['test-current']={'Id':'test-current','Name':'TR-DIGITAL','Image':'fake',
           'Config':{'Labels':{'io.local.thermalright-digital.owner':'thermalright-digital','io.local.thermalright-digital.instance':'b'*32}},'State':{'Running':True}}
         self.fake.write_text(json.dumps(fake))
         (RUN/'driver/status.json').write_text(json.dumps(dict(ready=True,timestamp=time.time(),model='TEST ONLY')))
@@ -199,6 +199,31 @@ php_admin_value[auto_prepend_file] = /work/tests/fixtures/unraid-local-prepend.p
         self.assertTrue((RUN/'supervisor.json').exists())
         code,data=self.request('stop');self.assertEqual(code,200,data)
         self.assertFalse((RUN/'supervisor.json').exists())
+
+    def test_schedule_persists_and_old_client_preserves_it(self):
+        code,data=self.request();self.assertEqual(code,200)
+        settings=dict(data['settings'])
+        settings['quiet_hours']=dict(enabled=True,days=[1,2,3,4,5,6,7],all_day=True,start='23:00',end='07:00')
+        code,data=self.request('settings',settings=json.dumps(settings));self.assertEqual(code,200,data)
+        code,data=self.request();self.assertEqual(code,200)
+        self.assertTrue(data['display']['off']);self.assertEqual(data['display']['reason'],'schedule')
+        self.assertEqual(data['display']['timezone'],'UTC')
+        self.assertTrue(data['settings']['quiet_hours']['enabled'])
+        code,data=self.request('settings',settings=json.dumps(self.settings));self.assertEqual(code,200,data)
+        self.assertEqual(json.loads((STATE/'settings.json').read_text())['quiet_hours'],settings['quiet_hours'])
+        before=(STATE/'settings.json').read_bytes()
+        settings['quiet_hours']['days']=[]
+        code,data=self.request('settings',settings=json.dumps(settings));self.assertEqual(code,409)
+        self.assertEqual((STATE/'settings.json').read_bytes(),before)
+
+    def test_visual_test_refuses_scheduled_off_without_creating_marker(self):
+        code,data=self.request();settings=data['settings']
+        settings['quiet_hours']['enabled']=True;settings['quiet_hours']['all_day']=True
+        code,data=self.request('settings',settings=json.dumps(settings));self.assertEqual(code,200,data)
+        (RUN/'display-test.json').unlink(missing_ok=True)
+        code,data=self.request('display-test');self.assertEqual(code,409)
+        self.assertIn('off by schedule',data['error'])
+        self.assertFalse((RUN/'display-test.json').exists())
 
     def test_csrf_and_method_checks_survive_fpm(self):
         for options,expected in [({'token':'wrong'},403),({'token':None},403),({'header':'wrong'},403),({'header':None},403),({'method':'GET'},405)]:
