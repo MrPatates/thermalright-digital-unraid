@@ -1,11 +1,16 @@
 Menu="Settings"
 Title="THERMALRIGHT DIGITAL"
 Icon="logo.png"
+Markdown="false"
 ---
 <?php
+// Unraid evaluates .page content from its router; __DIR__ then names the router.
+$tdPluginRoot=isset($docroot) && is_string($docroot)?$docroot.'/plugins/thermalright-digital':__DIR__;
+require_once $tdPluginRoot.'/i18n.php';
+$GLOBALS['tdI18n'] = $tdI18n = td_i18n_context(isset($locale) && is_string($locale)?$locale:null);
 $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [];
 ?>
-<div id="td-panel">
+<div id="td-panel" lang="<?=str_replace('_','-',$tdI18n['locale'])?>" dir="<?=$tdI18n['direction']?>">
 <style>
 #td-panel { --td-border:rgba(128,128,128,.35); --td-soft:rgba(128,128,128,.08); max-width:1120px; }
 #td-panel * { box-sizing:border-box; }
@@ -33,7 +38,7 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
 #td-panel input[type=time] { width:150px; max-width:100%; margin:0; }
 #td-panel input[type=color] { width:54px; height:34px; padding:2px; vertical-align:middle; margin:0; cursor:pointer; }
 #td-panel input[type=color]:disabled { cursor:default; opacity:.55; }
-#td-panel input[type=checkbox] { margin:0 6px 0 0; vertical-align:middle; }
+#td-panel input[type=checkbox] { margin:0; margin-inline-end:6px; vertical-align:middle; }
 #td-panel .td-inline { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; }
 #td-panel .td-inline > label { display:inline-flex; align-items:center; margin:0; }
 #td-panel .td-wide { grid-column:1/-1; }
@@ -59,114 +64,128 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
 #td-panel [hidden] { display:none !important; }
 @media(max-width:800px) { #td-panel .td-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } #td-panel .td-zone-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:600px) { #td-panel .td-grid { grid-template-columns:1fr; } #td-panel .td-section { padding:12px; } #td-panel .td-palette, #td-panel .td-zone-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } #td-panel .td-detail-grid { grid-template-columns:1fr; gap:4px; } #td-panel .td-detail-grid dd { margin-bottom:8px; } #td-panel .td-value { font-size:1.5em; } }
+#td-panel[dir=rtl] .td-metric dt, #td-panel[dir=rtl] .td-metric dd, #td-panel[dir=rtl] label, #td-panel[dir=rtl] .td-label, #td-panel[dir=rtl] .td-zone label, #td-panel[dir=rtl] .td-palette-item label, #td-panel[dir=rtl] .td-detail-grid dt, #td-panel[dir=rtl] .td-detail-grid dd { text-align:right; text-align-last:right; }
+#td-panel .td-value { direction:ltr; unicode-bidi:isolate; }
+#td-panel[dir=rtl] input[type=number], #td-panel[dir=rtl] input[type=time] { direction:ltr; }
 </style>
 <div class="td-overview">
 <div class="td-brand"><img class="td-logo" src="/plugins/thermalright-digital/logo.png" alt=""><div><p class="td-device">THERMALRIGHT DIGITAL</p><p class="td-help">Peerless Assassin 140 Digital</p><p class="td-help" id="td-version"></p></div></div>
-<span class="td-status" id="td-backend">Reading status…</span>
+<span class="td-status" id="td-backend"><?=td_h('Reading status…')?></span>
 </div>
-<p id="td-message" role="status" aria-live="polite">Reading status…</p>
-<div class="td-metrics" aria-label="Host CPU metrics">
-<dl class="td-metric"><dt>CPU temperature</dt><dd><span class="td-value" id="td-temp">—</span><span class="td-metric-source" id="td-temp-source"></span></dd></dl>
-<dl class="td-metric"><dt>CPU load</dt><dd><span class="td-value" id="td-load">—</span><span class="td-metric-source">All CPU cores</span></dd></dl>
-<dl class="td-metric"><dt>CPU frequency</dt><dd><span class="td-value" id="td-frequency">—</span><span class="td-metric-source" id="td-frequency-summary"></span></dd></dl>
-<dl class="td-metric"><dt>CPU power</dt><dd><span class="td-value" id="td-power">—</span><span class="td-metric-source" id="td-power-source"></span></dd></dl>
+<p id="td-message" role="status" aria-live="polite"><?=td_h('Reading status…')?></p>
+<div class="td-metrics" aria-label="<?=td_h('Host CPU metrics')?>">
+<dl class="td-metric"><dt><?=td_h('CPU temperature')?></dt><dd><span class="td-value" id="td-temp">—</span><span class="td-metric-source" id="td-temp-source"></span></dd></dl>
+<dl class="td-metric"><dt><?=td_h('CPU load')?></dt><dd><span class="td-value" id="td-load">—</span><span class="td-metric-source"><?=td_h('All CPU cores')?></span></dd></dl>
+<dl class="td-metric"><dt><?=td_h('CPU frequency')?></dt><dd><span class="td-value" id="td-frequency">—</span><span class="td-metric-source" id="td-frequency-summary"></span></dd></dl>
+<dl class="td-metric"><dt><?=td_h('CPU power')?></dt><dd><span class="td-value" id="td-power">—</span><span class="td-metric-source" id="td-power-source"></span></dd></dl>
 </div>
-<details class="td-details"><summary>Connection and metric sources</summary>
-<dl class="td-detail-grid"><dt>USB display</dt><dd id="td-usb"></dd><dt>Physical display</dt><dd id="td-capabilities">Capabilities will be confirmed after connecting.</dd><dt>Frequency</dt><dd id="td-frequency-source"></dd></dl>
-<p class="td-help">Watts refer to the selected CPU source. Driver-requested frequency may differ from actual frequency. The average uses active CPU policies without weighting by core count.</p>
+<details class="td-details"><summary><?=td_h('Connection and metric sources')?></summary>
+<dl class="td-detail-grid"><dt><?=td_h('USB display')?></dt><dd id="td-usb"></dd><dt><?=td_h('Physical display')?></dt><dd id="td-capabilities"><?=td_h('Capabilities will be confirmed after connecting.')?></dd><dt><?=td_h('Frequency')?></dt><dd id="td-frequency-source"></dd></dl>
+<p class="td-help"><?=td_h('Watts refer to the selected CPU source. Driver-requested frequency may differ from actual frequency. The average uses active CPU policies without weighting by core count.')?></p>
 </details>
 <form id="td-form">
 <input type="hidden" name="csrf_token" value="<?=htmlspecialchars($tdVar['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8')?>">
-<fieldset class="td-section"><legend>Service and metrics</legend>
+<fieldset class="td-section"><legend><?=td_h('Service and metrics')?></legend>
 <div class="td-grid">
-<div class="td-field td-wide"><label class="td-inline"><input type="checkbox" id="td-auto"> Start automatically after the array and Docker</label></div>
-<div class="td-field"><label for="td-sensor">CPU temperature sensor</label><select id="td-sensor"><option value="auto">Automatic: recognized CPU sensor</option></select></div>
-<div class="td-field"><label for="td-power-sensor">CPU power source</label><select id="td-power-sensor"><option value="auto">Automatic: recognized CPU source</option><option value="off">Disabled</option></select></div>
-<div class="td-field"><label for="td-frequency-mode">Displayed frequency</label><select id="td-frequency-mode"><option value="max">Maximum CPU policy frequency</option><option value="average">Average CPU policy frequency</option></select></div>
-<div class="td-field"><label for="td-interval">Refresh interval</label><div class="td-inline"><input id="td-interval" type="number" min="1" max="60" value="1" required><span>seconds (1–60)</span></div></div>
+<div class="td-field td-wide"><label class="td-inline"><input type="checkbox" id="td-auto"> <?=td_h('Start automatically after the array and Docker')?></label></div>
+<div class="td-field"><label for="td-sensor"><?=td_h('CPU temperature sensor')?></label><select id="td-sensor"><option value="auto"><?=td_h('Automatic: recognized CPU sensor')?></option></select></div>
+<div class="td-field"><label for="td-power-sensor"><?=td_h('CPU power source')?></label><select id="td-power-sensor"><option value="auto"><?=td_h('Automatic: recognized CPU source')?></option><option value="off"><?=td_h('Disabled')?></option></select></div>
+<div class="td-field"><label for="td-frequency-mode"><?=td_h('Displayed frequency')?></label><select id="td-frequency-mode"><option value="max"><?=td_h('Maximum CPU policy frequency')?></option><option value="average"><?=td_h('Average CPU policy frequency')?></option></select></div>
+<div class="td-field"><label for="td-interval"><?=td_h('Refresh interval')?></label><div class="td-inline"><input id="td-interval" type="number" min="1" max="60" value="1" required><span><?=td_h('seconds (1–60)')?></span></div></div>
 </div>
-<div class="td-actions"><button type="button" data-action="start">Start</button><button type="button" data-action="stop">Stop</button><button type="button" data-action="restart">Restart</button></div>
+<div class="td-actions"><button type="button" data-action="start"><?=td_h('Start')?></button><button type="button" data-action="stop"><?=td_h('Stop')?></button><button type="button" data-action="restart"><?=td_h('Restart')?></button></div>
 </fieldset>
-<fieldset class="td-section"><legend>Scheduled display off</legend>
-<label class="td-inline"><input type="checkbox" id="td-quiet-enabled"> Enable scheduled display off</label>
-<p class="td-help" id="td-quiet-status">Waiting for display status.</p>
-<p class="td-help" id="td-quiet-clock">Schedule follows the Unraid server clock.</p>
+<fieldset class="td-section"><legend><?=td_h('Scheduled display off')?></legend>
+<label class="td-inline"><input type="checkbox" id="td-quiet-enabled"> <?=td_h('Enable scheduled display off')?></label>
+<p class="td-help" id="td-quiet-status"><?=td_h('Waiting for display status.')?></p>
+<p class="td-help" id="td-quiet-clock"><?=td_h('Schedule follows the Unraid server clock.')?></p>
 <div id="td-quiet-options" hidden>
-<p class="td-subheading">Days the off period starts</p>
-<div class="td-checks" role="group" aria-label="Display off days">
-<label for="td-quiet-day-1"><input id="td-quiet-day-1" type="checkbox" checked> Mon</label>
-<label for="td-quiet-day-2"><input id="td-quiet-day-2" type="checkbox" checked> Tue</label>
-<label for="td-quiet-day-3"><input id="td-quiet-day-3" type="checkbox" checked> Wed</label>
-<label for="td-quiet-day-4"><input id="td-quiet-day-4" type="checkbox" checked> Thu</label>
-<label for="td-quiet-day-5"><input id="td-quiet-day-5" type="checkbox" checked> Fri</label>
-<label for="td-quiet-day-6"><input id="td-quiet-day-6" type="checkbox" checked> Sat</label>
-<label for="td-quiet-day-7"><input id="td-quiet-day-7" type="checkbox" checked> Sun</label>
+<p class="td-subheading"><?=td_h('Days the off period starts')?></p>
+<div class="td-checks" role="group" aria-label="<?=td_h('Display off days')?>">
+<label for="td-quiet-day-1"><input id="td-quiet-day-1" type="checkbox" checked> <?=td_h('Mon')?></label>
+<label for="td-quiet-day-2"><input id="td-quiet-day-2" type="checkbox" checked> <?=td_h('Tue')?></label>
+<label for="td-quiet-day-3"><input id="td-quiet-day-3" type="checkbox" checked> <?=td_h('Wed')?></label>
+<label for="td-quiet-day-4"><input id="td-quiet-day-4" type="checkbox" checked> <?=td_h('Thu')?></label>
+<label for="td-quiet-day-5"><input id="td-quiet-day-5" type="checkbox" checked> <?=td_h('Fri')?></label>
+<label for="td-quiet-day-6"><input id="td-quiet-day-6" type="checkbox" checked> <?=td_h('Sat')?></label>
+<label for="td-quiet-day-7"><input id="td-quiet-day-7" type="checkbox" checked> <?=td_h('Sun')?></label>
 </div>
-<label class="td-inline"><input type="checkbox" id="td-quiet-all-day"> Keep display off for the entire selected days</label>
+<label class="td-inline"><input type="checkbox" id="td-quiet-all-day"> <?=td_h('Keep display off for the entire selected days')?></label>
 <div class="td-grid td-subsection" id="td-quiet-times">
-<div class="td-field"><label for="td-quiet-start">Turn off at</label><input id="td-quiet-start" type="time" step="60" value="23:00" required></div>
-<div class="td-field"><label for="td-quiet-end">Turn back on at</label><input id="td-quiet-end" type="time" step="60" value="07:00" required></div>
+<div class="td-field"><label for="td-quiet-start"><?=td_h('Turn off at')?></label><input id="td-quiet-start" type="time" step="60" value="23:00" required></div>
+<div class="td-field"><label for="td-quiet-end"><?=td_h('Turn back on at')?></label><input id="td-quiet-end" type="time" step="60" value="07:00" required></div>
 </div>
-<p class="td-help">Times use the server timezone shown above. For Monday 23:00–07:00, select Monday: the display stays off until Tuesday at 07:00. Entire-day mode uses midnight to midnight.</p>
-<p class="td-help">All display LEDs turn off, including decorations. Metrics and the backend keep running; the display wakes automatically. Scheduled off takes priority over the visual test. Click Save to apply changes.</p>
+<p class="td-help"><?=td_h('Times use the server timezone shown above. For Monday 23:00–07:00, select Monday: the display stays off until Tuesday at 07:00. Entire-day mode uses midnight to midnight.')?></p>
+<p class="td-help"><?=td_h('All display LEDs turn off, including decorations. Metrics and the backend keep running; the display wakes automatically. Scheduled off takes priority over the visual test. Click Save to apply changes.')?></p>
 </div>
 </fieldset>
-<fieldset class="td-section"><legend>Display colors</legend>
+<fieldset class="td-section"><legend><?=td_h('Display colors')?></legend>
 <div class="td-grid">
-<div class="td-field"><label for="td-rgb-mode">Mode</label><select id="td-rgb-mode"><option value="static">Fixed color</option><option value="zones">Colors by category</option><option value="temperature">CPU temperature colors</option><option value="breathing">Breathing</option><option value="rainbow">Rainbow</option></select></div>
-<div class="td-field"><label for="td-rgb-target">Effect scope</label><select id="td-rgb-target"><option value="all">Digits and decorations</option><option value="digits">Digits</option><option value="decoration">Decorations</option></select></div>
-<div class="td-field"><label for="td-rgb-brightness">Brightness</label><div class="td-inline"><input id="td-rgb-brightness" type="range" min="0" max="100" step="1" value="100"><output id="td-rgb-brightness-value" for="td-rgb-brightness">100 %</output></div></div>
-<div class="td-field" id="td-rgb-fixed"><label for="td-rgb-color" id="td-rgb-color-label">Color</label><input id="td-rgb-color" type="color" value="#00b4ff"></div>
-<div class="td-field" id="td-rgb-animation" hidden><label for="td-rgb-period">Cycle duration</label><div class="td-inline"><input id="td-rgb-period" type="number" min="1" max="60" step="any" value="6" required><span>seconds</span></div></div>
+<div class="td-field"><label for="td-rgb-mode"><?=td_h('Mode')?></label><select id="td-rgb-mode"><option value="static"><?=td_h('Fixed color')?></option><option value="zones"><?=td_h('Colors by category')?></option><option value="temperature"><?=td_h('CPU temperature colors')?></option><option value="breathing"><?=td_h('Breathing')?></option><option value="rainbow"><?=td_h('Rainbow')?></option></select></div>
+<div class="td-field"><label for="td-rgb-target"><?=td_h('Effect scope')?></label><select id="td-rgb-target"><option value="all"><?=td_h('Digits and decorations')?></option><option value="digits"><?=td_h('Digits')?></option><option value="decoration"><?=td_h('Decorations')?></option></select></div>
+<div class="td-field"><label for="td-rgb-brightness"><?=td_h('Brightness')?></label><div class="td-inline"><input id="td-rgb-brightness" type="range" min="0" max="100" step="1" value="100"><output id="td-rgb-brightness-value" for="td-rgb-brightness">100 %</output></div></div>
+<div class="td-field" id="td-rgb-fixed"><label for="td-rgb-color" id="td-rgb-color-label"><?=td_h('Color')?></label><input id="td-rgb-color" type="color" value="#00b4ff"></div>
+<div class="td-field" id="td-rgb-animation" hidden><label for="td-rgb-period"><?=td_h('Cycle duration')?></label><div class="td-inline"><input id="td-rgb-period" type="number" min="1" max="60" step="any" value="6" required><span><?=td_h('seconds')?></span></div></div>
 </div>
 <div id="td-rgb-temperature" class="td-subsection" hidden>
-<p class="td-subheading">Categories that follow temperature</p>
-<p class="td-help">Select only “Temperature” to make digits such as 42 °C change color. Other categories keep their fixed colors below.</p>
-<div class="td-checks" role="group" aria-label="Categories with dynamic colors">
-<label for="td-rgb-temperature-zone-temperature"><input id="td-rgb-temperature-zone-temperature" type="checkbox" checked> Temperature</label>
-<label for="td-rgb-temperature-zone-load"><input id="td-rgb-temperature-zone-load" type="checkbox" checked> Load</label>
-<label for="td-rgb-temperature-zone-power"><input id="td-rgb-temperature-zone-power" type="checkbox" checked> Watts</label>
+<p class="td-subheading"><?=td_h('Categories that follow temperature')?></p>
+<p class="td-help"><?=td_h('Select only “Temperature” to make digits such as 42 °C change color. Other categories keep their fixed colors below.')?></p>
+<div class="td-checks" role="group" aria-label="<?=td_h('Categories with dynamic colors')?>">
+<label for="td-rgb-temperature-zone-temperature"><input id="td-rgb-temperature-zone-temperature" type="checkbox" checked> <?=td_h('Temperature')?></label>
+<label for="td-rgb-temperature-zone-load"><input id="td-rgb-temperature-zone-load" type="checkbox" checked> <?=td_h('Load')?></label>
+<label for="td-rgb-temperature-zone-power"><input id="td-rgb-temperature-zone-power" type="checkbox" checked> <?=td_h('Watts')?></label>
 <label for="td-rgb-temperature-zone-frequency"><input id="td-rgb-temperature-zone-frequency" type="checkbox" checked> MHz</label>
-<label for="td-rgb-temperature-zone-decoration"><input id="td-rgb-temperature-zone-decoration" type="checkbox" checked> Decorations</label>
+<label for="td-rgb-temperature-zone-decoration"><input id="td-rgb-temperature-zone-decoration" type="checkbox" checked> <?=td_h('Decorations')?></label>
 </div>
-<div class="td-inline"><button type="button" id="td-temperature-only">Temperature only</button><span class="td-help" id="td-rgb-temperature-summary"></span></div>
+<div class="td-inline"><button type="button" id="td-temperature-only"><?=td_h('Temperature only')?></button><span class="td-help" id="td-rgb-temperature-summary"></span></div>
 <div class="td-palette">
-<div class="td-palette-item"><label for="td-rgb-temperature-color-0">Cold color</label><input id="td-rgb-temperature-color-0" type="color" value="#00b4ff"><p class="td-help">Below the thresholds</p></div>
-<div class="td-palette-item"><label for="td-rgb-threshold-0">First threshold</label><div class="td-inline"><input id="td-rgb-threshold-0" type="number" min="0" max="125" step="any" value="40" required><span>°C</span><input id="td-rgb-temperature-color-1" type="color" value="#00ff00" aria-label="Color at the first threshold"></div></div>
-<div class="td-palette-item"><label for="td-rgb-threshold-1">Second threshold</label><div class="td-inline"><input id="td-rgb-threshold-1" type="number" min="0" max="125" step="any" value="60" required><span>°C</span><input id="td-rgb-temperature-color-2" type="color" value="#ff9900" aria-label="Color at the second threshold"></div></div>
-<div class="td-palette-item"><label for="td-rgb-threshold-2">Third threshold</label><div class="td-inline"><input id="td-rgb-threshold-2" type="number" min="0" max="125" step="any" value="80" required><span>°C</span><input id="td-rgb-temperature-color-3" type="color" value="#ff0000" aria-label="Color at and above the third threshold"></div></div>
+<div class="td-palette-item"><label for="td-rgb-temperature-color-0"><?=td_h('Cold color')?></label><input id="td-rgb-temperature-color-0" type="color" value="#00b4ff"><p class="td-help"><?=td_h('Below the thresholds')?></p></div>
+<div class="td-palette-item"><label for="td-rgb-threshold-0"><?=td_h('First threshold')?></label><div class="td-inline"><input id="td-rgb-threshold-0" type="number" min="0" max="125" step="any" value="40" required><span>°C</span><input id="td-rgb-temperature-color-1" type="color" value="#00ff00" aria-label="<?=td_h('Color at the first threshold')?>"></div></div>
+<div class="td-palette-item"><label for="td-rgb-threshold-1"><?=td_h('Second threshold')?></label><div class="td-inline"><input id="td-rgb-threshold-1" type="number" min="0" max="125" step="any" value="60" required><span>°C</span><input id="td-rgb-temperature-color-2" type="color" value="#ff9900" aria-label="<?=td_h('Color at the second threshold')?>"></div></div>
+<div class="td-palette-item"><label for="td-rgb-threshold-2"><?=td_h('Third threshold')?></label><div class="td-inline"><input id="td-rgb-threshold-2" type="number" min="0" max="125" step="any" value="80" required><span>°C</span><input id="td-rgb-temperature-color-3" type="color" value="#ff0000" aria-label="<?=td_h('Color at and above the third threshold')?>"></div></div>
 </div>
-<div class="td-inline"><label for="td-rgb-smoothing">Color smoothing</label><input id="td-rgb-smoothing" type="number" min="0" max="30" step="any" value="3" required><span>seconds</span></div>
-<p class="td-help">Use increasing thresholds for smooth color transitions. Smoothing affects colors only; digits show the actual reading. The fallback color is used when temperature is unavailable.</p>
+<div class="td-inline"><label for="td-rgb-smoothing"><?=td_h('Color smoothing')?></label><input id="td-rgb-smoothing" type="number" min="0" max="30" step="any" value="3" required><span><?=td_h('seconds')?></span></div>
+<p class="td-help"><?=td_h('Use increasing thresholds for smooth color transitions. Smoothing affects colors only; digits show the actual reading. The fallback color is used when temperature is unavailable.')?></p>
 </div>
 <div id="td-rgb-zones" class="td-subsection" hidden>
-<p class="td-subheading" id="td-rgb-zones-heading">Fixed colors by category</p>
+<p class="td-subheading" id="td-rgb-zones-heading"><?=td_h('Fixed colors by category')?></p>
 <div class="td-zone-grid">
-<div class="td-zone"><label for="td-rgb-zone-temperature">Temperature</label><input id="td-rgb-zone-temperature" type="color" value="#00b4ff"><span id="td-rgb-zone-note-temperature" class="td-zone-note">Fixed color</span></div>
-<div class="td-zone"><label for="td-rgb-zone-load">Load</label><input id="td-rgb-zone-load" type="color" value="#00b4ff"><span id="td-rgb-zone-note-load" class="td-zone-note">Fixed color</span></div>
-<div class="td-zone"><label for="td-rgb-zone-power">Watts</label><input id="td-rgb-zone-power" type="color" value="#00b4ff"><span id="td-rgb-zone-note-power" class="td-zone-note">Fixed color</span></div>
-<div class="td-zone"><label for="td-rgb-zone-frequency">MHz</label><input id="td-rgb-zone-frequency" type="color" value="#00b4ff"><span id="td-rgb-zone-note-frequency" class="td-zone-note">Fixed color</span></div>
-<div class="td-zone"><label for="td-rgb-zone-decoration">Decorations</label><input id="td-rgb-zone-decoration" type="color" value="#00b4ff"><span id="td-rgb-zone-note-decoration" class="td-zone-note">Fixed color</span></div>
+<div class="td-zone"><label for="td-rgb-zone-temperature"><?=td_h('Temperature')?></label><input id="td-rgb-zone-temperature" type="color" value="#00b4ff"><span id="td-rgb-zone-note-temperature" class="td-zone-note"><?=td_h('Fixed color')?></span></div>
+<div class="td-zone"><label for="td-rgb-zone-load"><?=td_h('Load')?></label><input id="td-rgb-zone-load" type="color" value="#00b4ff"><span id="td-rgb-zone-note-load" class="td-zone-note"><?=td_h('Fixed color')?></span></div>
+<div class="td-zone"><label for="td-rgb-zone-power"><?=td_h('Watts')?></label><input id="td-rgb-zone-power" type="color" value="#00b4ff"><span id="td-rgb-zone-note-power" class="td-zone-note"><?=td_h('Fixed color')?></span></div>
+<div class="td-zone"><label for="td-rgb-zone-frequency">MHz</label><input id="td-rgb-zone-frequency" type="color" value="#00b4ff"><span id="td-rgb-zone-note-frequency" class="td-zone-note"><?=td_h('Fixed color')?></span></div>
+<div class="td-zone"><label for="td-rgb-zone-decoration"><?=td_h('Decorations')?></label><input id="td-rgb-zone-decoration" type="color" value="#00b4ff"><span id="td-rgb-zone-note-decoration" class="td-zone-note"><?=td_h('Fixed color')?></span></div>
 </div>
 </div>
-<p id="td-rgb-capabilities" class="td-help">Available categories depend on the detected display model.</p>
-<div class="td-subsection"><button type="button" id="td-display-test">Test colors and segments</button><p id="td-test-state" class="td-help">An 8-second visual sequence, then an automatic return to normal display. Test digits are synthetic. The test uses saved settings; unsaved changes are kept as a draft.</p></div>
+<p id="td-rgb-capabilities" class="td-help"><?=td_h('Available categories depend on the detected display model.')?></p>
+<div class="td-subsection"><button type="button" id="td-display-test"><?=td_h('Test colors and segments')?></button><p id="td-test-state" class="td-help"><?=td_h('An 8-second visual sequence, then an automatic return to normal display. Test digits are synthetic. The test uses saved settings; unsaved changes are kept as a draft.')?></p></div>
 </fieldset>
-<div class="td-actions td-footer"><button type="submit">Save</button><button type="button" id="td-diagnostic">Export diagnostics</button></div>
+<div class="td-actions td-footer"><button type="submit"><?=td_h('Save')?></button><button type="button" id="td-diagnostic"><?=td_h('Export diagnostics')?></button></div>
 </form>
-<p class="td-help">Unavailable values stay blank on the display. “Frames sent” confirms USB transfers; check the physical display to verify rendering.</p>
-<div id="td-legacy" hidden><p>A legacy thermalright-screen installation was detected. Its resources are preserved.</p><button type="button" id="td-migrate">Migration: stop the labeled legacy container</button><p>This stops thermalright-screen only if its trcc.setup label matches. Its image, directory and Docker autostart setting are preserved. Disable its autostart in the Docker tab before enabling plugin autostart.</p></div>
-<details class="td-details"><summary>Recent logs</summary><pre id="td-logs" style="white-space:pre-wrap;max-height:320px;overflow:auto"></pre></details>
+<p class="td-help"><?=td_h('Unavailable values stay blank on the display. “Frames sent” confirms USB transfers; check the physical display to verify rendering.')?></p>
+<div id="td-legacy" hidden><p><?=td_h('A legacy thermalright-screen installation was detected. Its resources are preserved.')?></p><button type="button" id="td-migrate"><?=td_h('Migration: stop the labeled legacy container')?></button><p><?=td_h('This stops thermalright-screen only if its trcc.setup label matches. Its image, directory and Docker autostart setting are preserved. Disable its autostart in the Docker tab before enabling plugin autostart.')?></p></div>
+<details class="td-details"><summary><?=td_h('Recent logs')?></summary><pre id="td-logs" style="white-space:pre-wrap;max-height:320px;overflow:auto"></pre></details>
 </div>
+<script type="application/json" id="td-i18n"><?=td_i18n_json($tdI18n)?></script>
 <script>
 (() => {
+  const i18n=JSON.parse(document.getElementById('td-i18n').textContent);
+  const clockValue=value=>i18n.direction==='rtl'?'\u2066'+value+'\u2069':value;
+  const t=(source,parameters={})=>(i18n.messages[source]||source).replace(/\{([A-Za-z0-9_]+)\}/g,(match,key)=>Object.prototype.hasOwnProperty.call(parameters,key)?String(parameters[key]):match);
+  const list=values=>values.join(i18n.locale==='ar_AR'?'، ':['zh_CN','zh_TW','ja_JA'].includes(i18n.locale)?'、':', ');
+  const serverMessage=message=>{
+    const text=String(message);
+    if (/^(missing|wrong|uninitialized) csrf_token$/.test(text)) return t('Invalid CSRF token');
+    const fatal=text.match(/^Internal PHP error in (.+)\. Check the server PHP log\.$/);
+    return fatal?t('Internal PHP error in {location}. Check the server PHP log.',{location:fatal[1]}):t(text);
+  };
   const endpoint='/plugins/thermalright-digital/api.php';
   const el=id=>document.getElementById('td-'+id);
   const csrf=document.querySelector('#td-form input[name=csrf_token]').value;
   const zones=['temperature','load','power','frequency','decoration'];
   const weekdays=[1,2,3,4,5,6,7];
   const quietDefaults={enabled:false,days:[...weekdays],all_day:false,start:'23:00',end:'07:00'};
-  const zoneLabels={temperature:'temperature',load:'load',power:'watts',frequency:'MHz',decoration:'decorations'};
+  const zoneLabels={temperature:t('temperature'),load:t('load'),power:t('watts'),frequency:'MHz',decoration:t('decorations')};
   const rgbDefaults={mode:'static',color:'#00b4ff',brightness:100,period:6,target:'all',thresholds:[40,60,80],temperature_colors:['#00b4ff','#00ff00','#ff9900','#ff0000'],temperature_zones:[...zones],smoothing:3,zone_colors:Object.fromEntries(zones.map(z=>[z,'#00b4ff']))};
   let loaded=false, busy=false, fetching=false;
   function quietVisibility() {
@@ -175,21 +194,21 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
     el('quiet-times').hidden=allDay;
     for (const key of ['start','end']) el(`quiet-${key}`).disabled=!enabled || allDay;
   }
-  const metric=(value,digits,unit)=>Number.isFinite(value)?`${value.toFixed(digits)} ${unit}`:'Unavailable';
+  const metric=(value,digits,unit)=>Number.isFinite(value)?`${value.toFixed(digits)} ${unit}`:t('Unavailable');
   function rgbVisibility() {
     const mode=el('rgb-mode').value;
     el('rgb-fixed').hidden=!['static','breathing','temperature'].includes(mode);
     el('rgb-animation').hidden=!['breathing','rainbow'].includes(mode);
     el('rgb-temperature').hidden=mode!=='temperature';
     el('rgb-zones').hidden=!['zones','temperature'].includes(mode);
-    el('rgb-color-label').textContent=mode==='temperature'?'Fallback color':'Color';
+    el('rgb-color-label').textContent=mode==='temperature'?t('Fallback color'):t('Color');
     el('rgb-brightness-value').textContent=`${el('rgb-brightness').value} %`;
     const active=zones.filter(z=>el(`rgb-temperature-zone-${z}`).checked && (el('rgb-target').value==='all' || (el('rgb-target').value==='decoration')===(z==='decoration')));
-    el('rgb-temperature-summary').textContent=active.length?`Gradient active on: ${active.map(z=>zoneLabels[z]).join(', ')}.`:'No categories within the selected scope.';
+    el('rgb-temperature-summary').textContent=active.length?t('Gradient active on: {zones}.',{zones:list(active.map(z=>zoneLabels[z]))}):t('No categories within the selected scope.');
     for (const z of zones) {
       const dynamic=mode==='temperature' && active.includes(z);
       el(`rgb-zone-${z}`).disabled=dynamic;
-      el(`rgb-zone-note-${z}`).textContent=dynamic?'Temperature gradient':'Fixed color';
+      el(`rgb-zone-note-${z}`).textContent=dynamic?t('Temperature gradient'):t('Fixed color');
     }
   }
   function settingsFromForm() {
@@ -206,13 +225,13 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
     const body=new URLSearchParams({csrf_token:csrf,action,...data});
     const response=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'X-Thermalright-CSRF-Token':csrf},body});
     const text=await response.text();
-    if (response.redirected && /\/login(?:\.php)?(?:[/?#]|$)/.test(response.url||'')) throw new Error('Unraid session expired: sign in again and reload this page.');
-    if (!text.trim()) throw new Error(`Empty server response (HTTP ${response.status}). Check the server PHP log.`);
+    if (response.redirected && /\/login(?:\.php)?(?:[/?#]|$)/.test(response.url||'')) throw new Error(t('Unraid session expired: sign in again and reload this page.'));
+    if (!text.trim()) throw new Error(t('Empty server response (HTTP {status}). Check the server PHP log.',{status:response.status}));
     let result;
     try { result=JSON.parse(text); }
-    catch (_) { throw new Error(`Invalid JSON response from the server (HTTP ${response.status}). Check the server PHP log.`); }
-    if (!result || typeof result!=='object' || Array.isArray(result)) throw new Error(`Unexpected JSON response from the server (HTTP ${response.status}).`);
-    if (!response.ok || result.error) throw new Error(result.error || 'Request rejected');
+    catch (_) { throw new Error(t('Invalid JSON response from the server (HTTP {status}). Check the server PHP log.',{status:response.status})); }
+    if (!result || typeof result!=='object' || Array.isArray(result)) throw new Error(t('Unexpected JSON response from the server (HTTP {status}).',{status:response.status}));
+    if (!response.ok || result.error) throw new Error(serverMessage(result.error || 'Request rejected'));
     return result;
   }
   async function refresh() {
@@ -220,37 +239,37 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
     fetching=true;
     try {
       const s=await api('status');
-      el('version').textContent=`Unraid ${s.unraid} / ${s.release}`;
-      el('usb').textContent=s.usb.length?s.usb.map(u=>`${u.id} — ${u.node} — port ${u.port}`).join(', '):'Not found';
+      el('version').textContent=`Unraid ${s.unraid} / ${s.release} · ${i18n.name}`;
+      el('usb').textContent=s.usb.length?s.usb.map(u=>`${u.id} — ${u.node} — port ${u.port}`).join(', '):t('Not found');
       const backend=s.backend||{}, metrics=s.metrics||{}, settings=s.settings;
       const fresh=backend.timestamp && Date.now()/1000-backend.timestamp<Math.max(10,settings.interval*2+2);
-      el('backend').textContent=!s.docker?'Docker unavailable':(s.supervisor && fresh && backend.ready?(backend.display_off && backend.display_reason==='schedule'?'Display off — scheduled':`Frames sent — ${backend.model||'display connected'}`):(s.supervisor?'Waiting / connecting':'Stopped'));
+      el('backend').textContent=!s.docker?t('Docker unavailable'):(s.supervisor && fresh && backend.ready?(backend.display_off && backend.display_reason==='schedule'?t('Display off — scheduled'):t('Frames sent — {model}',{model:backend.model||t('display connected')})):(s.supervisor?t('Waiting / connecting'):t('Stopped')));
       const display=s.display||{};
-      el('quiet-clock').textContent=display.local_time && display.timezone?`Server time: ${display.local_time} · ${display.timezone}`:'Schedule follows the Unraid server clock.';
+      el('quiet-clock').textContent=display.local_time && display.timezone?t('Server time: {time} · {timezone}',{time:clockValue(display.local_time.replace(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/,day=>t(day))),timezone:clockValue(display.timezone)}):t('Schedule follows the Unraid server clock.');
       el('quiet-status').textContent=s.supervisor && fresh && backend.ready && typeof backend.display_off==='boolean'
-        ? (backend.display_off?(backend.display_reason==='schedule'?'Display off by schedule. Metrics and USB connection remain active.':'Display off: check backend status and logs.'):'Display on.')
-        : 'Display state will be confirmed when the backend connects.';
+        ? (backend.display_off?(backend.display_reason==='schedule'?t('Display off by schedule. Metrics and USB connection remain active.'):t('Display off: check backend status and logs.')):t('Display on.'))
+        : t('Display state will be confirmed when the backend connects.');
       el('temp').textContent=metric(metrics.cpu_temp,1,'°C');
       el('temp-source').textContent=metrics.sensor||'';
       el('load').textContent=metric(metrics.cpu_load,1,'%');
-      const frequencyKind=metrics.frequency_kind==='requested'?'driver-requested frequency':(metrics.frequency_kind==='measured'?'measured frequency':'');
+      const frequencyKind=metrics.frequency_kind==='requested'?t('driver-requested frequency'):(metrics.frequency_kind==='measured'?t('measured frequency'):'');
       const frequencyMode=(metrics.frequency_mode||settings.frequency_mode)==='average'?'average CPU policy frequency':'maximum CPU policy frequency';
       el('frequency').textContent=metric(metrics.cpu_mhz,0,'MHz');
-      el('frequency-summary').textContent=Number.isFinite(metrics.cpu_mhz)?`${frequencyMode==='average CPU policy frequency'?'Average':'Maximum'}${frequencyKind?' · '+frequencyKind:''}`:'';
-      el('frequency-source').textContent=metrics.frequency_source||'Unavailable';
+      el('frequency-summary').textContent=Number.isFinite(metrics.cpu_mhz)?`${frequencyMode==='average CPU policy frequency'?t('Average'):t('Maximum')}${frequencyKind?' · '+frequencyKind:''}`:'';
+      el('frequency-source').textContent=metrics.frequency_source?metrics.frequency_source.replace('maximum of unique active policies',t('maximum of unique active policies')).replace('arithmetic mean of unique active policies',t('arithmetic mean of unique active policies')):t('Unavailable');
       el('power').textContent=metric(metrics.cpu_watts,1,'W');
       el('power-source').textContent=metrics.power_source||'';
       const caps=backend.capabilities;
       el('capabilities').textContent=caps && typeof caps.power==='boolean' && typeof caps.frequency==='boolean'
-        ? `Watts : ${caps.power?'supported':'unsupported'} ; MHz : ${caps.frequency?'supported':'unsupported'}. Host metrics remain visible here.`
-        : 'Display capabilities will be confirmed after connecting. The readings above come from the host.';
+        ? t('Watts : {power} ; MHz : {frequency}. Host metrics remain visible here.',{power:caps.power?t('supported'):t('unsupported'),frequency:caps.frequency?t('supported'):t('unsupported')})
+        : t('Display capabilities will be confirmed after connecting. The readings above come from the host.');
       el('rgb-capabilities').textContent=caps && typeof caps.zones==='boolean'
-        ? (caps.zones?`Zone colors available${Array.isArray(caps.zone_names)&&caps.zone_names.length?' : '+caps.zone_names.map(z=>zoneLabels[z]||z).join(', '):''}.`:'This profile does not support independent zone colors.')+(caps.decoration===false?' Decorations cannot be controlled with this profile.':'')
-        : 'Available zones depend on the detected display model.';
+        ? (caps.zones?t('Zone colors available: {zones}.',{zones:Array.isArray(caps.zone_names)?list(caps.zone_names.map(z=>zoneLabels[z]||z)):''}):t('This profile does not support independent zone colors.'))+(caps.decoration===false?' '+t('Decorations cannot be controlled with this profile.'):'')
+        : t('Available zones depend on the detected display model.');
       el('test-state').textContent=backend.test_active
-        ? 'Visual test running: synthetic digits on the display, automatic return after 8 seconds. Host readings above remain real.'
-        : 'An 8-second visual sequence, then an automatic return to normal display. Test digits are synthetic. The test uses saved settings; unsaved changes are kept as a draft.';
-      el('message').textContent=s.pending?'Uninstall incomplete: enable Docker and retry from Plugins.':(s.service.message||`Ready. Autostart ${settings.autostart?'enabled':'disabled'}.`);
+        ? t('Visual test running: synthetic digits on the display, automatic return after 8 seconds. Host readings above remain real.')
+        : t('An 8-second visual sequence, then an automatic return to normal display. Test digits are synthetic. The test uses saved settings; unsaved changes are kept as a draft.');
+      el('message').textContent=s.pending?t('Uninstall incomplete: enable Docker and retry from Plugins.'):((s.service.message?serverMessage(s.service.message):t('Ready. Autostart {state}.',{state:settings.autostart?t('enabled'):t('disabled')})));
       if (!loaded) {
         const quiet={...quietDefaults,...(settings.quiet_hours||{})};
         el('quiet-enabled').checked=quiet.enabled; el('quiet-all-day').checked=quiet.all_day;
@@ -258,14 +277,14 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
         for (const day of weekdays) el(`quiet-day-${day}`).checked=quiet.days.includes(day);
         quietVisibility();
         el('auto').checked=settings.autostart; el('interval').value=settings.interval;
-        for (const v of s.sensors) el('sensor').add(new Option(`${v.label} (${v.value===null?'unavailable':v.value+' °C'})`,v.id));
-        if (![...el('sensor').options].some(o=>o.value===settings.sensor)) el('sensor').add(new Option('Configured sensor missing',settings.sensor));
+        for (const v of s.sensors) el('sensor').add(new Option(`${v.label} (${v.value===null?t('unavailable'):v.value+' °C'})`,v.id));
+        if (![...el('sensor').options].some(o=>o.value===settings.sensor)) el('sensor').add(new Option(t('Configured sensor missing'),settings.sensor));
         el('sensor').value=settings.sensor;
         el('frequency-mode').value=settings.frequency_mode||'max';
         const powerSources=(s.metric_sources||{}).power||[];
-        for (const v of powerSources) el('power-sensor').add(new Option(`${v.label}${v.available===false?' — unavailable':''}`,v.id));
+        for (const v of powerSources) el('power-sensor').add(new Option(`${v.label}${v.available===false?' — '+t('unavailable'):''}`,v.id));
         const powerSensor=settings.power_sensor||'auto';
-        if (![...el('power-sensor').options].some(o=>o.value===powerSensor)) el('power-sensor').add(new Option('Configured source missing',powerSensor));
+        if (![...el('power-sensor').options].some(o=>o.value===powerSensor)) el('power-sensor').add(new Option(t('Configured source missing'),powerSensor));
         el('power-sensor').value=powerSensor;
         const rgb={...rgbDefaults,...(settings.rgb||{})};
         for (const key of ['mode','color','brightness','period','target','smoothing']) el(`rgb-${key}`).value=rgb[key];
@@ -287,16 +306,16 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
     busy=true;
     document.querySelectorAll('#td-form button').forEach(b=>b.disabled=true);
     let message, failed=false;
-    try { const r=await api(action,data); message=r.message||'Operation completed'; }
+    try { const r=await api(action,data); message=serverMessage(r.message||'Operation completed'); }
     catch(e) { message=e.message; failed=true; }
     finally { busy=false; document.querySelectorAll('#td-form button').forEach(b=>b.disabled=false); const refreshed=await refresh(); if (message && (failed || refreshed)) el('message').textContent=message; }
   }
   el('form').addEventListener('submit',e=>{
     e.preventDefault();
     const settings=settingsFromForm();
-    if (settings.quiet_hours.enabled && !settings.quiet_hours.days.length) { el('message').textContent='Select at least one day for scheduled display off.'; return; }
-    if (settings.quiet_hours.enabled && !settings.quiet_hours.all_day && settings.quiet_hours.start===settings.quiet_hours.end) { el('message').textContent='Choose different off/on times, or select entire days.'; return; }
-    if (!settings.rgb.temperature_zones.length) { el('message').textContent='Select at least one category for temperature colors.'; return; }
+    if (settings.quiet_hours.enabled && !settings.quiet_hours.days.length) { el('message').textContent=t('Select at least one day for scheduled display off.'); return; }
+    if (settings.quiet_hours.enabled && !settings.quiet_hours.all_day && settings.quiet_hours.start===settings.quiet_hours.end) { el('message').textContent=t('Choose different off/on times, or select entire days.'); return; }
+    if (!settings.rgb.temperature_zones.length) { el('message').textContent=t('Select at least one category for temperature colors.'); return; }
     act('settings',{settings:JSON.stringify(settings)});
   });
   el('rgb-mode').addEventListener('change',rgbVisibility);
@@ -312,7 +331,7 @@ $tdVar = @parse_ini_file('/var/local/emhttp/var.ini',false,INI_SCANNER_RAW) ?: [
   });
   el('display-test').addEventListener('click',()=>act('display-test'));
   document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>act(b.dataset.action)));
-  el('migrate').addEventListener('click',()=>{if(confirm('Stop only the legacy thermalright-screen container with the expected label?')) act('legacy-stop');});
+  el('migrate').addEventListener('click',()=>{if(confirm(t('Stop only the legacy thermalright-screen container with the expected label?'))) act('legacy-stop');});
   el('diagnostic').addEventListener('click',async()=>{
     try {const d=await api('diagnostic');const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));a.href=url;a.download='thermalright-diagnostic.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){el('message').textContent=e.message;}
   });

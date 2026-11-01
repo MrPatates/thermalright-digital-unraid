@@ -29,8 +29,10 @@ with zipfile.ZipFile(dist/f'thermalright-digital-{version}.zip') as z:
         assert xml.attrib['icon']=='logo.png'
         assert tar.extractfile('logo.png').read()==(base/'icon.png').read_bytes()
         assert tar.extractfile('icons/logo.png').read()==(base/'icon.png').read_bytes()
-        for p in (base/'plugin').iterdir():
-            if p.is_file():assert tar.extractfile(p.name).read()==p.read_bytes(),p.name
+        for p in (base/'plugin').rglob('*'):
+            relative=p.relative_to(base/'plugin').as_posix()
+            if p.is_file():assert tar.extractfile(relative).read()==p.read_bytes(),relative
+            elif p.is_dir():assert tar.getmember(relative).mode==0o755,relative
         for event in ['docker_started','started','stopping','stopping_docker','stopped']:
             assert tar.getmember('event/'+event).mode & 0o111
     with tarfile.open(fileobj=io.BytesIO(z.read('thermalright-digital-source.tar.xz')),mode='r:xz') as tar:
@@ -38,7 +40,7 @@ with zipfile.ZipFile(dist/f'thermalright-digital-{version}.zip') as z:
             assert tar.getmember(name).isfile(),name
         assert tar.extractfile('backend/worker.py').read()==(base/'backend/worker.py').read_bytes()
         assert tar.extractfile('plugin/control.php').read()==(base/'plugin/control.php').read_bytes()
-        for name in ['README.md','README.fr.md','icon.svg','icon.png','ca_profile.xml','plugins/thermalright-digital.xml']:
+        for name in ['README.md','README.fr.md','icon.svg','icon.png','ca_profile.xml','plugins/thermalright-digital.xml','docs/TRANSLATIONS.md','plugin/i18n.php','tests/i18n.php','tests/test_translations.py']:
             assert tar.extractfile(name).read()==(base/name).read_bytes(),name
     for name in ['README.md','README.fr.md']:
         assert z.read(name)==(base/name).read_bytes(),name

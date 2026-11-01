@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026.11.01.2 — multilingual settings
+
+- Restored French and added settings-page translations for all 27 Unraid languages, including English. Follows the native Unraid language without a separate selector.
+- Translated settings, help, status, weekdays, RGB categories and common errors; scoped right-to-left rendering for Arabic.
+- English fallback for missing/corrupt translations and invalid placeholders; escaped HTML/JSON and plain-text insertion. Honors native language-pack overrides without modifying Unraid language files.
+- Saved settings, technical identifiers, server timezone, CSRF checks and English logs/diagnostics are preserved across language changes.
+- Catalog coverage, locale selection, PHP/FPM rendering, unchanged settings and payload inclusion are checked automatically. Native-speaker review is welcome.
+
 ## 2026.11.01.1 — scheduled display off
 
 - Shortened Docker instance name to TR-DIGITAL to keep its icon and name compact. Older owned names are migrated using the same ownership labels.

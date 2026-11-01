@@ -61,6 +61,19 @@ class ReleaseTests(unittest.TestCase):
                 self.assertIn(b'**THERMALRIGHT DIGITAL**', archive.extractfile('README.md').read())
                 self.assertIn(b'file:///usr/local/emhttp/plugins/', archive.extractfile('control.php').read())
 
+    def test_all_language_catalogs_and_helper_are_readable_in_offline_payload(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); image=root/'image.xz'; image.write_bytes(b'test image')
+            bundle=pack.package(root/'dist',image,'sha256:'+'a'*64,'2026.11.01.2')
+            languages=json.loads((BASE/'plugin/lang/languages.json').read_text())
+            exported={str(p.relative_to(BASE)) for p in exporter.source_files()}
+            with tarfile.open(bundle/'payload.txz','r:xz') as archive:
+                self.assertEqual(archive.getmember('lang').mode,0o755)
+                for name in ['i18n.php','lang/languages.json',*[f'lang/{code}.json' for code in languages]]:
+                    self.assertEqual(archive.extractfile(name).read(),(BASE/'plugin'/name).read_bytes())
+                    self.assertEqual(archive.getmember(name).mode,0o644)
+                    self.assertIn('plugin/'+name,exported)
+
     def test_github_manifest_pins_annexes_and_updates_from_latest(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); image = root / 'image.xz'; image.write_bytes(b'test image')

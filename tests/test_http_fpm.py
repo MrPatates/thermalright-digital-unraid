@@ -94,6 +94,7 @@ php_admin_value[auto_prepend_file] = /work/tests/fixtures/unraid-local-prepend.p
         cls.temp.cleanup()
 
     def setUp(self):
+        shutil.copytree(BASE/'plugin/lang',UI/'lang',dirs_exist_ok=True)
         for p in (BASE/'plugin').iterdir():
             if p.is_file():shutil.copyfile(p,UI/p.name)
         STATE.mkdir(exist_ok=True);RUN.mkdir(exist_ok=True)
@@ -113,12 +114,12 @@ php_admin_value[auto_prepend_file] = /work/tests/fixtures/unraid-local-prepend.p
         subprocess.run(['php',str(UI/'control.php'),'stop'],env=dict(os.environ,TD_FAKE_STATE=str(self.fake)),
                        stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=20)
 
-    def request(self,action='status',*,token='native-token',header='native-token',method='POST',**fields):
+    def request(self,action='status',*,token='native-token',header='native-token',method='POST',script='api.php',expect_json=True,**fields):
         data=dict(action=action,**fields)
         if token is not None:data['csrf_token']=token
         body=urlencode(data).encode() if method=='POST' else b''
-        params=dict(SCRIPT_FILENAME=str(UI/'api.php'),SCRIPT_NAME='/plugins/thermalright-digital/api.php',
-                    REQUEST_URI='/plugins/thermalright-digital/api.php',REQUEST_METHOD=method,
+        params=dict(SCRIPT_FILENAME=str(UI/script),SCRIPT_NAME='/plugins/thermalright-digital/'+script,
+                    REQUEST_URI='/plugins/thermalright-digital/'+script,REQUEST_METHOD=method,
                     CONTENT_TYPE='application/x-www-form-urlencoded',CONTENT_LENGTH=str(len(body)),
                     SERVER_PROTOCOL='HTTP/1.1',SERVER_NAME='localhost',HTTP_HOST='localhost',
                     SERVER_PORT='80',REMOTE_ADDR='127.0.0.1',GATEWAY_INTERFACE='CGI/1.1',DOCUMENT_ROOT='/usr/local/emhttp')
@@ -141,8 +142,52 @@ php_admin_value[auto_prepend_file] = /work/tests/fixtures/unraid-local-prepend.p
         headers=dict(line.decode().split(': ',1) for line in head.split(b'\r\n') if b': ' in line)
         code=int(headers.get('Status','200').split()[0])
         self.assertTrue(payload.strip(),f'Empty body, HTTP {code}, stderr={stderr!r}')
+        if not expect_json:
+            self.assertEqual(stderr,b'')
+            return code,payload.decode()
         self.assertIn('application/json',headers.get('Content-Type',''))
         return code,json.loads(payload)
+
+    def page(self,setup):
+        # The native router supplies locale in this include scope; no public locale parameter.
+        # Read/evaluate the body like Unraid, so __DIR__ is the router, not the plugin.
+        router=Path('/usr/local/emhttp/test-page.php')
+        router.write_text('<?php $docroot="/usr/local/emhttp"; '+setup+' eval("?>".explode("\\n---\\n",file_get_contents("'+str(UI/'ThermalrightDigital.page')+'"),2)[1]);')
+        (UI/'test-page.php').write_text('<?php include "/usr/local/emhttp/test-page.php";')
+        return self.request(method='GET',script='test-page.php',expect_json=False)
+
+    def test_all_localized_pages_render_under_real_fpm(self):
+        languages=json.loads((UI/'lang/languages.json').read_text())
+        for locale,metadata in languages.items():
+            with self.subTest(locale=locale):
+                code,html=self.page('$locale='+json.dumps(locale)+';')
+                self.assertEqual(code,200)
+                self.assertIn('lang="'+locale.replace('_','-')+'"',html)
+                self.assertIn('dir="'+metadata['direction']+'"',html)
+                self.assertIn('value="native-token"',html)
+                catalog=json.loads((UI/f'lang/{locale}.json').read_text())
+                self.assertIn(catalog['Scheduled display off'],html)
+                embedded=html.split('<script type="application/json" id="td-i18n">',1)[1].split('</script>',1)[0]
+                self.assertEqual(json.loads(embedded)['messages'],catalog)
+
+    def test_native_empty_locale_restores_english_after_french(self):
+        native=Path('/boot/config/plugins/dynamix');native.mkdir(parents=True,exist_ok=True)
+        (native/'dynamix.cfg').write_text('[display]\nlocale="fr_FR"\n')
+        code,french=self.page('')
+        self.assertEqual(code,200);self.assertIn('Enregistrer',french)
+        code,english=self.page('$locale="";')
+        self.assertEqual(code,200);self.assertIn('lang="en-US"',english);self.assertIn('>Save</button>',english)
+
+    def test_catalog_html_is_escaped_in_page_and_inline_json(self):
+        path=UI/'lang/fr_FR.json';catalog=json.loads(path.read_text())
+        catalog['Save']='</script><script>alert("bad")</script>&'
+        path.write_text(json.dumps(catalog))
+        code,html=self.page('$locale="fr_FR";')
+        self.assertEqual(code,200)
+        self.assertNotIn(catalog['Save'],html)
+        self.assertIn('&lt;/script&gt;',html)
+        embedded=html.split('<script type="application/json" id="td-i18n">',1)[1].split('</script>',1)[0]
+        self.assertEqual(json.loads(embedded)['messages']['Save'],catalog['Save'])
 
     def test_status_under_real_fpm(self):
         code,data=self.request()

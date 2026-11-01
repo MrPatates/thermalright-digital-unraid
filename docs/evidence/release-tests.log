@@ -1,3 +1,4 @@
+test_all_language_catalogs_and_helper_are_readable_in_offline_payload (test_release.ReleaseTests.test_all_language_catalogs_and_helper_are_readable_in_offline_payload) ... ok
 test_community_apps_metadata_and_source_export_are_consistent (test_release.ReleaseTests.test_community_apps_metadata_and_source_export_are_consistent) ... ok
 test_dependency_integrity_and_modified_cache_preserved (test_release.ReleaseTests.test_dependency_integrity_and_modified_cache_preserved) ... ok
 test_github_manifest_pins_annexes_and_updates_from_latest (test_release.ReleaseTests.test_github_manifest_pins_annexes_and_updates_from_latest) ... ok
@@ -7,7 +8,7 @@ test_offline_manifest_remains_available (test_release.ReleaseTests.test_offline_
 test_source_export_excludes_binary_dependencies (test_release.ReleaseTests.test_source_export_excludes_binary_dependencies) ... ok
 
 ----------------------------------------------------------------------
-Ran 7 tests in 0.106s
+Ran 8 tests in 0.458s
 
 OK
 Download verified: backend/test.whl

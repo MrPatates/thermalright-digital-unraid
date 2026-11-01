@@ -4,6 +4,8 @@ No syntax errors detected in plugin/cleanup.php
 No syntax errors detected in plugin/settings.php
 No syntax errors detected in plugin/schedule.php
 No syntax errors detected in plugin/metrics.php
+No syntax errors detected in plugin/i18n.php
+No syntax errors detected in plugin/ThermalrightDigital.page
 No syntax errors detected in tests/fake-docker.php
 PASS native initialization
 PASS reinstall preserves instance and settings
@@ -55,7 +57,7 @@ PASS Docker WebUI links to native plugin settings
 Private resources removed. The Unraid manager will finish removing the manifest; run the audit after 10 seconds.
 PASS compact-name instance is removed through the ownership inventory
 PASS native initialization
-Pre-existing or unknown file preserved : /tmp/td-test-d5617e2b/boot/config/plugins/thermalright-digital/unknown.txt
+Pre-existing or unknown file preserved : /tmp/td-test-c85ef19e/boot/config/plugins/thermalright-digital/unknown.txt
 PASS unknown file preserved and incomplete cleanup reported
 Private resources removed. The Unraid manager will finish removing the manifest; run the audit after 10 seconds.
 PASS cleanup can be retried
@@ -78,13 +80,13 @@ READ-ONLY AUDIT ; active version protected : 2026.10.31.3
 CANDIDATE old version : 2026.10.31.1
 CANDIDATE old version : 2026.10.31.2
 CANDIDATE Unraid autostart entry : thermalright-screen
-CANDIDATE verified legacy Docker template : /tmp/td-clean-569fcbc8/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+CANDIDATE verified legacy Docker template : /tmp/td-clean-c622c7db/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 CANDIDATE legacy container : old
 CANDIDATE legacy image : old-image
 CANDIDATE legacy appdata verified through its mount : /mnt/user/appdata/thermalright-screen
 CANDIDATE volume labeled legacy resource : old-volume
 CANDIDATE network labeled legacy resource : old-network
-REVIEW, KEPT : reference in /tmp/td-clean-569fcbc8/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REVIEW, KEPT : reference in /tmp/td-clean-c622c7db/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 Appdata still present : /mnt/user/appdata/thermalright-screen (removed only with mount evidence from the labeled container).
 Run again with --apply to remove only the verified candidates above.
 PASS nettoyage : audit reports remaining resources
@@ -93,7 +95,7 @@ CLEANUP ; active version protected : 2026.10.31.3
 REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-569fcbc8/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-c622c7db/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 REMOVING legacy image : old-image
 REMOVING legacy appdata verified through its mount : /mnt/user/appdata/thermalright-screen
@@ -116,7 +118,7 @@ REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING volume labeled legacy resource : old-volume
 REMOVING network labeled legacy resource : old-network
-REVIEW, KEPT : reference in /tmp/td-clean-e269d113/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REVIEW, KEPT : reference in /tmp/td-clean-9b81dcc2/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 Appdata still present : /mnt/user/appdata/thermalright-screen (removed only with mount evidence from the labeled container).
 Verified resource cleanup complete. Items marked KEPT/REVIEW remain in place.
 PASS nettoyage : resources without ownership evidence reported and preserved
@@ -125,7 +127,7 @@ CLEANUP ; active version protected : 2026.10.31.3
 REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-69c072a5/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-67c48365/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 KEPT : shared image old-image
 KEPT : shared path or symbolic link /mnt/user/appdata/thermalright-screen
@@ -136,10 +138,10 @@ Verified resource cleanup complete. Items marked KEPT/REVIEW remain in place.
 PASS nettoyage : shared dependencies prevent complete cleanup
 PASS nettoyage : shared image/directory and recovery journal preserved
 CLEANUP ; active version protected : 2026.10.31.3
-KEPT : Unknown file preserved : /tmp/td-clean-fe817027/boot/config/plugins/thermalright-digital/packages/2026.10.31.1/foreign.txt
+KEPT : Unknown file preserved : /tmp/td-clean-ea70697b/boot/config/plugins/thermalright-digital/packages/2026.10.31.1/foreign.txt
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-fe817027/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-ea70697b/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 REMOVING legacy image : old-image
 REMOVING legacy appdata verified through its mount : /mnt/user/appdata/thermalright-screen
@@ -152,7 +154,7 @@ CLEANUP ; active version protected : 2026.10.31.3
 REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-5f316370/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-c7872ac7/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 REMOVING legacy image : old-image
 REMOVING legacy appdata verified through its mount : /mnt/fast_pool/appdata/thermalright-screen
@@ -166,7 +168,7 @@ CLEANUP ; active version protected : 2026.10.31.3
 REMOVING old version : 2026.10.31.1
 REMOVING old version : 2026.10.31.2
 REMOVING Unraid autostart entry : thermalright-screen
-REMOVING verified legacy Docker template : /tmp/td-clean-15f8c2fb/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
+REMOVING verified legacy Docker template : /tmp/td-clean-4699afda/boot/config/plugins/dockerMan/templates-user/my-thermalright-screen.xml
 REMOVING legacy container : old
 REMOVING legacy image : old-image
 REMOVING volume labeled legacy resource : old-volume
@@ -327,6 +329,57 @@ PASS RAPL enabled=0: advancing counter converted to watts
 PASS reading watts preserves RAPL controls
 PASS RAPL enabled=0: unreadable counter stays unavailable
 TOTAL 42 metric checks passed
+PASS i18n: persistent Unraid language fallback
+PASS i18n: current native session overrides persistent language
+PASS i18n: native empty English locale overrides non-English config
+PASS i18n: locale spelling and encoding
+PASS i18n: Unraid irregular language aliases
+PASS i18n: script and regional fallback
+PASS i18n: unknown and path-like locales never become filenames
+PASS i18n: all 27 official Unraid languages including English
+PASS i18n: complete context for ar_AR
+PASS i18n: complete context for bn_BN
+PASS i18n: complete context for ca_CA
+PASS i18n: complete context for cs_CZ
+PASS i18n: complete context for da_DA
+PASS i18n: complete context for de_DE
+PASS i18n: complete context for el_GR
+PASS i18n: complete context for en_US
+PASS i18n: complete context for es_ES
+PASS i18n: complete context for fr_FR
+PASS i18n: complete context for hr_HR
+PASS i18n: complete context for hu_HU
+PASS i18n: complete context for it_IT
+PASS i18n: complete context for ja_JA
+PASS i18n: complete context for ko_KO
+PASS i18n: complete context for lv_LV
+PASS i18n: complete context for nl_NL
+PASS i18n: complete context for no_NO
+PASS i18n: complete context for pl_PL
+PASS i18n: complete context for pt_BR
+PASS i18n: complete context for pt_PT
+PASS i18n: complete context for ro_RO
+PASS i18n: complete context for ru_RU
+PASS i18n: complete context for sv_SE
+PASS i18n: complete context for uk_UA
+PASS i18n: complete context for zh_CN
+PASS i18n: complete context for zh_TW
+PASS i18n: selecting languages never rewrites Unraid configuration
+PASS i18n: missing, empty and non-string entries fall back individually
+PASS i18n: placeholder mismatches and unknown keys are rejected
+Thermalright translation fr_FR: Syntax error
+PASS i18n: malformed JSON falls back to English
+Thermalright translation fr_FR: Syntax error
+PASS i18n: missing catalog falls back to English
+PASS i18n: named parameter substitution
+PASS i18n: unknown message uses source text
+PASS i18n: parameter HTML is escaped
+PASS i18n: inline JSON prevents script breakout and preserves exact content
+PASS i18n: actual French page renders correctly in native include scope
+PASS i18n: actual Arabic page scopes right-to-left rendering
+PASS i18n: native language-pack override is decoded to plain text
+PASS i18n: invalid native placeholders retain bundled translation
+PASS i18n: native override cannot leak into another locale
 test_backend_failure_rolls_back_running_installation (__main__.InstallerTests.test_backend_failure_rolls_back_running_installation) ... ok
 test_corrupt_payload_is_refused_without_activation (__main__.InstallerTests.test_corrupt_payload_is_refused_without_activation) ... ok
 test_failed_first_install_cleans_created_files (__main__.InstallerTests.test_failed_first_install_cleans_created_files) ... ok
@@ -336,17 +389,17 @@ test_preexisting_configuration_folder_is_preserved (__main__.InstallerTests.test
 test_preexisting_unmarked_ui_folder_is_preserved (__main__.InstallerTests.test_preexisting_unmarked_ui_folder_is_preserved) ... ok
 test_sigkill_interruption_is_recoverable (__main__.InstallerTests.test_sigkill_interruption_is_recoverable) ... ok
 test_unsupported_unraid_is_refused (__main__.InstallerTests.test_unsupported_unraid_is_refused) ... ok
-test_url_corrupt_download_preserves_current_install (__main__.InstallerTests.test_url_corrupt_download_preserves_current_install) ... 127.0.0.1 - - [01/Nov/2026 01:27:22] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+test_url_corrupt_download_preserves_current_install (__main__.InstallerTests.test_url_corrupt_download_preserves_current_install) ... 127.0.0.1 - - [01/Nov/2026 02:24:45] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
 ok
-test_url_failed_activation_removes_downloaded_package (__main__.InstallerTests.test_url_failed_activation_removes_downloaded_package) ... 127.0.0.1 - - [01/Nov/2026 01:27:22] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
-127.0.0.1 - - [01/Nov/2026 01:27:22] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
+test_url_failed_activation_removes_downloaded_package (__main__.InstallerTests.test_url_failed_activation_removes_downloaded_package) ... 127.0.0.1 - - [01/Nov/2026 02:24:46] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 02:24:46] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
 ok
-test_url_fetches_missing_files_and_boots_offline (__main__.InstallerTests.test_url_fetches_missing_files_and_boots_offline) ... 127.0.0.1 - - [01/Nov/2026 01:27:23] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
-127.0.0.1 - - [01/Nov/2026 01:27:23] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
-127.0.0.1 - - [01/Nov/2026 01:27:23] "GET /thermalright-digital/packages/2026.10.31.3/backend-image.tar.xz HTTP/1.1" 200 -
+test_url_fetches_missing_files_and_boots_offline (__main__.InstallerTests.test_url_fetches_missing_files_and_boots_offline) ... 127.0.0.1 - - [01/Nov/2026 02:24:46] "GET /thermalright-digital/packages/2026.10.31.3/payload.txz HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 02:24:46] "GET /thermalright-digital/packages/2026.10.31.3/release.json HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 02:24:47] "GET /thermalright-digital/packages/2026.10.31.3/backend-image.tar.xz HTTP/1.1" 200 -
 ok
 
 ----------------------------------------------------------------------
-Ran 12 tests in 11.505s
+Ran 12 tests in 13.868s
 
 OK

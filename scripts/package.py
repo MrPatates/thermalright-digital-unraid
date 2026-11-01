@@ -42,7 +42,7 @@ def package(output, image, image_id, version, image_tag=None, download_base_url=
     release = dict(owner='thermalright-digital',version=version,trcc='9.11.2',
                    image_id=image_id,image_tag=image_tag or f'localhost/thermalright-digital:{version}',
                    image_sha256=sha(target),architecture='amd64',schema=1)
-    files = {p.name: p.read_bytes() for p in (BASE/'plugin').iterdir() if p.is_file()}
+    files = {p.relative_to(BASE/'plugin').as_posix(): p.read_bytes() for p in (BASE/'plugin').rglob('*') if p.is_file() and not p.is_symlink()}
     files['logo.png'] = (BASE/'icon.png').read_bytes()
     # Native Settings titles look under icons/, while plugin/menu icons use root.
     files['icons/logo.png'] = files['logo.png']
@@ -52,6 +52,11 @@ def package(output, image, image_id, version, image_tag=None, download_base_url=
         action = 'event-stop' if event.startswith('stop') else 'event-start'
         files['event/'+event] = ('#!/bin/bash\nexec /usr/bin/php /usr/local/emhttp/plugins/thermalright-digital/control.php '+action+'\n').encode()
     with tarfile.open(bundle/'payload.txz','w:xz',preset=6) as archive:
+        directories={str(parent) for name in files for parent in Path(name).parents if str(parent)!='.'}
+        for name in sorted(directories,key=lambda value:(value.count('/'),value)):
+            info=tarfile.TarInfo(name+'/'); info.type=tarfile.DIRTYPE
+            info.mode=0o755; info.mtime=0; info.uid=info.gid=0
+            archive.addfile(info)
         for name,data in sorted(files.items()):
             info = tarfile.TarInfo(name)
             info.size=len(data); info.mtime=0; info.uid=info.gid=0
@@ -77,7 +82,7 @@ echo "Already uninstalled."
     update_attribute = ' pluginURL='+quoteattr(plugin_url) if plugin_url else ''
     manifest=f'''<?xml version="1.0" encoding="UTF-8"?>
 <PLUGIN name="thermalright-digital" author={quoteattr(author)} version="{version}" launch="Settings/ThermalrightDigital" icon="logo.png" support={quoteattr('https://github.com/'+repository+'/issues' if repository else 'https://github.com/MrPatates/thermalright-digital-unraid/issues')} min="6.12.0"{update_attribute}>
-<CHANGES>Release {version}. Weekly scheduled display off, server timezone/DST handling and compact TR-DIGITAL container name. Host CPU metrics, RGB effects and inventory-based cleanup. SHA-256 verified packages.</CHANGES>
+<CHANGES>Release {version}. Multilingual settings for all 27 Unraid languages with English fallback and Arabic RTL. Weekly display-off schedule and compact TR-DIGITAL container name. Host CPU metrics, RGB effects and inventory-based cleanup. SHA-256 verified packages.</CHANGES>
 <FILE Run="/bin/bash" Method="install"><INLINE><![CDATA[
 {installer}
 ]]></INLINE></FILE>

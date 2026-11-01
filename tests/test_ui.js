@@ -3,13 +3,14 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const page = fs.readFileSync('plugin/ThermalrightDigital.page', 'utf8');
+// PHP rendering/escaping is checked separately; use English static labels here.
+const page = fs.readFileSync('plugin/ThermalrightDigital.page', 'utf8').replace(/<\?=td_h\('((?:\\.|[^'\\])*)'\)\?>/g,(_,text)=>text.replace(/\\'/g,"'").replace(/\\\\/g,'\\'));
 const script = page.match(/<script>([\s\S]*?)<\/script>/)[1];
 const token = 'native-token/+=';
 const flush = () => new Promise(resolve => setImmediate(resolve));
 const jsonResponse = data => ({status:200,ok:true,text:async()=>JSON.stringify(data)});
 
-function harness(status) {
+function harness(status,locale='en_US',overrides={}) {
   const nodes = new Map();
   const attr = (text, name) => (text.match(new RegExp(`(?:^|\\s)${name}="([^"]*)"`)) || [])[1];
   const makeNode = attrs => ({
@@ -35,6 +36,8 @@ function harness(status) {
     return nodes.get(id);
   };
   const requests=[], intervals=[];
+  const languages=JSON.parse(fs.readFileSync('plugin/lang/languages.json','utf8'));
+  nodes.get('td-i18n').textContent=JSON.stringify({locale,...languages[locale],messages:{...JSON.parse(fs.readFileSync(`plugin/lang/${locale}.json`,'utf8')),...overrides}});
   let responder=opts=>jsonResponse(opts.body.get('action')==='status'?status:{logs:''});
   vm.runInNewContext(script,{
     document:{hidden:false,getElementById:node,querySelector:()=>({value:token}),querySelectorAll:selector=>selector==='[data-action]'?buttons.filter(b=>b.dataset.action):buttons},
@@ -267,4 +270,40 @@ function harness(status) {
   night.node('td-quiet-enabled').checked=false;await night.fire('td-quiet-enabled','change');
   assert.equal(night.node('td-quiet-options').hidden,true);
   console.log('PASS UI: entire-day mode ignores time fields and schedule can be disabled');
+
+  const languages=JSON.parse(fs.readFileSync('plugin/lang/languages.json','utf8'));
+  for(const locale of Object.keys(languages)) {
+    const catalog=JSON.parse(fs.readFileSync(`plugin/lang/${locale}.json`,'utf8'));
+    const translate=(source,params={})=>catalog[source].replace(/\{([A-Za-z0-9_]+)\}/g,(_,key)=>String(params[key]));
+    const localStatus={...scheduled,backend:{...scheduled.backend,display_off:true},settings:{...modern.settings,quiet_hours:{...quietDefaults,enabled:true,days:[1,5]}}};
+    const localized=harness(localStatus,locale);await flush();
+    assert.equal(localized.node('td-backend').textContent,catalog['Display off — scheduled']);
+    assert.equal(localized.node('td-quiet-status').textContent,catalog['Display off by schedule. Metrics and USB connection remain active.']);
+    const clockValue=value=>locale==='ar_AR'?'\u2066'+value+'\u2069':value;
+    assert.equal(localized.node('td-quiet-clock').textContent,translate('Server time: {time} · {timezone}',{time:clockValue(`${catalog.Mon} 2026-11-02 23:30:00`),timezone:clockValue('Pacific/Auckland')}));
+    assert.equal(localized.node('td-frequency').textContent,catalog.Unavailable);
+    assert.ok(localized.node('td-version').textContent.endsWith(languages[locale].name));
+    await localized.fire('td-temperature-only','click');
+    assert.equal(localized.node('td-rgb-temperature-summary').textContent,translate('Gradient active on: {zones}.',{zones:catalog.temperature}));
+    await localized.fire('td-form','submit');
+    const submitted=JSON.parse(localized.requests.find(r=>r.body.get('action')==='settings').body.get('settings'));
+    assert.deepEqual(submitted.quiet_hours,localStatus.settings.quiet_hours);
+    assert.deepEqual(submitted.rgb.temperature_zones,['temperature']);
+    assert.equal(submitted.frequency_mode,'average');
+    for(const error of ['Invalid CSRF token','missing csrf_token','wrong csrf_token','uninitialized csrf_token']) {
+      localized.setResponder(()=>({status:403,ok:false,text:async()=>JSON.stringify({error})}));
+      await localized.poll();assert.equal(localized.node('td-message').textContent,catalog['Invalid CSRF token']);
+    }
+    localized.setResponder(()=>({status:500,ok:false,text:async()=>''}));await localized.poll();
+    assert.equal(localized.node('td-message').textContent,translate('Empty server response (HTTP {status}). Check the server PHP log.',{status:500}));
+    localized.setResponder(()=>({status:500,ok:false,text:async()=>JSON.stringify({error:'Internal PHP error in control.php:4. Check the server PHP log.'})}));await localized.poll();
+    assert.equal(localized.node('td-message').textContent,translate('Internal PHP error in {location}. Check the server PHP log.',{location:'control.php:4'}));
+    console.log('PASS UI locale '+locale+': localized state, clock, colors and errors; unchanged settings identifiers');
+  }
+  const attack='<img src=x onerror=alert(1)>';
+  const safe=harness({...modern,backend:{...modern.backend,model:attack}},'fr_FR',{'Frames sent — {model}':'{model} transmis'});await flush();
+  assert.equal(safe.node('td-backend').textContent,attack+' transmis');
+  safe.setResponder(()=>({status:400,ok:false,text:async()=>JSON.stringify({error:attack})}));await safe.poll();
+  assert.equal(safe.node('td-message').textContent,attack);
+  console.log('PASS UI: translated parameters and unknown server errors remain text nodes');
 })().catch(error=>{console.error(error);process.exit(1);});

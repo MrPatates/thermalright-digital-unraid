@@ -73,3 +73,9 @@ These checks require your Unraid server. Only the user-confirmed checks listed i
 10. To test removal with Docker unavailable, use a maintenance window and native UI controls. Stop Docker, request plugin removal, confirm failure and retained inventory, then enable Docker and retry. Do not delete inventory to force success.
 
 Local tests already simulate interrupted installations. Do not cut server power to reproduce them; boot flash and array failure behavior extend beyond this plugin's scope.
+
+## Language checks
+
+Switch Unraid to French and reload the plugin: confirm settings, help, buttons, schedule weekdays, status and errors are translated. Switch back to English and confirm it returns to English even if a previously saved locale was French. Test another installed language, including Arabic for panel direction if available. The rest of Unraid must retain its native layout.
+
+Confirm saved RGB colors, thermal category selection and schedule remain unchanged after language changes. The server clock must retain the Unraid timezone, with the weekday translated. Technical source names and diagnostic logs remain English. Native-speaker review and physical layout checks for long translations remain welcome; automated PHP/FPM/UI checks do not replace them.

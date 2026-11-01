@@ -18,6 +18,6 @@ The build runs PHP CLI, PHP-FPM, JavaScript, worker and release tests, then veri
 
 Build logs are in `.build/logs/` and deliverables in `dist/`. Local third-party archives are ignored by Git; `dependencies.lock.json` records their versions and hashes.
 
-Use English for the interface, errors, documentation and contribution templates. `README.fr.md` preserves the previous French README. Historical evidence logs retain their original wording. The original SVG logo is in `icon.svg`; `icon.png` is its 256 × 256 export, used in the plugin payload and Community Apps. Regenerate it with `magick -background none icon.svg -strip PNG32:icon.png` after changing the SVG.
+Use English for interface source messages, technical errors/logs, documentation and contribution templates. The settings page uses bundled translations for all 27 Unraid languages; see [TRANSLATIONS.md](docs/TRANSLATIONS.md) to contribute a correction. Do not translate configuration keys or identifiers. `README.fr.md` preserves the previous French README. Historical evidence logs retain their original wording. The original SVG logo is in `icon.svg`; `icon.png` is its 256 × 256 export, used in the plugin payload and Community Apps. Regenerate it with `magick -background none icon.svg -strip PNG32:icon.png` after changing the SVG.
 
 Describe the behavior changed and the checks performed in each contribution. Preserve LF line endings, license notices and pinned dependency versions; exclude generated files from commits. New catalog metadata must be included in both source export allowlists.

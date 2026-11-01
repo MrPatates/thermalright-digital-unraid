@@ -18,3 +18,31 @@ PASS UI: saved schedule, actual display-off state and server timezone are shown
 PASS UI: polling preserves schedule drafts and waits for worker confirmation
 PASS UI: missing weekdays and equal interval times are rejected before sending
 PASS UI: entire-day mode ignores time fields and schedule can be disabled
+PASS UI locale ar_AR: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale bn_BN: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale ca_CA: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale cs_CZ: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale da_DA: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale de_DE: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale el_GR: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale en_US: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale es_ES: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale fr_FR: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale hr_HR: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale hu_HU: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale it_IT: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale ja_JA: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale ko_KO: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale lv_LV: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale nl_NL: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale no_NO: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale pl_PL: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale pt_BR: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale pt_PT: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale ro_RO: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale ru_RU: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale sv_SE: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale uk_UA: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale zh_CN: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI locale zh_TW: localized state, clock, colors and errors; unchanged settings identifiers
+PASS UI: translated parameters and unknown server errors remain text nodes

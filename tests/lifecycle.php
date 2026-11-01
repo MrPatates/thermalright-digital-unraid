@@ -16,7 +16,7 @@ function fixture(): void {
  foreach(['name'=>'k10temp','temp1_label'=>'Tctl','temp1_input'=>'55000'] as $f=>$v)put($root.'/sys/class/hwmon/hwmon0/'.$f,$v);
  fs_save(['online'=>true,'containers'=>[],'images'=>[],'volumes'=>[],'networks'=>[]]);
  mkdir(ui_dir(),0700,true);
- foreach(glob('/work/plugin/*') as $p)copy($p,ui_dir().'/'.basename($p));
+ foreach(glob('/work/plugin/*') as $p)if(is_file($p))copy($p,ui_dir().'/'.basename($p));
  put(ui_dir().'/.td-owner',TD_NAME);
  $r=['owner'=>TD_NAME,'version'=>'test.1','image_id'=>'sha256:'.str_repeat('a',64),'image_tag'=>'localhost/thermalright-digital:test.1','image_sha256'=>hash('sha256','fake image'),'payload_sha256'=>hash('sha256','fake payload')];
  put(ui_dir().'/release.json',json_encode($r));

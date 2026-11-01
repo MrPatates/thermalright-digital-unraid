@@ -44,6 +44,6 @@ test_temperature_gradient_matches_all_customisable_stops (test_worker.RgbTests.t
 test_temperature_smoothing_uses_elapsed_time_but_displays_current_digits (test_worker.RgbTests.test_temperature_smoothing_uses_elapsed_time_but_displays_current_digits) ... ok
 
 ----------------------------------------------------------------------
-Ran 44 tests in 0.025s
+Ran 44 tests in 0.026s
 
 OK

@@ -4,12 +4,13 @@
 
 [Français](README.fr.md) · [Releases](https://github.com/MrPatates/thermalright-digital-unraid/releases) · [Report an issue](https://github.com/MrPatates/thermalright-digital-unraid/issues)
 
-A community plugin that controls the USB display of a Thermalright Peerless Assassin 140 Digital from Unraid Settings. It provides an English interface, real host CPU metrics and a TRCC 9.11.2 driver in an isolated Docker container. It adds no global Python, pip, User Scripts or systemd installation to Unraid.
+A community plugin that controls the USB display of a Thermalright Peerless Assassin 140 Digital from Unraid Settings. It provides a multilingual interface, real host CPU metrics and a TRCC 9.11.2 driver in an isolated Docker container. It adds no global Python, pip, User Scripts or systemd installation to Unraid.
 
-Version **2026.11.01.1**, licensed under **GPL-3.0-or-later**. Core functionality, including CPU watts and temperature colors by category, was confirmed by the user with version .7 on **Unraid 7.3.4**, USB **0416:8001**, **LF12** profile. Other accepted versions and layouts still need hardware validation. This release adds scheduled display off and a compact Docker instance name; see the [test report](docs/TEST-REPORT.md) for validation limits.
+Version **2026.11.01.2**, licensed under **GPL-3.0-or-later**. Core functionality, including CPU watts and temperature colors by category, was confirmed by the user with version .7 on **Unraid 7.3.4**, USB **0416:8001**, **LF12** profile. Other accepted versions and layouts still need hardware validation. This release adds automatic interface translation for all 27 Unraid languages, including French; see the [test report](docs/TEST-REPORT.md) for validation limits.
 
 ## Features
 
+- Settings in all 27 Unraid languages, automatically following the Unraid language selection, with English fallback and Arabic right-to-left layout.
 - CPU temperature from hwmon, load from `/proc/stat`, MHz from cpufreq and CPU power from hwmon or RAPL package energy counters.
 - Static RGB, independent zone colors, temperature colors, breathing, rainbow, brightness and color smoothing.
 - Choose which categories follow temperature: only the °C digits, or any combination of load, watts, MHz and decorations. Other categories keep their fixed colors.
@@ -37,18 +38,20 @@ The plugin accepts stable x86_64 Unraid **6.12.x and 7.0.x–7.3.x**. Other vers
 Download the complete release ZIP, verify `SHA256SUMS`, then copy the **entire `thermalright-digital` directory** to `/boot/config/plugins/`. Select this file in the Unraid plugin installer:
 
 ```text
-/boot/config/plugins/thermalright-digital/packages/2026.11.01.1/thermalright-digital.plg
+/boot/config/plugins/thermalright-digital/packages/2026.11.01.2/thermalright-digital.plg
 ```
 
 Or run:
 
 ```bash
-plugin install /boot/config/plugins/thermalright-digital/packages/2026.11.01.1/thermalright-digital.plg
+plugin install /boot/config/plugins/thermalright-digital/packages/2026.11.01.2/thermalright-digital.plg
 ```
 
 Allow about 85 MiB on the boot flash and 250 MiB in Docker storage. The plugin creates no appdata, Docker volume or private network.
 
 ## Settings and readings
+
+The page uses the language selected in Unraid. French and all other official Unraid languages are bundled. Reload the page after switching language. Logs and diagnostics stay in English; see [translation support and contributions](docs/TRANSLATIONS.md).
 
 Under **Display colors**, select **CPU temperature colors**, then **Temperature only**. Digits such as **42 °C** will follow the palette while W/MHz/% keep their fixed category colors. Configure thresholds, four palette colors and smoothing. Smoothing affects colors only; digits show actual readings. Effects update the USB display live. Motherboard and fan ARGB are controlled separately by their own hardware.
 

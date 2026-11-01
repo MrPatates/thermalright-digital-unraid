@@ -2,7 +2,7 @@
 
 ## Automated coverage
 
-Release 2026.11.01.1 covers 322 automated tests/checks, including 59 schedule checks. The build runs the following suites against actual pinned PHP/TRCC dependencies. Docker lifecycle fixtures simulate the Docker API; they do not access a production daemon or USB device.
+Release 2026.11.01.2 covers 410 automated tests/checks, including 59 schedule checks and multilingual PHP, PHP-FPM, UI, catalog and packaging checks. The build runs the following suites against actual pinned PHP/TRCC dependencies. Docker lifecycle fixtures simulate the Docker API; they do not access a production daemon or USB device.
 
 - Worker tests: TRCC layouts and masks, unavailable/zero/overflow readings, RGB modes, brightness, thermal category selection, smoothing, stale feeds, visual-test lifetime and error paths.
 - PHP lifecycle tests: ownership, version guard, host sampling, single supervisor, USB address change, container isolation, stop/uninstall, unavailable Docker, pre-existing/shared resources and exact native manifest cleanup.
@@ -43,7 +43,7 @@ The original workstation used Podman for actual image execution and simulated Do
 To rerun after building:
 
 ```bash
-CONTAINER_ENGINE=podman bash scripts/check.sh localhost/thermalright-digital:2026.11.01.1
+CONTAINER_ENGINE=podman bash scripts/check.sh localhost/thermalright-digital:2026.11.01.2
 ```
 
 PHP fixtures remain in disposable containers with no host Docker socket. Their image versions/digests are pinned in `scripts/check.sh`.
@@ -67,3 +67,9 @@ Local metadata tests check XML structure, real project/support/install destinati
 Tests cover strict schedule validation and legacy migration, same-day/overnight/entire-day boundaries, Sunday-to-Monday wrap, multiple selected days, spring/autumn DST, non-browser timezone handling, timezone changes, RAM feed, visual-test cancellation and no persistent sampling writes. Driver tests check global-off frames for all LEDs, real metric retention, test suppression, automatic wake without USB reconnect and invalid state handling. HTTP tests check persistence, legacy clients, invalid input and refused tests during off. UI checks cover server clock, actual worker state, draft retention, weekdays/times/entire-day controls and validation. Lifecycle tests cover migration from both previous container names and updated inventory ownership.
 
 The schedule and compact Docker layout still need the physical checks in VALIDATION-UNRAID.md. Earlier hardware confirmation does not certify the new off/wake behavior.
+
+## Multilingual interface release
+
+All 27 official Unraid locales are bundled, including English. Seven catalog checks cover exact key coverage, nonempty UTF-8 plain text, preserved named placeholders, UI source coverage and no writes to core language packs. Forty-nine PHP checks cover native/session/config selection, explicit English, aliases, allowlisted paths, missing/corrupt entries, safe HTML/JSON, actual French/Arabic page rendering and native overrides. The UI suite includes one behavior check per locale covering state, server clock, errors, RGB targeting and unchanged serialized settings. Three additional real PHP-FPM tests render every locale, verify English restoration and test HTML/script escaping. Release checks verify all catalogs and the helper are exported and readable in the payload.
+
+This verifies integration and catalog integrity, not native-speaker fluency. Translations and long-text layout remain open to community review. Physical testing with Unraid's installed language packs remains on the manual validation list. Technical logs and diagnostics intentionally remain English.

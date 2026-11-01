@@ -1,8 +1,11 @@
+test_all_localized_pages_render_under_real_fpm (__main__.FpmTests.test_all_localized_pages_render_under_real_fpm) ... ok
+test_catalog_html_is_escaped_in_page_and_inline_json (__main__.FpmTests.test_catalog_html_is_escaped_in_page_and_inline_json) ... ok
 test_compile_fatal_returns_json_instead_of_empty_body (__main__.FpmTests.test_compile_fatal_returns_json_instead_of_empty_body) ... ok
 test_csrf_and_method_checks_survive_fpm (__main__.FpmTests.test_csrf_and_method_checks_survive_fpm) ... ok
 test_diagnostic_under_real_fpm (__main__.FpmTests.test_diagnostic_under_real_fpm) ... ok
 test_invalid_config_returns_json_error (__main__.FpmTests.test_invalid_config_returns_json_error) ... ok
 test_logs_under_real_fpm (__main__.FpmTests.test_logs_under_real_fpm) ... ok
+test_native_empty_locale_restores_english_after_french (__main__.FpmTests.test_native_empty_locale_restores_english_after_french) ... ok
 test_non_utf8_log_is_still_valid_json (__main__.FpmTests.test_non_utf8_log_is_still_valid_json) ... ok
 test_rgb_settings_persist_and_metrics_sources_are_json (__main__.FpmTests.test_rgb_settings_persist_and_metrics_sources_are_json) ... ok
 test_schedule_persists_and_old_client_preserves_it (__main__.FpmTests.test_schedule_persists_and_old_client_preserves_it) ... ok
@@ -13,6 +16,6 @@ test_visual_test_is_explicit_transient_and_requires_ready_backend (__main__.FpmT
 test_visual_test_refuses_scheduled_off_without_creating_marker (__main__.FpmTests.test_visual_test_refuses_scheduled_off_without_creating_marker) ... ok
 
 ----------------------------------------------------------------------
-Ran 13 tests in 4.689s
+Ran 16 tests in 5.145s
 
 OK

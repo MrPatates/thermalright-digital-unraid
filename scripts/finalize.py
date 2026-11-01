@@ -12,7 +12,7 @@ DIST = BASE / 'dist'
 DIST.mkdir(exist_ok=True)
 EVIDENCE = BASE / 'docs/evidence'
 EVIDENCE.mkdir(exist_ok=True)
-for name in ['worker-tests.log', 'integration-tests.log', 'ui-tests.log', 'http-fpm-tests.log', 'release-tests.log', 'image-verification.log', 'runtime-smoke.log']:
+for name in ['worker-tests.log', 'integration-tests.log', 'ui-tests.log', 'translation-tests.log', 'http-fpm-tests.log', 'release-tests.log', 'image-verification.log', 'runtime-smoke.log']:
     source = BASE / '.build/logs' / name
     if source.exists():
         shutil.copyfile(source, EVIDENCE / name)

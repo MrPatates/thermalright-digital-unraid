@@ -1,0 +1,12 @@
+test_all_official_language_codes_have_catalogs (__main__.TranslationTests.test_all_official_language_codes_have_catalogs) ... ok
+test_catalogs_are_plain_text_and_contain_no_script_or_html (__main__.TranslationTests.test_catalogs_are_plain_text_and_contain_no_script_or_html) ... ok
+test_english_is_the_complete_plain_text_master (__main__.TranslationTests.test_english_is_the_complete_plain_text_master) ... ok
+test_every_language_covers_every_message_without_empty_values (__main__.TranslationTests.test_every_language_covers_every_message_without_empty_values) ... ok
+test_named_parameters_are_preserved_exactly (__main__.TranslationTests.test_named_parameters_are_preserved_exactly) ... ok
+test_static_and_dynamic_ui_messages_have_master_entries (__main__.TranslationTests.test_static_and_dynamic_ui_messages_have_master_entries) ... ok
+test_translation_support_never_writes_core_language_files (__main__.TranslationTests.test_translation_support_never_writes_core_language_files) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.027s
+
+OK
